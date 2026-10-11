@@ -136,9 +136,14 @@ because a local file has no stable identity to remember.
 
 ## Working with this repo
 
-### Mac — Terminal
+**To just use SORT**, you do not need any of this. Download `index.html` and open it.
+That is the whole program.
 
-Get it the first time:
+This section is for working on the code.
+
+### Get a copy
+
+**Mac — Terminal**
 
 ```bash
 cd ~/Documents
@@ -146,18 +151,9 @@ git clone https://github.com/CDAVIO/Sort.git
 cd Sort
 ```
 
-After you change something:
+**Windows — PowerShell**
 
-```bash
-cd ~/Documents/Sort
-git add .
-git commit -m "what changed"
-git push
-```
-
-### Windows — PowerShell
-
-The git commands are identical. Only the folder path is written differently:
+The git commands are identical everywhere. Only the folder path is written differently:
 
 ```powershell
 cd $HOME\Documents
@@ -165,10 +161,11 @@ git clone https://github.com/CDAVIO/Sort.git
 cd Sort
 ```
 
-After you change something:
+### After you change something
 
-```powershell
-cd $HOME\Documents\Sort
+Same on both systems:
+
+```bash
 git add .
 git commit -m "what changed"
 git push
@@ -176,17 +173,24 @@ git push
 
 ### Signing in
 
-GitHub does not accept your account password for git. It needs a **personal access token**.
+Git will ask for a username and a password:
 
 ```
-Username: CDAVIO
-Password: <the token, not your GitHub password>
+Username: your GitHub username
+Password: a personal access token
 ```
 
-Make one at **github.com/settings/tokens** → *Tokens (classic)* → *Generate new token*.
-Tick only **repo**, set an expiration, and copy it immediately — it is shown once.
+**Your GitHub password does not work here.** It only works for logging into the website.
+Git has needed a token since 2021 — the field is still labelled *Password*, which is the
+confusing part.
 
-Nothing appears on screen while you paste the token. That is normal. Press Enter.
+Make a token at **github.com/settings/tokens** → *Tokens (classic)* → *Generate new token*:
+
+- Tick only **repo**
+- Set an expiration, for example 90 days
+- Copy it immediately — GitHub shows it once and never again
+
+Nothing appears on screen while you paste it. That is normal. Press Enter.
 
 Save it so you only do this once:
 
@@ -195,16 +199,17 @@ git config --global credential.helper osxkeychain      # Mac
 git config --global credential.helper manager          # Windows
 ```
 
-### If a command fails
+Treat a token like a password. Never paste it into a chat, a file, or your code.
 
-Chain commands with `&&` so a failure stops the rest:
+### Chain commands with `&&`
 
 ```bash
 cd ~/Documents/Sort && git add . && git commit -m "update" && git push
 ```
 
-Without `&&`, a failed `cd` leaves you in the wrong folder and the following commands run
-there anyway — which is how you end up accidentally turning your home folder into a repo.
+With `&&`, a failed step stops the rest. Without it, a failed `cd` leaves you in the wrong
+folder and every following command runs there anyway — which is how people accidentally turn
+their home folder into a git repository.
 
 ---
 
