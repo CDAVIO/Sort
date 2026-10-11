@@ -133,6 +133,81 @@ because a local file has no stable identity to remember.
 
 ---
 
+
+## Working with this repo
+
+### Mac — Terminal
+
+Get it the first time:
+
+```bash
+cd ~/Documents
+git clone https://github.com/CDAVIO/Sort.git
+cd Sort
+```
+
+After you change something:
+
+```bash
+cd ~/Documents/Sort
+git add .
+git commit -m "what changed"
+git push
+```
+
+### Windows — PowerShell
+
+The git commands are identical. Only the folder path is written differently:
+
+```powershell
+cd $HOME\Documents
+git clone https://github.com/CDAVIO/Sort.git
+cd Sort
+```
+
+After you change something:
+
+```powershell
+cd $HOME\Documents\Sort
+git add .
+git commit -m "what changed"
+git push
+```
+
+### Signing in
+
+GitHub does not accept your account password for git. It needs a **personal access token**.
+
+```
+Username: CDAVIO
+Password: <the token, not your GitHub password>
+```
+
+Make one at **github.com/settings/tokens** → *Tokens (classic)* → *Generate new token*.
+Tick only **repo**, set an expiration, and copy it immediately — it is shown once.
+
+Nothing appears on screen while you paste the token. That is normal. Press Enter.
+
+Save it so you only do this once:
+
+```bash
+git config --global credential.helper osxkeychain      # Mac
+git config --global credential.helper manager          # Windows
+```
+
+### If a command fails
+
+Chain commands with `&&` so a failure stops the rest:
+
+```bash
+cd ~/Documents/Sort && git add . && git commit -m "update" && git push
+```
+
+Without `&&`, a failed `cd` leaves you in the wrong folder and the following commands run
+there anyway — which is how you end up accidentally turning your home folder into a repo.
+
+---
+
 ## Privacy
 
 Nothing is uploaded. Nothing is installed. There is no account, no analytics, no server,
