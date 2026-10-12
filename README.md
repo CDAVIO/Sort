@@ -57,14 +57,72 @@ Month names: English, Romanian (Martie) or numeric.
 
 ## Renaming
 
-`IMG_0001.HEIC` becomes `01_03_2025.HEIC`, `2025-03-31_14-22-05.HEIC`, or whatever you build.
+Renaming is optional. By default SORT keeps every filename exactly as the camera wrote it.
 
-Tokens: `{orig} {year} {mm} {dd} {HH} {MI} {SS} {device} {city} {n}`
+When you do rename, you compose a pattern from tokens. SORT fills each token from the
+metadata it read, and always keeps the file extension.
 
-Keeping the original name returns it **byte for byte** — `IMG_3323.JPG` stays `IMG_3323.JPG`,
-not `IMG_3323.jpg`. Duplicates get `_2`, `_3` and so on.
+### Tokens
 
----
+| Token | Means | Example |
+|---|---|---|
+| `{orig}` | the original name, without extension | `IMG_9497` |
+| `{year}` | year of capture | `2025` |
+| `{mm}` | month, two digits | `03` |
+| `{dd}` | day, two digits | `31` |
+| `{HH}` | hour, 24-hour clock | `14` |
+| `{MI}` | minute | `22` |
+| `{SS}` | second | `05` |
+| `{device}` | camera model, spaces removed | `iPhone16ProMax` |
+| `{city}` | nearest city from GPS | `Bucharest` |
+| `{n}` | counter, four digits | `0001` |
+
+### Example patterns
+
+All of these show the same photo — `IMG_9497.HEIC`, taken on an iPhone 16 Pro Max in
+Bucharest on 31 March 2025 at 14:22:05.
+
+| Pattern | Result |
+|---|---|
+| `{orig}` | `IMG_9497.HEIC` |
+| `{dd}_{mm}_{year}` | `31_03_2025.HEIC` |
+| `{year}-{mm}-{dd}` | `2025-03-31.HEIC` |
+| `{year}-{mm}-{dd}_{HH}-{MI}-{SS}` | `2025-03-31_14-22-05.HEIC` |
+| `{year}{mm}{dd}_{orig}` | `20250331_IMG_9497.HEIC` |
+| `{device}_{year}-{mm}-{dd}` | `iPhone16ProMax_2025-03-31.HEIC` |
+| `{city}_{year}-{mm}-{dd}_{n}` | `Bucharest_2025-03-31_0001.HEIC` |
+| `{orig}_{city}` | `IMG_9497_Bucharest.HEIC` |
+
+You can type any text between tokens:
+
+| Pattern | Result |
+|---|---|
+| `Holiday_{year}_{n}` | `Holiday_2025_0001.HEIC` |
+| `{city} - {dd}.{mm}.{year}` | `Bucharest - 31.03.2025.HEIC` |
+
+### Rules
+
+**The extension is never changed.** `IMG_3323.JPG` keeps `.JPG` in capitals;
+`photo.jpeg` keeps `.jpeg`. SORT does not normalise it.
+
+**Keeping the original name returns it byte for byte.** Choose `{orig}` and the file
+arrives with precisely the name it had, including its capitalisation.
+
+**Duplicates are numbered.** If two files would end up with the same name in the same
+folder, the second becomes `_2`, the third `_3`, and so on. Nothing is ever overwritten.
+
+**Missing data falls back to a visible placeholder**, so you can spot those files
+immediately rather than having them silently blend in:
+
+| Missing | Token | Becomes |
+|---|---|---|
+| no capture date | `{year}` `{mm}` `{dd}` | `0000` `00` `00` |
+| no GPS | `{city}` | `NoLoc` |
+| no camera model | `{device}` | `UnknownDevice` |
+
+If you would rather not see placeholders in your filenames, keep `{orig}` and let the
+folder structure carry the sorting instead — a missing folder level simply disappears,
+while a missing token in a filename has to be filled with something.
 
 ## Copy, Move, Preview
 
@@ -141,7 +199,7 @@ That is the whole program.
 
 This section is for working on the code.
 
-### Get a copy
+### Get a copy and open it
 
 **Mac — Terminal**
 
@@ -149,17 +207,38 @@ This section is for working on the code.
 cd ~/Documents
 git clone https://github.com/CDAVIO/Sort.git
 cd Sort
+open -a "Google Chrome" index.html
 ```
 
 **Windows — PowerShell**
 
-The git commands are identical everywhere. Only the folder path is written differently:
+The git commands are identical everywhere. Only the paths are written differently:
 
 ```powershell
 cd $HOME\Documents
 git clone https://github.com/CDAVIO/Sort.git
 cd Sort
+start chrome index.html
 ```
+
+The last line is the one that opens SORT. `cd Sort` only moves you into the folder.
+
+Use Chrome, Edge or Brave. Safari cannot write to folders, so the folder picker does nothing there.
+
+**If it says `destination path 'Sort' already exists`**
+
+A folder of that name is already there, probably from an earlier attempt. Git refuses to
+clone over it on purpose. Delete it first:
+
+```bash
+rm -rf ~/Documents/Sort          # Mac
+```
+
+```powershell
+Remove-Item -Recurse -Force $HOME\Documents\Sort      # Windows
+```
+
+Then run the commands again.
 
 ### After you change something
 
