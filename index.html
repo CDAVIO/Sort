@@ -269,7 +269,13 @@ code{font-family:'JetBrains Mono',monospace;font-size:.92em;background:var(--was
 .stagebar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;
   align-items:center;padding:11px 13px;font-size:11px;color:var(--ink3);pointer-events:none;
   font-family:'JetBrains Mono',monospace}
-.stagebar .lock{display:inline-flex;align-items:center;gap:5px}
+.stagebar{pointer-events:none}
+.stagebar .lock{display:inline-flex;align-items:center;gap:6px;pointer-events:auto;
+  font:inherit;font-size:11px;color:var(--ink2);cursor:pointer;
+  background:var(--paper);border:1px solid var(--rule2);border-radius:99px;
+  padding:5px 11px;transition:border-color .14s,color .14s}
+.stagebar .lock:hover{border-color:var(--ink);color:var(--ink)}
+.stagebar .lock .ic{font-size:13px}
 .stagebar .turbo{opacity:0;transition:opacity .2s;color:var(--ink)}
 .stagebar .turbo.on{opacity:1}
 
@@ -312,6 +318,25 @@ code{font-family:'JetBrains Mono',monospace;font-size:.92em;background:var(--was
 .tl .d3{color:var(--ink3)}
 #errBox .tl{white-space:normal;line-height:1.6;color:var(--ink2)}
 
+.kinds{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:22px}
+.kind{display:flex;align-items:center;gap:11px;padding:12px 13px;
+  border:1px solid var(--rule);border-radius:var(--r2);background:var(--paper)}
+.kind .ka{width:30px;height:30px;flex:0 0 30px;display:block;
+  animation:kbob 3.6s ease-in-out infinite}
+.kind .ka svg{width:100%;height:100%;display:block}
+.kind:nth-child(2) .ka{animation-delay:.3s}
+.kind:nth-child(3) .ka{animation-delay:.6s}
+.kind:nth-child(4) .ka{animation-delay:.9s}
+@keyframes kbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.kind b{display:block;font-size:13px;font-weight:620;letter-spacing:-.008em;color:var(--ink)}
+.kind i{display:block;font-style:normal;font-size:11.5px;color:var(--ink3);margin-top:2px}
+.kind.off{background:var(--wash)}
+.kind.off b{color:var(--ink2)}
+.kind.off .ka{opacity:.72}
+@media(max-width:880px){.kinds{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:380px){.kinds{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.kind .ka{animation:none}}
+
 /* footer */
 .how{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:46px;
   background:var(--rule);border:1px solid var(--rule);border-radius:var(--r);overflow:hidden}
@@ -321,10 +346,10 @@ code{font-family:'JetBrains Mono',monospace;font-size:.92em;background:var(--was
 .howitem p{font-size:12.5px;color:var(--ink3);line-height:1.65}
 @media(max-width:700px){.how{grid-template-columns:1fr}}
 .foot .d{color:#c9a800}
-.foot{margin-top:68px;padding-top:26px;border-top:1px solid var(--rule);
-  display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
-.foot .fl{font-size:13px;color:var(--ink2);line-height:1.8;max-width:46ch;font-weight:500}
-.foot .fr{font-size:12.5px;color:var(--ink3);font-family:'Montserrat',sans-serif;font-weight:800;letter-spacing:0}
+.foot{margin-top:68px;padding:26px 0 8px;border-top:1px solid var(--rule);text-align:center}
+.foot .fb{font-size:13px;color:var(--ink2);font-family:'Montserrat',sans-serif;
+  font-weight:800;letter-spacing:.005em}
+.foot .fc{font-size:11.5px;color:var(--ink3);margin-top:7px;letter-spacing:.01em}
 .foot a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule2)}
 .foot a:hover{border-color:var(--ink)}
 
@@ -459,6 +484,7 @@ code{font-family:'JetBrains Mono',monospace;font-size:.92em;background:var(--was
 
 <svg class="sr" aria-hidden="true"><defs>
 <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+<symbol id="i-macfolder" viewBox="0 0 80 80"><path fill="#f2994a" stroke="none" fill-rule="evenodd" clip-rule="evenodd" d="M16 17a4 4 0 0 0-4 4v38a4 4 0 0 0 4 4h48a4 4 0 0 0 4-4V29a4 4 0 0 0-4-4H35.4c-.367 0-.711-.177-.924-.475l-.34-.474l-.376-.526l-.377-.525l-3.099-4.329A4 4 0 0 0 27.032 17z"/><rect width="56" height="38" x="12" y="25" fill="#f2c94c" stroke="none" rx="4"/></symbol>
 <symbol id="i-folder-in" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 10v5m0 0 2-2m-2 2-2-2"/></symbol>
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><circle cx="8.5" cy="10" r="1.6"/><path d="m4 17 4.5-4.5L13 17m0 0 3.5-3.5L20 17"/></symbol>
@@ -510,7 +536,14 @@ code{font-family:'JetBrains Mono',monospace;font-size:.92em;background:var(--was
 
 <section class="hero">
   <h1>Your camera roll, in folders that make sense.</h1>
-  <p class="lede">SORT reads the camera model, capture date and GPS out of every photo and video, then files them the way you want. Everything happens on your computer — no upload, no server, no account.</p>
+  <p class="lede">SORT opens every file, reads who shot it, when and where, and files it where you said it should go. It runs on your computer — no upload, no account.</p>
+
+  <div class="kinds">
+    <div class="kind"><span class="ka" id="kPhoto"></span><div><b>Photos</b><i>camera · date · place</i></div></div>
+    <div class="kind"><span class="ka" id="kVideo"></span><div><b>Videos</b><i>camera · date · place</i></div></div>
+    <div class="kind off"><span class="ka" id="kDoc"></span><div><b>Documents</b><i>left where they are</i></div></div>
+    <div class="kind off"><span class="ka" id="kMusic"></span><div><b>Music</b><i>left where they are</i></div></div>
+  </div>
 
   <div class="pathstage">
     <div class="cue"><svg class="ic"><use href="#i-folder"/></svg> Where a file ends up</div>
@@ -543,8 +576,8 @@ code{font-family:'JetBrains Mono',monospace;font-size:.92em;background:var(--was
 </section>
 
 <footer class="foot">
-  <div class="fl">Nothing leaves your computer.</div>
-  <div class="fr"><a href="https://sort.cdav.io">SORT<span class="d">.</span>CDAV<span class="d">.</span>IO</a></div>
+  <div class="fb">Developed by <a href="https://cdav.io" target="_blank" rel="noopener">CDAV<span class="d">.</span>IO</a></div>
+  <div class="fc">&copy; <span id="yr">2026</span> CDAV.IO — all rights reserved</div>
 </footer>
 </div>
 
@@ -643,7 +676,7 @@ code{font-family:'JetBrains Mono',monospace;font-size:.92em;background:var(--was
           <div class="stagebox" id="stageBox">
             <canvas id="stage"></canvas>
             <div class="stagebar">
-              <span class="lock" id="stLock"></span>
+              <button type="button" class="lock" id="stLock"></button>
               <span class="turbo" id="stTurbo">turbo</span>
             </div>
           </div>
@@ -703,12 +736,30 @@ const svgImg = svg => {
   try{ const i=new Image(); i.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); return i; }
   catch(e){ return {complete:false,naturalWidth:0}; }   // canvas falls back to vector shapes
 };
-const ART_PHOTO = c => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="${c}" d="M19.504 21.505v1h-1v1H2.5v-1h-1V6.5h1v-1h1v15.003h1v1z"/><path fill="${c}" d="M22.505 5.5v-1h-6.002v-1h-1v-1h-1v-1H6.5v1h-2v17.004h1v1h17.004v-1h1V5.501zm-7.002 7.002v1h1v1.001h1v1h1v1h1.001v1H6.501v-5h1v-1h1v-1.001h1v-1h1.001v-1h1v1h1v1h1v1h1v1zm-9.002-8h1v-1h2v1h1.001v2h-1v1h-2v-1h-1zm16.004 13.003h-1v-1h-1v-1h-1v-1.001h-1.001v-1h-1v-1h-1v-1h-1v-1.001h1v-1h1v-1h1v1h1v1h1v1h1v1h1z"/></svg>`;
+/* ---------- file-type art: flat colour, 32-unit grid, drawn on the canvas ---------- */
+const PAGE_BODY = `<path d="M6.5 5.2A3.2 3.2 0 0 1 9.7 2h8.1l7.7 7.8v17A3.2 3.2 0 0 1 22.3 30H9.7a3.2 3.2 0 0 1-3.2-3.2z" fill="#fff" stroke="#b9b5ad" stroke-width="1.3" stroke-linejoin="round"/>`;
+const ART_PHOTO_F = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><clipPath id="k"><rect x="3" y="5" width="26" height="22" rx="4.6"/></clipPath></defs><rect x="3" y="5" width="26" height="22" rx="4.6" fill="#4cc2ef"/><g clip-path="url(#k)"><circle cx="10.2" cy="12" r="3.1" fill="#ffd905"/><path d="M-2 28 10.6 16.2l5.6 5.4 4.4-3.9L34 28z" fill="#1d8f5f"/><path d="M13.5 28 22 20l12 8z" fill="#34b377"/></g><rect x="3.6" y="5.6" width="24.8" height="20.8" rx="4.1" fill="none" stroke="rgba(0,0,0,.09)" stroke-width="1.2"/></svg>`;
+const ART_VIDEO_F = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M24.6 13.9 29.6 10v12l-5-3.9z" fill="#8098f2"/><rect x="2.4" y="6.8" width="19.8" height="18.4" rx="4.2" fill="#3b57d6"/><path d="M9.9 12.1 17.1 16l-7.2 3.9z" fill="#fff"/></svg>`;
+const ART_DOC_F = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">${PAGE_BODY}<path d="M17.8 2 25.5 9.8h-5.5a2.2 2.2 0 0 1-2.2-2.2z" fill="#8fb3e6"/><g fill="#a9bed9"><rect x="10.2" y="14.6" width="11.6" height="1.8" rx=".9"/><rect x="10.2" y="18.6" width="11.6" height="1.8" rx=".9"/><rect x="10.2" y="22.6" width="7.4" height="1.8" rx=".9"/></g></svg>`;
+const ART_MUSIC_F = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">${PAGE_BODY}<path d="M17.8 2 25.5 9.8h-5.5a2.2 2.2 0 0 1-2.2-2.2z" fill="#c3b2fb"/><path d="M13.1 23.4v-8.1l7-1.6v8.1" fill="none" stroke="#8257e6" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11.4" cy="23.5" r="2.1" fill="#8257e6"/><circle cx="18.4" cy="21.8" r="2.1" fill="#8257e6"/></svg>`;
 const ART_FOLDER = (back,front) => `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><g fill="none"><path fill="${back}" fill-rule="evenodd" d="M16 17a4 4 0 0 0-4 4v38a4 4 0 0 0 4 4h48a4 4 0 0 0 4-4V29a4 4 0 0 0-4-4H35.4c-.367 0-.711-.177-.924-.475l-.34-.474l-.376-.526l-.377-.525l-3.099-4.329A4 4 0 0 0 27.032 17z" clip-rule="evenodd"/><rect width="56" height="38" x="12" y="25" fill="${front}" rx="4"/></g></svg>`;
-const IMG_DOC=svgImg(ART_PHOTO('#9d9a93'));
+const IMG_PHOTO=svgImg(ART_PHOTO_F);
+const IMG_VIDEO=svgImg(ART_VIDEO_F);
+const IMG_DOC=svgImg(ART_DOC_F);
+const IMG_MUSIC=svgImg(ART_MUSIC_F);
 const IMG_FOLDER=svgImg(ART_FOLDER('#f2994a','#f2c94c'));
 const IMG_FOLDER_OFF=svgImg(ART_FOLDER('#dedcd6','#ebe9e3'));
 const ready=i=>i.complete&&i.naturalWidth>0;
+/* what drifts above the line: mostly photos, then video, then the rest */
+const FILE_ART=[IMG_PHOTO,IMG_PHOTO,IMG_PHOTO,IMG_PHOTO,IMG_VIDEO,IMG_VIDEO,IMG_DOC,IMG_MUSIC];
+function imgForCat(cat,name){
+  if(cat==='Videos') return IMG_VIDEO;
+  if(cat==='Others'){
+    const e=(String(name||'').split('.').pop()||'').toLowerCase();
+    return MUSIC_EXT.has(e)?IMG_MUSIC:IMG_DOC;
+  }
+  return IMG_PHOTO;
+}
 const pad = (n,l=2) => String(n).padStart(l,'0');
 const fmtN = n => n.toLocaleString('en-US');
 const fmtB = b => b<1024?b+' B':b<1048576?(b/1024).toFixed(0)+' KB':b<1073741824?(b/1048576).toFixed(1)+' MB':(b/1073741824).toFixed(2)+' GB';
@@ -720,6 +771,7 @@ const MONTHS_RO=['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie','Iulie'
 const PHOTO_EXT=new Set(['jpg','jpeg','jpe','png','heic','heif','webp','tif','tiff','bmp','gif','avif','dng','cr2','cr3','nef','arw','raf','orf','rw2','srw','pef','jxl']);
 const VIDEO_EXT=new Set(['mov','mp4','m4v','avi','mkv','3gp','3g2','webm','mts','m2ts','mpg','mpeg','wmv','flv','insv','hevc']);
 const SIDE_EXT=new Set(['aae','xmp','thm','lrv','json']);
+const MUSIC_EXT=new Set(['mp3','m4a','aac','wav','flac','ogg','oga','opus','aiff','aif','wma','alac','amr','caf','mid','midi']);
 
 /* ---------- Offline city database (name|country|lat|lon) ---------- */
 const CITY_RAW=`
@@ -1403,7 +1455,7 @@ const ST={
   plan:[], results:null, lastReport:null,
   segments:['{device}','{year}','{month}'],
   preset:'device', rnPreset:'orig',
-  cfg:{monthLang:'en',missing:'skip',shots:true,live:true,side:true,others:false,privacy:true}
+  cfg:{monthLang:'en',missing:'skip',shots:true,live:true,side:true,others:false,mask:false}
 };
 const HAS_FSA = typeof window.showDirectoryPicker === 'function';
 
@@ -1612,7 +1664,7 @@ const Stage={
     this.c=$('stage'); this.ctx=this.c.getContext('2d');
     this.nodes=[]; this.map=new Map(); this.over=null;
     this.parts=[]; this.floats=[]; this.sparks=[]; this.rings=[];
-    this.mode='idle'; this.recent=[]; this.done=0; this.turbo=false; this.running=false;
+    this.mode='idle'; this.recentImg=[]; this.done=0; this.turbo=false; this.running=false;
     this.resize(); addEventListener('resize',()=>this.resize());
     if(window.ResizeObserver){
       this.ro=new ResizeObserver(()=>this.resize());
@@ -1631,8 +1683,8 @@ const Stage={
     this.pad=this.narrow?16:26;
     this.divY=Math.round(this.H*0.46);
     this.rootY=this.divY+(this.narrow?44:50);
-    this.busY=this.rootY+(this.narrow?40:46);
-    this.childY=this.busY+(this.narrow?30:34);
+    this.busY=this.rootY+(this.narrow?44:50);
+    this.childY=this.busY+(this.narrow?32:36);
     this.slotW=this.narrow?78:92;
     this.maxNodes=Math.max(2,Math.floor((this.W-this.pad*2)/this.slotW));
     this.layout();
@@ -1652,7 +1704,7 @@ const Stage={
     this.resize();
     this.kind=mode; this.mode=mode; this.parts=[]; this.sparks=[]; this.rings=[]; this.done=0;
     this.nodes=[]; this.map.clear(); this.over=null;
-    this.recent=[]; this.turbo=false;
+    this.recentImg=[]; this.turbo=false;
     this.floats=[]; for(let i=0;i<11;i++) this.floats.push(this.newFloat(true));
     this.layout();
     if(!this.running){ this.running=true; requestAnimationFrame(t=>this.loop(t)); }
@@ -1663,13 +1715,19 @@ const Stage={
     return {x:this.pad+20+Math.random()*Math.max(40,this.W-this.pad*2-40),
             y:seed?Math.random()*(this.divY-46)+16:-14,
             vy:0.09+Math.random()*0.13, ph:Math.random()*6.3,
-            name:this.recent.length?this.recent[Math.floor(Math.random()*this.recent.length)]:''};
+            sp:0.9+Math.random()*0.35, img:this.pickImg()};
   },
-  note(name){
-    this.recent.unshift(name); if(this.recent.length>5) this.recent.pop();
-    const f=this.floats.find(f=>!f.name); if(f) f.name=name;
+  /* the drifting icons echo what is actually flowing through right now */
+  pickImg(){
+    const r=this.recentImg;
+    if(r&&r.length&&Math.random()<0.7) return r[Math.floor(Math.random()*r.length)];
+    return FILE_ART[Math.floor(Math.random()*FILE_ART.length)];
   },
-  mask(n){ return n.length>22?n.slice(0,19)+'\u2026':n; },
+  note(cat,name){
+    this.recentImg.unshift(imgForCat(cat,name));
+    if(this.recentImg.length>6) this.recentImg.pop();
+  },
+  maskLabel(l){ return ST.cfg.mask ? '*******' : l; },
   folder(label){
     let nd=this.map.get(label);
     if(nd) return nd;
@@ -1685,7 +1743,7 @@ const Stage={
   },
   catColor(c){ return c==='Videos'?'#33489e':c==='Screenshots'?'#1d6e52':c==='Others'?'#a3a099':'#15140f'; },
   send(label,cat,name){
-    this.note(name);
+    this.note(cat,name);
     const nd=this.folder(label);
     nd.n++; nd.glow=1; this.done++;
     if(this.parts.length>44){ this.turbo=true; return; }
@@ -1693,10 +1751,11 @@ const Stage={
     // a drifting file becomes the one being filed
     let src=null, bi=-1;
     const ripe=this.divY*0.45;
-    this.floats.forEach((f,i)=>{ if(f.name&&f.y>ripe&&(src===null||f.y>src.y)){src=f;bi=i;} });
+    this.floats.forEach((f,i)=>{ if(f.y>ripe&&(src===null||f.y>src.y)){src=f;bi=i;} });
     const x0=src?src.x:this.pad+Math.random()*(this.W-this.pad*2), y0=src?src.y:this.divY*0.3;
+    const img=src?src.img:imgForCat(cat,name);
     if(bi>=0) this.floats[bi]=this.newFloat(false);
-    this.parts.push({x0,y0,nd,cat,name,t:0,sp:1/(30+Math.random()*16),crossed:false});
+    this.parts.push({x0,y0,nd,cat,img,t:0,sp:1/(30+Math.random()*16),crossed:false});
   },
   rr(x,y,w,h,r){ const g=this.ctx; g.beginPath(); g.moveTo(x+r,y);
     g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r);
@@ -1736,16 +1795,13 @@ const Stage={
     for(const f of this.floats){
       if(live){ f.y+=f.vy; f.ph+=0.012; }
       if(f.y>this.divY-20){ Object.assign(f,this.newFloat(false)); continue; }
-      const x=Math.max(34,Math.min(this.W-34,f.x+Math.sin(f.ph)*7));
+      const x=Math.max(30,Math.min(this.W-30,f.x+Math.sin(f.ph)*7));
       const fade=Math.min(1,(this.divY-20-f.y)/40)*Math.min(1,f.y/18+0.2);
-      g.globalAlpha=0.92*fade;
-      if(ready(IMG_DOC)) g.drawImage(IMG_DOC,x-11,f.y-11,22,22);
+      const s=(this.narrow?21:25)*(f.sp||1);
+      g.globalAlpha=0.94*fade;
+      if(ready(f.img)) g.drawImage(f.img,x-s/2,f.y-s/2,s,s);
       else{ g.fillStyle='#fff'; g.strokeStyle='#bdbbb4'; g.lineWidth=1.3; g.lineJoin='round';
-            this.docPath(x,f.y,21); g.fill(); g.stroke(); }
-      if(f.name){
-        g.font="9px 'JetBrains Mono',monospace"; g.textAlign='center'; g.textBaseline='top';
-        g.fillStyle='#8d8a83'; g.fillText(this.mask(f.name),x,f.y+14);
-      }
+            this.docPath(x,f.y,s*0.9); g.fill(); g.stroke(); }
       g.globalAlpha=1;
     }
 
@@ -1780,25 +1836,25 @@ const Stage={
       const lo=Math.min(...xs), hi=Math.max(...xs);
       g.strokeStyle='rgba(21,20,15,0.22)'; g.lineWidth=1;
       g.beginPath();
-      g.moveTo(rootX,this.rootY+21); g.lineTo(rootX,this.busY);
+      g.moveTo(rootX,this.rootY+37); g.lineTo(rootX,this.busY);
       if(hi>lo){ g.moveTo(lo,this.busY); g.lineTo(hi,this.busY); }
       for(const nd of list){ g.moveTo(nd.x,this.busY); g.lineTo(nd.x,nd.y-15); }
       g.stroke();
     }
 
     // root
-    this.drawFolder(rootX,this.rootY,46,true);
+    this.drawFolder(rootX,this.rootY,55,true);
     g.font="700 11px 'JetBrains Mono',monospace"; g.textAlign='center'; g.textBaseline='top';
     g.fillStyle='#15140f';
-    let rl=(this.kind==='scan'?'YOUR LIBRARY':(ST.dstLabel||'DESTINATION')).toUpperCase();
+    let rl=(this.kind==='scan'?'YOUR LIBRARY':(ST.mode==='preview'?'PREVIEW':this.maskLabel(ST.dstLabel||'DESTINATION'))).toUpperCase();
     if(rl.length>22) rl=rl.slice(0,21)+'…';
-    g.fillText(rl,rootX,this.rootY+24);
+    g.fillText(rl,rootX,this.rootY+21);
 
     // children
     for(const nd of list){
       const age=Math.min(1,(t-nd.born)/280);
       const filled=nd.n>0;
-      const s=(34+(nd.glow*5))*(0.85+0.15*age);
+      const s=(41+(nd.glow*5))*(0.85+0.15*age);
       g.globalAlpha=age;
       g.lineJoin='round';
       if(nd.glow>0.03){
@@ -1809,7 +1865,7 @@ const Stage={
       const lw=Math.max(56,(nd.slot||this.slotW)-8);
       g.font="9.5px 'JetBrains Mono',monospace"; g.textAlign='center'; g.textBaseline='top';
       g.fillStyle=filled?'#15140f':'#a3a099';
-      let lb=nd.isOver?`+${nd.extra} more`:nd.label;
+      let lb=nd.isOver?`+${nd.extra} more`:this.maskLabel(nd.label);
       const maxc=Math.max(7,Math.floor(lw/5.6));
       if(lb.length>maxc) lb=lb.slice(0,maxc-1)+'…';
       g.fillText(lb,nd.x,nd.y+s*0.46);
@@ -1841,14 +1897,16 @@ const Stage={
         g.globalAlpha=0.12*(1-k/4); g.fillStyle=col;
         g.beginPath(); g.arc(tx2,ty2,3.2-k*0.6,0,Math.PI*2); g.fill();
       }
-      g.globalAlpha=p.t>0.72?(1-p.t)/0.28:1;
-      const lbl=this.mask(p.name);
-      g.font="9.5px 'JetBrains Mono',monospace"; g.textAlign='center'; g.textBaseline='middle';
-      const w=Math.min(104,g.measureText(lbl).width+18);
-      const cxx=Math.max(w/2+3,Math.min(this.W-w/2-3,x));
-      g.fillStyle='#fff'; g.strokeStyle=col; g.lineWidth=1.1;
-      this.rr(cxx-w/2,y-9.5,w,19,6); g.fill(); g.stroke();
-      g.fillStyle=col; g.fillText(lbl,cxx,y+0.5);
+      const a=p.t>0.72?(1-p.t)/0.28:1;
+      const s=this.narrow?23:26, rad=s*0.72;
+      g.globalAlpha=a*0.92; g.fillStyle='#fff';
+      g.beginPath(); g.arc(x,y,rad,0,Math.PI*2); g.fill();
+      g.globalAlpha=a*0.38; g.strokeStyle=col; g.lineWidth=1.2;
+      g.beginPath(); g.arc(x,y,rad,0,Math.PI*2); g.stroke();
+      g.globalAlpha=a;
+      if(ready(p.img)) g.drawImage(p.img,x-s/2,y-s/2,s,s);
+      else{ g.fillStyle='#fff'; g.strokeStyle=col; g.lineWidth=1.2; g.lineJoin='round';
+            this.docPath(x,y,s*0.86); g.fill(); g.stroke(); }
       g.globalAlpha=1;
     }
 
@@ -2378,6 +2436,14 @@ bindSwitch('swShots','shots',renderStructPreview);
 bindSwitch('swLive','live');
 bindSwitch('swSide','side');
 bindSwitch('swOthers','others',renderStructPreview);
+function renderMaskBtn(){
+  $('stLock').innerHTML = ST.cfg.mask
+    ? ICO('lock')+'<span>folders hidden</span>'
+    : ICO('eye')+'<span>hide folder names</span>';
+}
+$('stLock').onclick=()=>{ ST.cfg.mask=!ST.cfg.mask; renderMaskBtn(); };
+renderMaskBtn();
+
 initBadges();
 // tap a capability on a touch screen to read its name
 $('caps').addEventListener('click',e=>{
@@ -2385,6 +2451,13 @@ $('caps').addEventListener('click',e=>{
   document.querySelectorAll('.cap.open').forEach(x=>{ if(x!==c) x.classList.remove('open'); });
   c.classList.toggle('open');
 });
+/* the four file kinds in the hero, same art the canvas uses */
+(function(){
+  const art={kPhoto:ART_PHOTO_F,kVideo:ART_VIDEO_F,kDoc:ART_DOC_F,kMusic:ART_MUSIC_F};
+  for(const id in art){ const el=$(id); if(el) el.innerHTML=art[id]; }
+  const y=$('yr'); if(y) y.textContent=new Date().getFullYear();
+})();
+
 renderPresets(); renderSegs(); renderRnPresets(); renderStructPreview();
 Stage.init();
 setMode('copy');
