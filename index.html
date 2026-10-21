@@ -4,9 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SORT - organize photos by device, date and place</title>
-<meta name="description" content="Sort your camera roll into folders by device, date and place. Runs entirely in your browser. Nothing is uploaded, nothing is installed.">
+<meta name="description" content="Sort your camera roll into folders by device, date and place. A free app for macOS and Windows that runs entirely on your own computer.">
 <meta name="theme-color" content="#ffffff">
-<link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="SORT">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -360,16 +359,6 @@ a.btn{text-decoration:none}
 .dlcard p{font-size:12.5px;color:var(--ink3);line-height:1.65;margin-top:13px}
 .dlcard p b{color:var(--ink2);font-weight:600}
 .dlnote{font-size:12px;color:var(--ink3);margin-top:20px;line-height:1.6}
-.altrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
-.altnote{font-size:12px;color:var(--ink3);margin-top:12px;line-height:1.6}
-@media(max-width:520px){.altrow .btn{flex:1;justify-content:center}}
-.installed{margin-top:22px;padding:13px 16px;border-radius:var(--r2);
-  border:1px solid #cfe3d6;background:#f1f8f3;color:#1d6e52;
-  display:flex;align-items:center;justify-content:center;gap:9px;font-size:13.5px;font-weight:500}
-.installed .ic{font-size:17px;flex:none}
-.orline{display:flex;align-items:center;gap:14px;margin-top:26px;color:var(--ink3);font-size:11.5px}
-.orline::before,.orline::after{content:'';flex:1;height:1px;background:var(--rule)}
-.orline span{white-space:nowrap}
 @media(max-width:720px){.dl{padding:26px 18px 22px}.dlgrid{grid-template-columns:1fr}}
 .offline{margin-top:54px;padding:15px 18px;border:1px solid var(--good-rule,#cfe3d6);
   border-radius:var(--r2);background:var(--good-bg,#f1f8f3);color:var(--good,#1d6e52);
@@ -636,20 +625,7 @@ a.btn{text-decoration:none}
     </div>
   </div>
 
-  <div class="orline"><span>or skip the install</span></div>
-
-  <div class="altrow">
-    <button class="btn" id="btnInstall" hidden><svg class="ic"><use href="#i-down"/></svg> Install from this page</button>
-    <a class="btn" href="index.html" download="SORT.html"><svg class="ic"><use href="#i-down"/></svg> Save as one file</a>
-  </div>
-  <p class="altnote" id="altNote">Both run in Chrome or Edge instead of a window of their own. Everything else is the same.</p>
-
-  <div class="installed" id="installedBox" hidden>
-    <svg class="ic"><use href="#i-check"/></svg>
-    <span>SORT is installed on this computer. Open it from your Dock or Start menu.</span>
-  </div>
-
-  <p class="dlnote">Every version is the same SORT — one page that runs on your own machine, with nothing sent anywhere.</p>
+  <p class="dlnote">Free, and both builds are the same SORT. Every photo stays on your computer — nothing is uploaded and no account is involved.</p>
 </section>
 
 <div class="offline" id="offlineNote" hidden>
@@ -2545,36 +2521,8 @@ $('caps').addEventListener('click',e=>{
   }
 })();
 
-/* ---------- install as an app (Chrome / Edge) ---------- */
+/* the worker only makes the site itself load fast and survive a dropout */
 (function(){
-  if(location.protocol==='file:') return;          // the saved copy has nothing to install
-
-  const standalone = matchMedia('(display-mode: standalone)').matches
-                  || matchMedia('(display-mode: window-controls-overlay)').matches
-                  || navigator.standalone===true;
-  if(standalone){
-    const b=$('installedBox'); if(b) b.hidden=false;
-    return;
-  }
-
-  let prompt=null;
-  addEventListener('beforeinstallprompt', e=>{
-    e.preventDefault(); prompt=e;
-    const btn0=$('btnInstall'); if(btn0) btn0.hidden=false;
-  });
-  const btn=$('btnInstall');
-  if(btn) btn.onclick=async()=>{
-    if(!prompt) return;
-    btn.disabled=true;
-    try{ prompt.prompt(); await prompt.userChoice; }catch(e){}
-    prompt=null; btn.disabled=false; btn.hidden=true;
-  };
-  addEventListener('appinstalled',()=>{
-    const b2=$('btnInstall'); if(b2) b2.hidden=true;
-    const done=$('installedBox'); if(done) done.hidden=false;
-  });
-
-  // the worker is what makes the installed copy work offline
   const local = location.hostname==='localhost'||location.hostname==='127.0.0.1';
   if('serviceWorker' in navigator && (location.protocol==='https:'||local)){
     addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));

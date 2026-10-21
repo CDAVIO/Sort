@@ -2,7 +2,7 @@
 # so the Electron sources and the README stay out of the published site.
 
 [build]
-  command = "rm -rf dist && mkdir -p dist && cp index.html manifest.webmanifest sw.js dist/ && cp -r icons dist/icons"
+  command = "rm -rf dist && mkdir -p dist && cp index.html sw.js dist/ && cp -r icons dist/icons"
   publish = "dist"
 
 # The worker and the page must never be served stale, or an installed copy
@@ -14,11 +14,6 @@
 
 [[headers]]
   for = "/index.html"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
-
-[[headers]]
-  for = "/manifest.webmanifest"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
