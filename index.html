@@ -2514,9 +2514,9 @@ $('caps').addEventListener('click',e=>{
   const art={kPhoto:ART_PHOTO_F,kVideo:ART_VIDEO_F,kDoc:ART_DOC_F,kMusic:ART_MUSIC_F};
   for(const id in art){ const el=$(id); if(el) el.innerHTML=art[id]; }
   const y=$('yr'); if(y) y.textContent=new Date().getFullYear();
-  // already downloaded? then the download block is noise, and index.html is not there to link to
+  // opened from disk: say so, but keep the downloads — they point at the apps,
+  // which matter just as much to someone reading a saved copy
   if(location.protocol==='file:'){
-    const d=$('dlBlock'); if(d) d.hidden=true;
     const o=$('offlineNote'); if(o) o.hidden=false;
   }
 })();
