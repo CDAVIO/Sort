@@ -359,6 +359,9 @@ a.btn{text-decoration:none}
 .dlcard p{font-size:12.5px;color:var(--ink3);line-height:1.65;margin-top:13px}
 .dlcard p.warn{background:var(--wash);border:1px solid var(--rule);border-radius:9px;
   padding:10px 12px;color:var(--ink2);margin-top:11px}
+.dlcard p.warn code{font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:var(--paper);border:1px solid var(--rule);border-radius:5px;
+  padding:4px 6px;display:inline-block;color:var(--ink);word-break:break-all}
 .dlcard p b{color:var(--ink2);font-weight:600}
 .dlnote{font-size:12px;color:var(--ink3);margin-top:20px;line-height:1.6}
 @media(max-width:720px){.dl{padding:26px 18px 22px}.dlgrid{grid-template-columns:1fr}}
@@ -618,7 +621,7 @@ a.btn{text-decoration:none}
       <h3>macOS</h3>
       <a class="btn btn-solid btn-lg" href="https://github.com/CDAVIO/Sort/releases/latest"><svg class="ic"><use href="#i-down"/></svg> Download for macOS</a>
       <p>Two files: take <b>arm64</b> for an Apple Silicon Mac (M1 and newer), the other for an Intel one. Open the <b>.dmg</b> and drag SORT into Applications.</p>
-      <p class="warn"><b>First launch:</b> right-click the app → <b>Open</b> → Open. A plain double-click is refused, because the build carries no Apple certificate. Only the first time.</p>
+      <p class="warn"><b>First launch:</b> right-click the app → <b>Open</b> → Open. A plain double-click is refused, because the build carries no Apple certificate. Only the first time.<br><br>If macOS instead says SORT is <b>damaged</b>, open Terminal and paste this once:<br><code>xattr -cr /Applications/SORT.app</code></p>
     </div>
     <div class="dlcard">
       <svg class="ic icLogo"><use href="#i-windows"/></svg>
