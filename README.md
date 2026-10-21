@@ -165,6 +165,24 @@ A ZIP cannot exceed 4 GB — for a large library, use Chrome.
 
 ---
 
+## Running it offline
+
+The page carries everything it needs — fonts included — so it makes **no network request at
+all**, not even on first load. Download it once and it keeps working with the internet off.
+
+On the site, **Keep SORT on your computer** saves the page as `SORT.html`. That file is the
+whole app.
+
+| | How to open it |
+|---|---|
+| macOS | right-click → Open With → Google Chrome (Safari cannot open folders) |
+| Windows | double-click — Edge and Chrome both work |
+
+It is the same file on both. Opened from `file://`, Chrome still counts as a secure context,
+so folder access keeps working exactly as it does on the site.
+
+---
+
 ## Large libraries
 
 100 GB works. Files are **streamed**, never loaded into memory, so 100 GB uses about as much
