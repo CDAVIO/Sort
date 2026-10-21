@@ -1,0 +1,46 @@
+{
+  "name": "sort-cdavio",
+  "productName": "SORT",
+  "version": "1.0.0",
+  "description": "Sort your camera roll into folders by device, date and place.",
+  "author": "CDAV.IO <hello@cdav.io>",
+  "homepage": "https://sort.cdav.io",
+  "license": "UNLICENSED",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "prestart": "node build.js",
+    "start": "electron .",
+    "prebuild": "node build.js",
+    "build:mac": "npm run prebuild && electron-builder --mac",
+    "build:win": "npm run prebuild && electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^38.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "io.cdav.sort",
+    "productName": "SORT",
+    "copyright": "© CDAV.IO",
+    "directories": { "output": "dist", "buildResources": "resources" },
+    "files": ["main.js", "preload.js", "app/**/*", "package.json"],
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["arm64", "x64"] }],
+      "category": "public.app-category.photography",
+      "icon": "resources/icon.png",
+      "identity": null
+    },
+    "dmg": { "title": "SORT" },
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }, { "target": "portable", "arch": ["x64"] }],
+      "icon": "resources/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "SORT"
+    }
+  }
+}

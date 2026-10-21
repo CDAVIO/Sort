@@ -360,10 +360,9 @@ a.btn{text-decoration:none}
 .dlcard p{font-size:12.5px;color:var(--ink3);line-height:1.65;margin-top:13px}
 .dlcard p b{color:var(--ink2);font-weight:600}
 .dlnote{font-size:12px;color:var(--ink3);margin-top:20px;line-height:1.6}
-.install{margin-top:22px}
-.install .btn{min-width:280px}
-.install p{font-size:12.5px;color:var(--ink3);line-height:1.65;margin:12px auto 0;max-width:46ch}
-.install p b{color:var(--ink2);font-weight:600}
+.altrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+.altnote{font-size:12px;color:var(--ink3);margin-top:12px;line-height:1.6}
+@media(max-width:520px){.altrow .btn{flex:1;justify-content:center}}
 .installed{margin-top:22px;padding:13px 16px;border-radius:var(--r2);
   border:1px solid #cfe3d6;background:#f1f8f3;color:#1d6e52;
   display:flex;align-items:center;justify-content:center;gap:9px;font-size:13.5px;font-weight:500}
@@ -620,36 +619,37 @@ a.btn{text-decoration:none}
 
 <section class="dl" id="dlBlock">
   <h2>Get SORT on your computer</h2>
-  <p class="dlLede">No installer, no account, and nothing to update. Once it is on your machine it runs with the internet off.</p>
+  <p class="dlLede">A real app in its own window — no browser, no account, and it keeps working with the internet off.</p>
 
-  <div class="install" id="installBox" hidden>
-    <button class="btn btn-solid btn-lg" id="btnInstall"><svg class="ic"><use href="#i-down"/></svg> Install SORT as an app</button>
-    <p>Puts SORT in your <b>Dock</b> or <b>Start menu</b> with its own icon, and opens it in its own window — no browser bar, no tabs.</p>
+  <div class="dlgrid">
+    <div class="dlcard">
+      <svg class="ic icLogo"><use href="#i-apple"/></svg>
+      <h3>macOS</h3>
+      <a class="btn btn-solid btn-lg" href="https://github.com/CDAVIO/Sort/releases/latest"><svg class="ic"><use href="#i-down"/></svg> Download for macOS</a>
+      <p>Open the <b>.dmg</b> and drag SORT into Applications. The first time you run it, <b>right-click the app → Open</b> — the build carries no Apple certificate, so a plain double-click is refused.</p>
+    </div>
+    <div class="dlcard">
+      <svg class="ic icLogo"><use href="#i-windows"/></svg>
+      <h3>Windows</h3>
+      <a class="btn btn-solid btn-lg" href="https://github.com/CDAVIO/Sort/releases/latest"><svg class="ic"><use href="#i-down"/></svg> Download for Windows</a>
+      <p>Run the <b>Setup .exe</b>. Windows will say the publisher is unknown — choose <b>More info → Run anyway</b>. There is a <b>portable</b> build too, which installs nothing.</p>
+    </div>
   </div>
+
+  <div class="orline"><span>or skip the install</span></div>
+
+  <div class="altrow">
+    <button class="btn" id="btnInstall" hidden><svg class="ic"><use href="#i-down"/></svg> Install from this page</button>
+    <a class="btn" href="index.html" download="SORT.html"><svg class="ic"><use href="#i-down"/></svg> Save as one file</a>
+  </div>
+  <p class="altnote" id="altNote">Both run in Chrome or Edge instead of a window of their own. Everything else is the same.</p>
 
   <div class="installed" id="installedBox" hidden>
     <svg class="ic"><use href="#i-check"/></svg>
     <span>SORT is installed on this computer. Open it from your Dock or Start menu.</span>
   </div>
 
-  <div class="orline" id="orLine" hidden><span>or just save the file</span></div>
-
-  <div class="dlgrid">
-    <div class="dlcard">
-      <svg class="ic icLogo"><use href="#i-apple"/></svg>
-      <h3>macOS</h3>
-      <a class="btn btn-lg" href="index.html" download="SORT.html"><svg class="ic"><use href="#i-down"/></svg> Download SORT</a>
-      <p>Save it anywhere you like. Then <b>right-click → Open With → Google Chrome</b>. Safari cannot open folders, so SORT will only offer you a zip there.</p>
-    </div>
-    <div class="dlcard">
-      <svg class="ic icLogo"><use href="#i-windows"/></svg>
-      <h3>Windows</h3>
-      <a class="btn btn-lg" href="index.html" download="SORT.html"><svg class="ic"><use href="#i-down"/></svg> Download SORT</a>
-      <p>Save it anywhere you like, then double-click it. <b>Edge</b> and <b>Chrome</b> both work, and Edge is already on every Windows machine.</p>
-    </div>
-  </div>
-
-  <p class="dlnote">Either way it is the same SORT — one page that runs on your own machine, with nothing sent anywhere.</p>
+  <p class="dlnote">Every version is the same SORT — one page that runs on your own machine, with nothing sent anywhere.</p>
 </section>
 
 <div class="offline" id="offlineNote" hidden>
@@ -2554,28 +2554,24 @@ $('caps').addEventListener('click',e=>{
                   || navigator.standalone===true;
   if(standalone){
     const b=$('installedBox'); if(b) b.hidden=false;
-    const o=$('orLine'); if(o) o.hidden=true;
     return;
   }
 
   let prompt=null;
   addEventListener('beforeinstallprompt', e=>{
     e.preventDefault(); prompt=e;
-    const box=$('installBox'); if(box) box.hidden=false;
-    const o=$('orLine'); if(o) o.hidden=false;
+    const btn0=$('btnInstall'); if(btn0) btn0.hidden=false;
   });
   const btn=$('btnInstall');
   if(btn) btn.onclick=async()=>{
     if(!prompt) return;
     btn.disabled=true;
     try{ prompt.prompt(); await prompt.userChoice; }catch(e){}
-    prompt=null; btn.disabled=false;
-    const box=$('installBox'); if(box) box.hidden=true;
+    prompt=null; btn.disabled=false; btn.hidden=true;
   };
   addEventListener('appinstalled',()=>{
-    const box=$('installBox'); if(box) box.hidden=true;
+    const b2=$('btnInstall'); if(b2) b2.hidden=true;
     const done=$('installedBox'); if(done) done.hidden=false;
-    const o=$('orLine'); if(o) o.hidden=true;
   });
 
   // the worker is what makes the installed copy work offline

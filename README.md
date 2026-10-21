@@ -165,6 +165,44 @@ A ZIP cannot exceed 4 GB — for a large library, use Chrome.
 
 ---
 
+## The desktop app
+
+`electron/` wraps the same `index.html` in a native window — no browser, its own
+icon, its own Dock/Start-menu entry.
+
+It does **not** use Chromium's File System Access API. Iterating a directory picked
+with `showDirectoryPicker` hangs in Electron ([electron#45225][e]), and that is
+SORT's main loop. Instead `electron/shim.js` reimplements the handful of File
+System Access calls SORT makes on top of Node `fs` in the main process, so the app
+code runs unchanged. Copying is `fs.copyFile` and moving is `fs.rename`, which are
+both faster than pushing bytes through JavaScript.
+
+[e]: https://github.com/electron/electron/issues/45225
+
+```
+cd electron
+npm install
+npm start            # run it locally
+npm run build:mac    # .dmg   (needs macOS)
+npm run build:win    # .exe   (needs Windows)
+```
+
+You do not need either machine: push a tag and GitHub builds both.
+
+```
+git tag v1.0.0 && git push origin v1.0.0
+```
+
+`.github/workflows/build-apps.yml` runs on GitHub's own macOS and Windows runners
+and attaches the installers to the release.
+
+The builds are **unsigned** — no Apple or Windows certificate is configured. macOS
+refuses a plain double-click on first run (right-click → Open instead) and Windows
+SmartScreen warns that the publisher is unknown. Signing costs about $99/year for
+Apple and $200/year for a Windows certificate.
+
+---
+
 ## Running it offline
 
 The page carries everything it needs — fonts included — so it makes **no network request at
