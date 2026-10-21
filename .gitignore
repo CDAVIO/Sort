@@ -3,3 +3,4 @@ Thumbs.db
 node_modules/
 electron/app/
 electron/dist/
+dist/

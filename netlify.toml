@@ -1,0 +1,29 @@
+# Netlify: no framework, no bundler — just copy the web files into dist/
+# so the Electron sources and the README stay out of the published site.
+
+[build]
+  command = "rm -rf dist && mkdir -p dist && cp index.html manifest.webmanifest sw.js dist/ && cp -r icons dist/icons"
+  publish = "dist"
+
+# The worker and the page must never be served stale, or an installed copy
+# keeps showing an old build after a deploy.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Icons are content-stable; let them sit in the cache.
+[[headers]]
+  for = "/icons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
