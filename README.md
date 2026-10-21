@@ -205,19 +205,12 @@ Apple and $200/year for a Windows certificate.
 
 ## Running it offline
 
-The page carries everything it needs — fonts included — so it makes **no network request at
-all**, not even on first load. Download it once and it keeps working with the internet off.
+The page carries everything it needs — fonts included — so it makes **no network
+request at all**, not even on first load. The desktop app and the page behave the
+same way here: once SORT is on your machine, the internet is never touched again.
 
-On the site, **Keep SORT on your computer** saves the page as `SORT.html`. That file is the
-whole app.
-
-| | How to open it |
-|---|---|
-| macOS | right-click → Open With → Google Chrome (Safari cannot open folders) |
-| Windows | double-click — Edge and Chrome both work |
-
-It is the same file on both. Opened from `file://`, Chrome still counts as a secure context,
-so folder access keeps working exactly as it does on the site.
+Opening `index.html` straight from disk works too, in Chrome, Edge or Brave.
+Safari cannot write to folders, so there it falls back to a ZIP.
 
 ---
 

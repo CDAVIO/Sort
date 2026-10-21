@@ -357,6 +357,8 @@ code{font-family:'JetBrains Mono',monospace;font-size:.92em;background:var(--was
 .dlcard .btn{width:100%;justify-content:center}
 a.btn{text-decoration:none}
 .dlcard p{font-size:12.5px;color:var(--ink3);line-height:1.65;margin-top:13px}
+.dlcard p.warn{background:var(--wash);border:1px solid var(--rule);border-radius:9px;
+  padding:10px 12px;color:var(--ink2);margin-top:11px}
 .dlcard p b{color:var(--ink2);font-weight:600}
 .dlnote{font-size:12px;color:var(--ink3);margin-top:20px;line-height:1.6}
 @media(max-width:720px){.dl{padding:26px 18px 22px}.dlgrid{grid-template-columns:1fr}}
@@ -615,13 +617,15 @@ a.btn{text-decoration:none}
       <svg class="ic icLogo"><use href="#i-apple"/></svg>
       <h3>macOS</h3>
       <a class="btn btn-solid btn-lg" href="https://github.com/CDAVIO/Sort/releases/latest"><svg class="ic"><use href="#i-down"/></svg> Download for macOS</a>
-      <p>Open the <b>.dmg</b> and drag SORT into Applications. The first time you run it, <b>right-click the app → Open</b> — the build carries no Apple certificate, so a plain double-click is refused.</p>
+      <p>Two files: take <b>arm64</b> for an Apple Silicon Mac (M1 and newer), the other for an Intel one. Open the <b>.dmg</b> and drag SORT into Applications.</p>
+      <p class="warn"><b>First launch:</b> right-click the app → <b>Open</b> → Open. A plain double-click is refused, because the build carries no Apple certificate. Only the first time.</p>
     </div>
     <div class="dlcard">
       <svg class="ic icLogo"><use href="#i-windows"/></svg>
       <h3>Windows</h3>
       <a class="btn btn-solid btn-lg" href="https://github.com/CDAVIO/Sort/releases/latest"><svg class="ic"><use href="#i-down"/></svg> Download for Windows</a>
-      <p>Run the <b>Setup .exe</b>. Windows will say the publisher is unknown — choose <b>More info → Run anyway</b>. There is a <b>portable</b> build too, which installs nothing.</p>
+      <p>Take <b>SORT Setup</b> to install it, or the plain <b>SORT .exe</b> to run it without installing anything.</p>
+      <p class="warn"><b>First launch:</b> Windows says the publisher is unknown — choose <b>More info → Run anyway</b>. Only the first time.</p>
     </div>
   </div>
 
