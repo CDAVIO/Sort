@@ -16,24 +16,55 @@
     "build:win": "npm run prebuild && electron-builder --win"
   },
   "devDependencies": {
-    "electron": "^38.0.0",
-    "electron-builder": "^25.1.8"
+    "electron": "^38.8.6",
+    "electron-builder": "^26.18.0"
   },
   "build": {
     "appId": "io.cdav.sort",
     "productName": "SORT",
     "copyright": "© CDAV.IO",
-    "directories": { "output": "dist", "buildResources": "resources" },
-    "files": ["main.js", "preload.js", "app/**/*", "package.json"],
+    "directories": {
+      "output": "dist",
+      "buildResources": "resources"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "app/**/*",
+      "package.json"
+    ],
     "mac": {
-      "target": [{ "target": "dmg", "arch": ["arm64", "x64"] }],
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
       "category": "public.app-category.photography",
       "icon": "resources/icon.png",
-      "identity": null
+      "notarize": false
     },
-    "dmg": { "title": "SORT" },
+    "dmg": {
+      "title": "SORT"
+    },
     "win": {
-      "target": [{ "target": "nsis", "arch": ["x64"] }, { "target": "portable", "arch": ["x64"] }],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "resources/icon.png"
     },
     "nsis": {

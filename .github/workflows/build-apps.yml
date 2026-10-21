@@ -7,6 +7,11 @@ on:
   push:
     tags: ['v*']
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to attach the builds to, e.g. v1.0.0. Leave empty to only keep them as artifacts.'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -42,10 +47,18 @@ jobs:
 
       - name: Build
         working-directory: electron
+        shell: bash
         env:
-          # unsigned: no Apple or Windows certificate is configured
+          # No certificate is configured. On macOS electron-builder still applies an
+          # ad-hoc signature, which Apple Silicon requires before it will launch an app.
           CSC_IDENTITY_AUTO_DISCOVERY: false
-        run: npx electron-builder ${{ matrix.flag }} --publish never
+        run: |
+          set -o pipefail
+          if ! npx electron-builder ${{ matrix.flag }} --publish never 2>&1 | tee build.log; then
+            echo "::error::electron-builder failed. Last lines of its output:"
+            tail -30 build.log | while IFS= read -r l; do echo "::error::$l"; done
+            exit 1
+          fi
 
       - name: Collect installers
         shell: bash
@@ -62,9 +75,10 @@ jobs:
           if-no-files-found: error
 
       - name: Attach to the release
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') || inputs.tag != ''
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
           files: out/*
           draft: false
           body: |
