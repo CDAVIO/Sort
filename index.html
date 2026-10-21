@@ -6,6 +6,10 @@
 <title>SORT - organize photos by device, date and place</title>
 <meta name="description" content="Sort your camera roll into folders by device, date and place. Runs entirely in your browser. Nothing is uploaded, nothing is installed.">
 <meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SORT">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'><rect width='80' height='80' rx='18' fill='%2315140f'/><path fill='%23f2994a' d='M16 17a4 4 0 0 0-4 4v38a4 4 0 0 0 4 4h48a4 4 0 0 0 4-4V29a4 4 0 0 0-4-4H35.4l-4.7-6.6A4 4 0 0 0 27 17z'/><rect width='56' height='38' x='12' y='25' fill='%23f2c94c' rx='4'/></svg>">
 
 <style>
@@ -356,6 +360,17 @@ a.btn{text-decoration:none}
 .dlcard p{font-size:12.5px;color:var(--ink3);line-height:1.65;margin-top:13px}
 .dlcard p b{color:var(--ink2);font-weight:600}
 .dlnote{font-size:12px;color:var(--ink3);margin-top:20px;line-height:1.6}
+.install{margin-top:22px}
+.install .btn{min-width:280px}
+.install p{font-size:12.5px;color:var(--ink3);line-height:1.65;margin:12px auto 0;max-width:46ch}
+.install p b{color:var(--ink2);font-weight:600}
+.installed{margin-top:22px;padding:13px 16px;border-radius:var(--r2);
+  border:1px solid #cfe3d6;background:#f1f8f3;color:#1d6e52;
+  display:flex;align-items:center;justify-content:center;gap:9px;font-size:13.5px;font-weight:500}
+.installed .ic{font-size:17px;flex:none}
+.orline{display:flex;align-items:center;gap:14px;margin-top:26px;color:var(--ink3);font-size:11.5px}
+.orline::before,.orline::after{content:'';flex:1;height:1px;background:var(--rule)}
+.orline span{white-space:nowrap}
 @media(max-width:720px){.dl{padding:26px 18px 22px}.dlgrid{grid-template-columns:1fr}}
 .offline{margin-top:54px;padding:15px 18px;border:1px solid var(--good-rule,#cfe3d6);
   border-radius:var(--r2);background:var(--good-bg,#f1f8f3);color:var(--good,#1d6e52);
@@ -604,25 +619,37 @@ a.btn{text-decoration:none}
 </section>
 
 <section class="dl" id="dlBlock">
-  <h2>Keep SORT on your computer</h2>
-  <p class="dlLede">One file. Download it once and it runs with no internet, no installer and no account — the same page, on your own machine.</p>
+  <h2>Get SORT on your computer</h2>
+  <p class="dlLede">No installer, no account, and nothing to update. Once it is on your machine it runs with the internet off.</p>
+
+  <div class="install" id="installBox" hidden>
+    <button class="btn btn-solid btn-lg" id="btnInstall"><svg class="ic"><use href="#i-down"/></svg> Install SORT as an app</button>
+    <p>Puts SORT in your <b>Dock</b> or <b>Start menu</b> with its own icon, and opens it in its own window — no browser bar, no tabs.</p>
+  </div>
+
+  <div class="installed" id="installedBox" hidden>
+    <svg class="ic"><use href="#i-check"/></svg>
+    <span>SORT is installed on this computer. Open it from your Dock or Start menu.</span>
+  </div>
+
+  <div class="orline" id="orLine" hidden><span>or just save the file</span></div>
 
   <div class="dlgrid">
     <div class="dlcard">
       <svg class="ic icLogo"><use href="#i-apple"/></svg>
       <h3>macOS</h3>
-      <a class="btn btn-solid btn-lg" href="index.html" download="SORT.html"><svg class="ic"><use href="#i-down"/></svg> Download SORT</a>
+      <a class="btn btn-lg" href="index.html" download="SORT.html"><svg class="ic"><use href="#i-down"/></svg> Download SORT</a>
       <p>Save it anywhere you like. Then <b>right-click → Open With → Google Chrome</b>. Safari cannot open folders, so SORT will only offer you a zip there.</p>
     </div>
     <div class="dlcard">
       <svg class="ic icLogo"><use href="#i-windows"/></svg>
       <h3>Windows</h3>
-      <a class="btn btn-solid btn-lg" href="index.html" download="SORT.html"><svg class="ic"><use href="#i-down"/></svg> Download SORT</a>
+      <a class="btn btn-lg" href="index.html" download="SORT.html"><svg class="ic"><use href="#i-down"/></svg> Download SORT</a>
       <p>Save it anywhere you like, then double-click it. <b>Edge</b> and <b>Chrome</b> both work, and Edge is already on every Windows machine.</p>
     </div>
   </div>
 
-  <p class="dlnote">It is the same file on both — SORT is a web page that runs on your machine, which is why there is nothing to install and nothing to update.</p>
+  <p class="dlnote">Either way it is the same SORT — one page that runs on your own machine, with nothing sent anywhere.</p>
 </section>
 
 <div class="offline" id="offlineNote" hidden>
@@ -2515,6 +2542,46 @@ $('caps').addEventListener('click',e=>{
   if(location.protocol==='file:'){
     const d=$('dlBlock'); if(d) d.hidden=true;
     const o=$('offlineNote'); if(o) o.hidden=false;
+  }
+})();
+
+/* ---------- install as an app (Chrome / Edge) ---------- */
+(function(){
+  if(location.protocol==='file:') return;          // the saved copy has nothing to install
+
+  const standalone = matchMedia('(display-mode: standalone)').matches
+                  || matchMedia('(display-mode: window-controls-overlay)').matches
+                  || navigator.standalone===true;
+  if(standalone){
+    const b=$('installedBox'); if(b) b.hidden=false;
+    const o=$('orLine'); if(o) o.hidden=true;
+    return;
+  }
+
+  let prompt=null;
+  addEventListener('beforeinstallprompt', e=>{
+    e.preventDefault(); prompt=e;
+    const box=$('installBox'); if(box) box.hidden=false;
+    const o=$('orLine'); if(o) o.hidden=false;
+  });
+  const btn=$('btnInstall');
+  if(btn) btn.onclick=async()=>{
+    if(!prompt) return;
+    btn.disabled=true;
+    try{ prompt.prompt(); await prompt.userChoice; }catch(e){}
+    prompt=null; btn.disabled=false;
+    const box=$('installBox'); if(box) box.hidden=true;
+  };
+  addEventListener('appinstalled',()=>{
+    const box=$('installBox'); if(box) box.hidden=true;
+    const done=$('installedBox'); if(done) done.hidden=false;
+    const o=$('orLine'); if(o) o.hidden=true;
+  });
+
+  // the worker is what makes the installed copy work offline
+  const local = location.hostname==='localhost'||location.hostname==='127.0.0.1';
+  if('serviceWorker' in navigator && (location.protocol==='https:'||local)){
+    addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
   }
 })();
 
