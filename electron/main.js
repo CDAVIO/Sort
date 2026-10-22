@@ -10,6 +10,9 @@ const fsp  = fs.promises;
 
 let win = null;
 
+// the preload runs in its own process and reads this from the environment
+process.env.SORT_VERSION = app.getVersion();
+
 function createWindow() {
   win = new BrowserWindow({
     width: 1200, height: 860, minWidth: 380, minHeight: 540,
@@ -42,6 +45,8 @@ app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(
 /* ---------------- file operations ---------------- */
 const ok  = v => ({ ok: true, v });
 const err = e => ({ ok: false, e: (e && e.message) || String(e) });
+
+ipcMain.handle('version', async () => ok(app.getVersion()));
 
 ipcMain.handle('pick', async (_e, { title }) => {
   const r = await dialog.showOpenDialog(win, {

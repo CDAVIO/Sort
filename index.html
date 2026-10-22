@@ -378,14 +378,13 @@ body::before{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;
     radial-gradient(100vw 64vh at 50% 124%, rgba(255,217,5,.028), transparent 72%)}
 
 /* ── masthead ────────────────────────────────────────────────── */
-.mast{position:sticky;top:0;z-index:40;padding:14px 0;gap:26px;flex-wrap:nowrap}
-/* the bar itself stays inside the column; its background bleeds the full width */
-.mast::before{content:'';position:absolute;inset:0;left:50%;width:100vw;
-  transform:translateX(-50%);z-index:-1;
+.topbar{position:sticky;top:0;z-index:40;
   background:rgba(0,0,0,.88);backdrop-filter:blur(18px) saturate(140%);
   -webkit-backdrop-filter:blur(18px) saturate(140%);
   border-bottom:1px solid var(--rule)}
-@media(max-width:600px){.mast{padding:12px 0}}
+/* the row lines up with the page column, the bar behind it spans the window */
+.mast{max-width:1120px;margin:0 auto;padding:14px 28px;gap:26px;flex-wrap:nowrap}
+@media(max-width:600px){.mast{padding:12px 16px}}
 .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
 .bw{display:flex;flex-direction:column;line-height:1.1}
 .nav{display:flex;gap:4px;margin-left:auto}
@@ -470,6 +469,19 @@ body::before{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;
 .qc:hover{color:var(--ink)}
 
 .dl{scroll-margin-top:90px}
+
+/* a quiet strip along the bottom of the app window when a newer build exists */
+.updbar{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:80;
+  display:flex;align-items:center;gap:12px;padding:11px 13px 11px 18px;
+  border:1px solid var(--rule2);border-radius:999px;background:rgba(18,18,18,.96);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 18px 50px -20px rgba(0,0,0,.9)}
+.updTxt{font-size:13.5px;color:var(--ink2)}
+.updTxt b{color:var(--brand);font-weight:700}
+.updbar .btn{padding:8px 15px;font-size:13px}
+@media(max-width:560px){.updbar{left:12px;right:12px;transform:none;border-radius:var(--r2);flex-wrap:wrap}}
+/* clear of the wizard's own footer bar in the app window */
+html[data-mode="app"] .updbar{bottom:80px}
 
 
 /* ── hero ────────────────────────────────────────────────────── */
@@ -585,8 +597,24 @@ body::before{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;
 
 /* `hidden` has to beat the display rules above */
 [hidden]{display:none!important}
-html[data-mode="app"] .shell{display:none}
+/* ── the desktop window is the tool and nothing else ───────────────
+   No masthead, no page behind the panel, no scrim blurring a page that
+   is not there, and no card shadow floating over emptiness. The panel
+   simply fills the window the way a native view does. */
+html[data-mode="app"] .shell,
+html[data-mode="app"] .topbar,
+html[data-mode="app"] .scrim{display:none}
 html[data-mode="app"],html[data-mode="app"] body{height:100%;overflow:hidden}
+html[data-mode="app"] body{background:var(--paper)}
+html[data-mode="app"] .modal{padding:0}
+html[data-mode="app"] .panel{width:100%;max-width:none;height:100%;max-height:none;
+  border:0;border-radius:0;box-shadow:none;animation:none;background:var(--paper)}
+html[data-mode="app"] .wizbody{max-width:860px;width:100%;margin:0 auto}
+html[data-mode="app"] .wizhead,
+html[data-mode="app"] .wizfoot{padding-left:max(22px,calc((100% - 860px)/2));
+  padding-right:max(22px,calc((100% - 860px)/2))}
+/* room for the traffic lights on macOS */
+html[data-mode="app"][data-os="mac"] .wizhead{padding-top:30px}
 html[data-mode="app"] #wizClose{display:none}
 html[data-mode="app"] .scrim{pointer-events:none}
 
@@ -941,6 +969,12 @@ html[data-mode="app"] .scrim{pointer-events:none}
   <div class="fb">Developed by <a href="https://cdav.io" target="_blank" rel="noopener">CDAV<span class="d">.</span>IO</a></div>
   <div class="fc">&copy; <span id="yr">2026</span> CDAV.IO, all rights reserved</div>
 </footer>
+</div>
+
+<div class="updbar" id="updBar" hidden>
+  <span class="updTxt">SORT <b id="updV"></b> is out. You have <span id="updNow"></span>.</span>
+  <a class="btn btn-solid" id="updGet" href="https://github.com/CDAVIO/Sort/releases/latest" target="_blank" rel="noopener">Get it</a>
+  <button type="button" class="btn" id="updLater">Later</button>
 </div>
 
 <!-- ─────────── wizard ─────────── -->
@@ -2954,6 +2988,40 @@ $('caps').addEventListener('click',e=>{
     .catch(()=>{ failed=true; render(); });
 })();
 
+/* ---------- is there a newer build than the one running? ---------- */
+(function(){
+  const N=window.__sortNative;
+  if(!N||!N.version) return;                 // only the desktop app has a version
+  const bar=$('updBar'); if(!bar) return;
+
+  // 1.10.0 is newer than 1.9.0, so compare the numbers, not the strings
+  const parts=v=>String(v).replace(/^v/,'').split('.').map(n=>parseInt(n,10)||0);
+  const newer=(a,b)=>{ const x=parts(a),y=parts(b);
+    for(let i=0;i<Math.max(x.length,y.length);i++){
+      const d=(x[i]||0)-(y[i]||0); if(d) return d>0;
+    } return false; };
+
+  let dismissed=false;
+  try{ dismissed = localStorage.getItem('sort-skip-update')===String(N.version); }catch(e){}
+
+  fetch('https://api.github.com/repos/CDAVIO/Sort/releases/latest',
+        {headers:{Accept:'application/vnd.github+json'}})
+    .then(r=>r.ok?r.json():Promise.reject(r.status))
+    .then(d=>{
+      const latest=String(d.tag_name||'').replace(/^v/,'');
+      if(!latest||!newer(latest,N.version)) return;
+      $('updV').textContent=latest;
+      $('updNow').textContent=N.version;
+      $('updGet').href=d.html_url||$('updGet').href;
+      if(!dismissed) bar.hidden=false;
+      $('updLater').onclick=()=>{
+        bar.hidden=true;
+        try{ localStorage.setItem('sort-skip-update',String(N.version)); }catch(e){}
+      };
+    })
+    .catch(()=>{});                          // offline is the normal case, stay quiet
+})();
+
 /* the worker only makes the site itself load fast and survive a dropout */
 (function(){
   const local = location.hostname==='localhost'||location.hostname==='127.0.0.1';
@@ -2965,11 +3033,12 @@ $('caps').addEventListener('click',e=>{
 /* in the desktop app the window IS the tool, so skip the sales page */
 if(window.__sortNative){
   document.documentElement.dataset.mode='app';
+  if(window.__sortNative.platform==='darwin') document.documentElement.dataset.os='mac';
   // the capability circles test a browser; inside the app they are always green,
   // so they say nothing and only add clutter
 
   const pn=$('pickNote');
-  if(pn) pn.textContent="SORT asks for the folder once, then reads each file's metadata on this machine \u2014 the bytes never go anywhere.";
+  if(pn) pn.textContent="SORT asks for the folder once, then reads each file's metadata on this machine. The bytes never go anywhere.";
 }
 
 renderPresets(); renderSegs(); renderRnPresets(); renderStructPreview();

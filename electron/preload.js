@@ -6,6 +6,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 const call = (ch, args) => ipcRenderer.invoke(ch, args);
 
 contextBridge.exposeInMainWorld('__sortNative', {
+  version  : process.env.SORT_VERSION || '',
   platform : process.platform,
   sep      : process.platform === 'win32' ? '\\' : '/',
   pick     : title             => call('pick',       { title }),
