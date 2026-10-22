@@ -19,25 +19,26 @@
 
 
 :root{
-  --paper:#ffffff;
-  --wash:#f7f7f5;
-  --wash2:#efeeea;
-  --rule:#e4e3de;
-  --rule2:#cfcec7;
-  --ink:#15140f;
-  --ink2:#6b6862;
-  --ink3:#a3a099;
+  --paper:#000000;        /* the page itself */
+  --wash:#121212;         /* panels raised off it */
+  --wash2:#1e1e1e;
+  --rule:#272727;
+  --rule2:#3a3a3a;
+  --ink:#f3f3f3;
+  --ink2:#a6a6a6;
+  --ink3:#6f6f6f;
   --brand:#ffd905;
-  --photo:#15140f;
-  --video:#33489e;
-  --shot:#1d6e52;
-  --other:#a3a099;
-  --bad:#b3261e;
-  --bad-bg:#fdf3f2;
-  --ok:#1d6e52;
-  --ok-bg:#f1f8f4;
-  --r:14px; --r2:10px; --r3:7px;
-  --shadow:0 1px 2px rgba(21,20,15,.05), 0 8px 24px -16px rgba(21,20,15,.18);
+  --on-brand:#111111;     /* text on a yellow fill */
+  --photo:#e8e8e8;
+  --video:#6f86ef;
+  --shot:#3fae84;
+  --other:#8a8a8a;
+  --bad:#ff6b5e;
+  --bad-bg:#1f1210;
+  --ok:#4fc08d;
+  --ok-bg:#0f1a14;
+  --r:18px; --r2:12px; --r3:10px;
+  --shadow:0 1px 2px rgba(0,0,0,.6), 0 18px 40px -24px rgba(0,0,0,.9);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
@@ -59,7 +60,7 @@ body{
 .mast{display:flex;align-items:center;justify-content:space-between;gap:20px;
   padding:26px 0 24px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:13px;min-width:0}
-.glyph{width:42px;height:42px;border-radius:11px;background:var(--ink);
+.glyph{width:42px;height:42px;border-radius:12px;background:var(--wash2);
   display:grid;place-items:center;flex:none;position:relative}
 .glyph svg{width:21px;height:21px;stroke:#fff;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .glyph::after{content:'';position:absolute;top:-3px;right:-3px;width:11px;height:11px;
@@ -89,9 +90,9 @@ body{
 
 /* ─────────── hero ─────────── */
 .hero{padding:16px 0 40px;border-top:1px solid var(--rule)}
-.hero h1{font-size:30px;line-height:1.22;letter-spacing:-.021em;font-weight:650;
+.hero h1{font-size:clamp(34px,6vw,62px);line-height:1.04;letter-spacing:-.035em;font-weight:800;
   max-width:19ch;margin:26px 0 0}
-@media(max-width:600px){.hero h1{font-size:25px}}
+@media(max-width:600px){.hero h1{letter-spacing:-.028em}}
 .lede{color:var(--ink2);margin-top:12px;max-width:56ch;font-size:15.5px}
 .pathstage{margin-top:26px;border:1px solid var(--rule);border-radius:var(--r);
   background:var(--wash);padding:19px 20px;overflow:hidden}
@@ -122,7 +123,7 @@ body{
 .sub:first-child{margin-top:0}
 
 /* ─────────── controls ─────────── */
-.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 15px;border-radius:var(--r3);
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 17px;border-radius:999px;
   border:1px solid var(--rule2);background:var(--paper);color:var(--ink);
   font-family:inherit;font-size:13.5px;font-weight:550;cursor:pointer;
   transition:background .14s,border-color .14s,color .14s}
@@ -130,12 +131,13 @@ body{
 .btn:active{background:var(--wash2)}
 .btn:disabled{opacity:.4;cursor:not-allowed;background:var(--paper)}
 .btn .ic{font-size:16px}
-.btn-solid{background:var(--ink);border-color:var(--ink);color:#fff}
-.btn-solid:hover{background:#2c2a22;border-color:#2c2a22}
-.btn-solid:active{background:#000}
+.btn-solid{background:var(--brand);border-color:var(--brand);color:var(--on-brand);font-weight:700}
+.btn-solid:hover{background:#ffe23d;border-color:#ffe23d}
+.btn-solid:active{background:var(--gold,#e3be00)}
+.btn-solid .ic{color:var(--on-brand)}
 .btn-danger{color:var(--bad);border-color:#ecd3d0}
 .btn-danger:hover{background:var(--bad-bg);border-color:#dfb3ae}
-.btn-lg{padding:14px 20px;font-size:15px;font-weight:600}
+.btn-lg{padding:15px 26px;font-size:15px;font-weight:600}
 
 .row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
 input[type=text]{flex:1;min-width:170px;padding:10px 13px;background:var(--paper);
@@ -345,30 +347,33 @@ code{font-family:'JetBrains Mono',monospace;font-size:.92em;background:var(--was
 @media(max-width:380px){.kinds{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.kind .ka{animation:none}}
 
-.dl{margin-top:54px;padding:34px 30px 30px;border:1px solid var(--rule);
+.dl{margin-top:54px;padding:46px 30px 40px;border:1px solid var(--rule);
   border-radius:var(--r);background:var(--wash);text-align:center}
-.dl h2{font-size:21px;font-weight:650;letter-spacing:-.016em}
-.dlLede{color:var(--ink2);font-size:14.5px;margin:9px auto 0;max-width:52ch}
-.dlgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:24px;text-align:left}
-.dlcard{background:var(--paper);border:1px solid var(--rule);border-radius:var(--r2);padding:20px 20px 22px}
-.dlcard .ic{font-size:24px;color:var(--ink2)}
-.dlcard .icLogo{font-size:26px;color:var(--ink)}
-.dlcard h3{font-size:15px;font-weight:650;margin:9px 0 14px;letter-spacing:-.01em}
-.dlcard .btn{width:100%;justify-content:center}
+.dl h2{font-size:clamp(24px,3.4vw,34px);font-weight:800;letter-spacing:-.03em}
+.dlLede{color:var(--ink2);font-size:15px;margin:11px auto 0;max-width:48ch}
 a.btn{text-decoration:none}
-.dlcard p{font-size:12.5px;color:var(--ink3);line-height:1.65;margin-top:13px}
-.dlcard p.warn{background:var(--wash);border:1px solid var(--rule);border-radius:9px;
-  padding:10px 12px;color:var(--ink2);margin-top:11px}
-.dlcard p.warn code{font-family:'JetBrains Mono',monospace;font-size:11px;
-  background:var(--paper);border:1px solid var(--rule);border-radius:5px;
-  padding:4px 6px;display:inline-block;color:var(--ink);word-break:break-all}
-.dlcard p b{color:var(--ink2);font-weight:600}
-.dlnote{font-size:12px;color:var(--ink3);margin-top:20px;line-height:1.6}
-@media(max-width:720px){.dl{padding:26px 18px 22px}.dlgrid{grid-template-columns:1fr}}
-.offline{margin-top:54px;padding:15px 18px;border:1px solid var(--good-rule,#cfe3d6);
-  border-radius:var(--r2);background:var(--good-bg,#f1f8f3);color:var(--good,#1d6e52);
-  display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:500}
-.offline .ic{font-size:17px;flex:none}
+.dlMain{margin-top:26px;min-width:290px;justify-content:center}
+.dlStatus{font-size:12.5px;color:var(--ink3);margin-top:12px;min-height:18px}
+
+.dlSwitch{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+.dlSwitch button{font:inherit;font-size:12.5px;padding:7px 14px;border-radius:999px;
+  background:transparent;border:1px solid var(--rule);color:var(--ink3);cursor:pointer}
+.dlSwitch button:hover{color:var(--ink);border-color:var(--rule2)}
+.dlSwitch button[aria-pressed="true"]{background:var(--wash2);border-color:var(--rule2);color:var(--ink)}
+
+.dlSteps{margin:26px auto 0;max-width:620px;text-align:left}
+.dlSteps ol{margin:0;padding-left:20px;font-size:13.5px;color:var(--ink2);line-height:1.85}
+.dlSteps li::marker{color:var(--ink3)}
+.dlSteps b{color:var(--ink);font-weight:600}
+.term{display:flex;align-items:center;gap:10px;margin-top:9px;padding:11px 13px;
+  background:#0a0a0a;border:1px solid var(--rule2);border-radius:var(--r2)}
+.term code{flex:1;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--brand);
+  background:none;border:0;padding:0;
+  word-break:break-all;line-height:1.5}
+.term button{font:inherit;font-size:11.5px;padding:6px 12px;border-radius:999px;cursor:pointer;
+  background:var(--wash2);border:1px solid var(--rule2);color:var(--ink2);flex:none}
+.term button:hover{color:var(--ink)}
+@media(max-width:720px){.dl{padding:34px 18px 30px}.dlMain{min-width:0;width:100%}}
 
 /* footer */
 .how{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:46px;
@@ -612,27 +617,22 @@ a.btn{text-decoration:none}
 </section>
 
 <section class="dl" id="dlBlock">
-  <h2>Get SORT on your computer</h2>
-  <p class="dlLede">A real app in its own window — no browser, no account, and it keeps working with the internet off.</p>
+  <h2>Download SORT</h2>
+  <p class="dlLede">A real app in its own window. Free, no account, and it keeps working with the internet off.</p>
 
-  <div class="dlgrid">
-    <div class="dlcard">
-      <svg class="ic icLogo"><use href="#i-apple"/></svg>
-      <h3>macOS</h3>
-      <a class="btn btn-solid btn-lg" href="https://github.com/CDAVIO/Sort/releases/latest"><svg class="ic"><use href="#i-down"/></svg> Download for macOS</a>
-      <p>Two files: take <b>arm64</b> for an Apple Silicon Mac (M1 and newer), the other for an Intel one. Open the <b>.dmg</b> and drag SORT into Applications.</p>
-      <p class="warn"><b>First launch:</b> right-click the app → <b>Open</b> → Open. A plain double-click is refused, because the build carries no Apple certificate. Only the first time.<br><br>If macOS instead says SORT is <b>damaged</b>, open Terminal and paste this once:<br><code>xattr -cr /Applications/SORT.app</code></p>
-    </div>
-    <div class="dlcard">
-      <svg class="ic icLogo"><use href="#i-windows"/></svg>
-      <h3>Windows</h3>
-      <a class="btn btn-solid btn-lg" href="https://github.com/CDAVIO/Sort/releases/latest"><svg class="ic"><use href="#i-down"/></svg> Download for Windows</a>
-      <p>Take <b>SORT Setup</b> to install it, or the plain <b>SORT .exe</b> to run it without installing anything.</p>
-      <p class="warn"><b>First launch:</b> Windows says the publisher is unknown — choose <b>More info → Run anyway</b>. Only the first time.</p>
-    </div>
+  <a class="btn btn-solid btn-lg dlMain" id="dlMain" href="https://github.com/CDAVIO/Sort/releases/latest">
+    <svg class="ic"><use href="#i-down"/></svg> <span id="dlMainLabel">Download SORT</span>
+  </a>
+  <p class="dlStatus" id="dlStatus">Checking the latest version…</p>
+
+  <div class="dlSwitch" id="dlSwitch">
+    <button type="button" data-os="mac-arm">Mac · Apple chip</button>
+    <button type="button" data-os="mac-intel">Mac · Intel</button>
+    <button type="button" data-os="win">Windows</button>
+    <button type="button" data-os="win-portable">Windows · portable</button>
   </div>
 
-  <p class="dlnote">Free, and both builds are the same SORT. Every photo stays on your computer — nothing is uploaded and no account is involved.</p>
+  <div class="dlSteps" id="dlSteps"></div>
 </section>
 
 <div class="offline" id="offlineNote" hidden>
@@ -813,7 +813,7 @@ const IMG_VIDEO=svgImg(ART_VIDEO_F);
 const IMG_DOC=svgImg(ART_DOC_F);
 const IMG_MUSIC=svgImg(ART_MUSIC_F);
 const IMG_FOLDER=svgImg(ART_FOLDER('#f2994a','#f2c94c'));
-const IMG_FOLDER_OFF=svgImg(ART_FOLDER('#dedcd6','#ebe9e3'));
+const IMG_FOLDER_OFF=svgImg(ART_FOLDER('#3a3a3a','#4a4a4a'));
 const ready=i=>i.complete&&i.naturalWidth>0;
 /* what drifts above the line: mostly photos, then video, then the rest */
 const FILE_ART=[IMG_PHOTO,IMG_PHOTO,IMG_PHOTO,IMG_PHOTO,IMG_VIDEO,IMG_VIDEO,IMG_DOC,IMG_MUSIC];
@@ -1806,7 +1806,7 @@ const Stage={
     }
     return nd;
   },
-  catColor(c){ return c==='Videos'?'#33489e':c==='Screenshots'?'#1d6e52':c==='Others'?'#a3a099':'#15140f'; },
+  catColor(c){ return c==='Videos'?'#6f86ef':c==='Screenshots'?'#3fae84':c==='Others'?'#8a8a8a':'#e8e8e8'; },
   send(label,cat,name){
     this.note(cat,name);
     const nd=this.folder(label);
@@ -1830,7 +1830,7 @@ const Stage={
     const g=this.ctx, img=filled?IMG_FOLDER:IMG_FOLDER_OFF;
     if(ready(img)){ g.drawImage(img,x-s/2,y-s/2,s,s); return; }
     if(filled){ g.fillStyle='#f2c94c'; this.folderPath(x,y,s*0.76); g.fill(); }
-    else{ g.strokeStyle='rgba(21,20,15,0.3)'; g.lineWidth=1.3; this.folderPath(x,y,s*0.76); g.stroke(); }
+    else{ g.strokeStyle='rgba(255,255,255,0.30)'; g.lineWidth=1.3; this.folderPath(x,y,s*0.76); g.stroke(); }
   },
   folderPath(x,y,s){
     const g=this.ctx, k=s/24;
@@ -1865,16 +1865,16 @@ const Stage={
       const s=(this.narrow?21:25)*(f.sp||1);
       g.globalAlpha=0.94*fade;
       if(ready(f.img)) g.drawImage(f.img,x-s/2,f.y-s/2,s,s);
-      else{ g.fillStyle='#fff'; g.strokeStyle='#bdbbb4'; g.lineWidth=1.3; g.lineJoin='round';
+      else{ g.fillStyle='#1b1b1b'; g.strokeStyle='#4a4a4a'; g.lineWidth=1.3; g.lineJoin='round';
             this.docPath(x,f.y,s*0.9); g.fill(); g.stroke(); }
       g.globalAlpha=1;
     }
 
     /* ---------- the divider ---------- */
     const grad=g.createLinearGradient(this.pad,0,W-this.pad,0);
-    grad.addColorStop(0,'rgba(228,227,222,0)');
+    grad.addColorStop(0,'rgba(255,217,5,0)');
     grad.addColorStop(.18,'#ffd905'); grad.addColorStop(.82,'#ffd905');
-    grad.addColorStop(1,'rgba(228,227,222,0)');
+    grad.addColorStop(1,'rgba(255,217,5,0)');
     g.strokeStyle=grad; g.lineWidth=1.6;
     g.beginPath(); g.moveTo(this.pad,this.divY); g.lineTo(W-this.pad,this.divY); g.stroke();
     // sparks where a file crossed
@@ -1887,9 +1887,9 @@ const Stage={
       g.globalAlpha=1;
     }
     g.font="9.5px 'JetBrains Mono',monospace"; g.textBaseline='middle';
-    g.fillStyle='#a3a099'; g.textAlign='left';
+    g.fillStyle='#8a8a8a'; g.textAlign='left';
     g.fillText(this.kind==='scan'?'reading each file':'where does it go?',this.pad,this.divY+13);
-    g.textAlign='right'; g.fillStyle='#6b6862';
+    g.textAlign='right'; g.fillStyle='#9a9a9a';
     const verb=this.kind==='scan'?'read':(ST.mode==='preview'?'planned':ST.mode==='move'?'moved':'copied');
     g.fillText(this.done?`${verb} × ${fmtN(this.done)}`:'',W-this.pad,this.divY+13);
 
@@ -1899,7 +1899,7 @@ const Stage={
     if(list.length){
       const xs=list.map(n=>n.x);
       const lo=Math.min(...xs), hi=Math.max(...xs);
-      g.strokeStyle='rgba(21,20,15,0.22)'; g.lineWidth=1;
+      g.strokeStyle='rgba(255,255,255,0.20)'; g.lineWidth=1;
       g.beginPath();
       g.moveTo(rootX,this.rootY+37); g.lineTo(rootX,this.busY);
       if(hi>lo){ g.moveTo(lo,this.busY); g.lineTo(hi,this.busY); }
@@ -1910,7 +1910,7 @@ const Stage={
     // root
     this.drawFolder(rootX,this.rootY,55,true);
     g.font="700 11px 'JetBrains Mono',monospace"; g.textAlign='center'; g.textBaseline='top';
-    g.fillStyle='#15140f';
+    g.fillStyle='#f3f3f3';
     let rl=(this.kind==='scan'?'YOUR LIBRARY':(ST.mode==='preview'?'PREVIEW':this.maskLabel(ST.dstLabel||'DESTINATION'))).toUpperCase();
     if(rl.length>22) rl=rl.slice(0,21)+'…';
     g.fillText(rl,rootX,this.rootY+21);
@@ -1929,13 +1929,13 @@ const Stage={
       this.drawFolder(nd.x,nd.y,s,filled);
       const lw=Math.max(56,(nd.slot||this.slotW)-8);
       g.font="9.5px 'JetBrains Mono',monospace"; g.textAlign='center'; g.textBaseline='top';
-      g.fillStyle=filled?'#15140f':'#a3a099';
+      g.fillStyle=filled?'#f3f3f3':'#6f6f6f';
       let lb=nd.isOver?`+${nd.extra} more`:this.maskLabel(nd.label);
       const maxc=Math.max(7,Math.floor(lw/5.6));
       if(lb.length>maxc) lb=lb.slice(0,maxc-1)+'…';
       g.fillText(lb,nd.x,nd.y+s*0.46);
       if(nd.n){
-        g.font="9px 'JetBrains Mono',monospace"; g.fillStyle='#a3a099';
+        g.font="9px 'JetBrains Mono',monospace"; g.fillStyle='#7d7d7d';
         g.fillText(fmtN(nd.n),nd.x,nd.y+s*0.46+12);
       }
       g.globalAlpha=1;
@@ -1964,13 +1964,13 @@ const Stage={
       }
       const a=p.t>0.72?(1-p.t)/0.28:1;
       const s=this.narrow?23:26, rad=s*0.72;
-      g.globalAlpha=a*0.92; g.fillStyle='#fff';
+      g.globalAlpha=a*0.95; g.fillStyle='#1b1b1b';
       g.beginPath(); g.arc(x,y,rad,0,Math.PI*2); g.fill();
       g.globalAlpha=a*0.38; g.strokeStyle=col; g.lineWidth=1.2;
       g.beginPath(); g.arc(x,y,rad,0,Math.PI*2); g.stroke();
       g.globalAlpha=a;
       if(ready(p.img)) g.drawImage(p.img,x-s/2,y-s/2,s,s);
-      else{ g.fillStyle='#fff'; g.strokeStyle=col; g.lineWidth=1.2; g.lineJoin='round';
+      else{ g.fillStyle='#1b1b1b'; g.strokeStyle=col; g.lineWidth=1.2; g.lineJoin='round';
             this.docPath(x,y,s*0.86); g.fill(); g.stroke(); }
       g.globalAlpha=1;
     }
@@ -1979,7 +1979,7 @@ const Stage={
     for(let i=this.rings.length-1;i>=0;i--){
       const r=this.rings[i]; r.t+=0.06;
       if(r.t>=1){ this.rings.splice(i,1); continue; }
-      g.strokeStyle=`rgba(21,20,15,${0.26*(1-r.t)})`; g.lineWidth=1.3;
+      g.strokeStyle=`rgba(255,255,255,${0.30*(1-r.t)})`; g.lineWidth=1.3;
       g.beginPath(); g.arc(r.x,r.y,8+r.t*22,0,Math.PI*2); g.stroke();
     }
 
@@ -2526,6 +2526,85 @@ $('caps').addEventListener('click',e=>{
   if(location.protocol==='file:'){
     const o=$('offlineNote'); if(o) o.hidden=false;
   }
+})();
+
+/* ---------- pick the right installer for whoever is reading ---------- */
+(function(){
+  const REPO='CDAVIO/Sort', RELEASES='https://github.com/'+REPO+'/releases/latest';
+  const QUAR='xattr -dr com.apple.quarantine /Applications/SORT.app';
+
+  const TARGETS={
+    'mac-arm':   {label:'Download for Mac', name:'Apple chip',       match:n=>/arm64\.dmg$/i.test(n)},
+    'mac-intel': {label:'Download for Mac', name:'Intel Mac',        match:n=>/\.dmg$/i.test(n)&&!/arm64/i.test(n)},
+    'win':       {label:'Download for Windows', name:'Windows installer', match:n=>/\.exe$/i.test(n)&&/setup/i.test(n)},
+    'win-portable':{label:'Download the portable app', name:'Windows, portable', match:n=>/\.exe$/i.test(n)&&!/setup/i.test(n)}
+  };
+  const STEPS={
+    mac:`<ol><li>Open the <b>.dmg</b> and drag <b>SORT</b> into your <b>Applications</b> folder.</li>
+      <li>macOS blocks it the first time — that is normal for an app without a paid Apple certificate.
+      Open <b>Terminal</b> and run this once:
+      <div class="term"><code id="qCmd">${QUAR}</code><button type="button" id="qCopy">Copy</button></div></li>
+      <li>Open SORT from Applications. It works normally from now on.</li></ol>`,
+    win:`<ol><li>Run the file you downloaded.</li>
+      <li>Windows says the publisher is unknown — choose <b>More info</b>, then <b>Run anyway</b>. Only the first time.</li>
+      <li>SORT opens in its own window.</li></ol>`
+  };
+
+  const $$=id=>document.getElementById(id);
+  const main=$$('dlMain'), label=$$('dlMainLabel'), status=$$('dlStatus'),
+        steps=$$('dlSteps'), sw=$$('dlSwitch');
+  if(!main||!sw||!steps) return;
+  let release=null, failed=false, current='win';
+
+  function guess(){
+    const ua=navigator.userAgent||'', plat=navigator.platform||'';
+    if(!(/Mac/.test(plat)||/Macintosh/.test(ua))) return 'win';
+    try{
+      const c=document.createElement('canvas').getContext('webgl');
+      const i=c&&c.getExtension('WEBGL_debug_renderer_info');
+      const gpu=i?c.getParameter(i.UNMASKED_RENDERER_WEBGL):'';
+      if(/Intel/i.test(gpu)) return 'mac-intel';
+    }catch(e){}
+    return 'mac-arm';                      // every Mac sold since 2020
+  }
+  const mb=b=>b>0?(b/1048576).toFixed(0)+' MB':'';
+
+  function render(){
+    const t=TARGETS[current];
+    label.textContent=t.label;
+    steps.innerHTML = current.indexOf('mac')===0 ? STEPS.mac : STEPS.win;
+    const copy=$$('qCopy');
+    if(copy) copy.onclick=async()=>{
+      try{ await navigator.clipboard.writeText(QUAR); copy.textContent='Copied'; }
+      catch(e){ const r=document.createRange(); r.selectNode($$('qCmd'));
+                getSelection().removeAllRanges(); getSelection().addRange(r); copy.textContent='Select + \u2318C'; }
+      setTimeout(()=>{ copy.textContent='Copy'; },1800);
+    };
+    const tabs=sw.children?[...sw.children]:[];
+    tabs.forEach(b=>b.setAttribute&&b.setAttribute('aria-pressed', String(b.dataset.os===current)));
+
+    const asset=release&&release.assets&&release.assets.filter(a=>t.match(a.name))[0];
+    if(asset){
+      main.href=asset.browser_download_url;
+      status.textContent=t.name+' \u00b7 version '+String(release.tag_name).replace(/^v/,'')+' \u00b7 '+mb(asset.size);
+    }else{
+      main.href=RELEASES;
+      status.textContent = failed
+        ? 'Opens every file on GitHub.'
+        : release ? 'No '+t.name+' file in this release yet \u2014 the button opens them all on GitHub.'
+                  : 'Checking the latest version\u2026';
+    }
+  }
+
+  current=guess();
+  sw.addEventListener('click',e=>{ const b=e.target.closest('button[data-os]'); if(!b) return;
+                                   current=b.dataset.os; render(); });
+  render();
+
+  fetch('https://api.github.com/repos/'+REPO+'/releases/latest',{headers:{Accept:'application/vnd.github+json'}})
+    .then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(d=>{ release=d; render(); })
+    .catch(()=>{ failed=true; render(); });
 })();
 
 /* the worker only makes the site itself load fast and survive a dropout */
