@@ -375,6 +375,104 @@ a.btn{text-decoration:none}
 .term button:hover{color:var(--ink)}
 @media(max-width:720px){.dl{padding:34px 18px 30px}.dlMain{min-width:0;width:100%}}
 
+
+/* ── the soft glow behind everything ─────────────────────────── */
+body::before{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:
+    radial-gradient(58vw 46vh at 10% -8%, rgba(255,217,5,.13), transparent 62%),
+    radial-gradient(46vw 40vh at 96% 10%, rgba(255,255,255,.055), transparent 62%),
+    radial-gradient(52vw 44vh at 50% 108%, rgba(255,217,5,.07), transparent 64%)}
+
+/* ── masthead ────────────────────────────────────────────────── */
+.mast{position:sticky;top:0;z-index:40;gap:26px;
+  background:rgba(0,0,0,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--rule)}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+.bw{display:flex;flex-direction:column;line-height:1.1}
+.nav{display:flex;gap:4px;margin-left:auto}
+.nav a{font-size:13.5px;color:var(--ink2);text-decoration:none;padding:8px 13px;border-radius:999px}
+.nav a:hover{color:var(--ink);background:var(--wash)}
+.navdl{flex:none}
+@media(max-width:760px){.nav{display:none}.mast{gap:14px}}
+
+/* the logo: a file drops into the folder, the dot breathes */
+.glyph{position:relative;width:44px;height:44px;border-radius:12px;background:var(--wash2);
+  display:grid;place-items:center;overflow:hidden;flex:none}
+.glyph svg{width:30px;height:30px;display:block;overflow:visible}
+.lgFile{animation:lgDrop 3.2s cubic-bezier(.45,0,.3,1) infinite;transform-origin:center}
+@keyframes lgDrop{
+  0%,8%   {transform:translateY(-15px);opacity:0}
+  22%     {transform:translateY(-15px);opacity:1}
+  46%,100%{transform:translateY(5px);opacity:0}}
+.lgDot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;
+  background:var(--brand);animation:lgPulse 3.2s ease-in-out infinite}
+@keyframes lgPulse{0%,38%{transform:scale(.7);opacity:.5}52%{transform:scale(1.15);opacity:1}100%{transform:scale(.7);opacity:.5}}
+.brand:hover .lgFront{transform:translateY(1.5px)}
+.lgFront{transition:transform .25s ease}
+@media(prefers-reduced-motion:reduce){.lgFile,.lgDot{animation:none}.lgFile{opacity:0}}
+
+/* ── hero ────────────────────────────────────────────────────── */
+.eyebrow{font-size:12.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--brand);font-weight:650;margin-bottom:16px}
+.herofoot{font-size:12.5px;color:var(--ink3);margin-top:16px}
+.heroact{margin-top:28px}
+
+/* ── the band ────────────────────────────────────────────────── */
+.band{margin-top:70px;padding:40px 34px;border:1px solid var(--rule);border-radius:var(--r);
+  background:linear-gradient(180deg,var(--wash),rgba(18,18,18,.4))}
+.bandGrid{display:grid;grid-template-columns:1.25fr 1fr;gap:38px;align-items:center}
+.band h2{font-size:clamp(21px,2.7vw,30px);font-weight:750;letter-spacing:-.028em;line-height:1.18}
+.band p{color:var(--ink2);font-size:14.5px;margin-top:14px;line-height:1.7}
+.band p i{font-style:normal;color:var(--ink3);font-family:'JetBrains Mono',monospace;font-size:13px}
+.stats{display:grid;gap:12px}
+.stat{padding:14px 16px;border:1px solid var(--rule);border-radius:var(--r2);background:var(--paper)}
+.stat b{display:block;font-size:21px;font-weight:800;color:var(--brand);letter-spacing:-.02em}
+.stat span{display:block;font-size:12.5px;color:var(--ink3);margin-top:3px;line-height:1.5}
+@media(max-width:820px){.bandGrid{grid-template-columns:1fr;gap:26px}.band{padding:30px 20px}}
+
+/* ── generic section ─────────────────────────────────────────── */
+.sec{margin-top:84px;scroll-margin-top:90px}
+.kicker{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--brand);font-weight:650}
+.secH{font-size:clamp(24px,3.6vw,38px);font-weight:800;letter-spacing:-.032em;margin-top:10px}
+
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
+.feat{padding:24px 22px 26px;border:1px solid var(--rule);border-radius:var(--r);background:var(--wash)}
+.feat .ic{font-size:23px;color:var(--brand)}
+.feat h3{font-size:15px;font-weight:650;margin:13px 0 8px;letter-spacing:-.012em}
+.feat p{font-size:13px;color:var(--ink3);line-height:1.68}
+@media(max-width:900px){.grid3{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.grid3{grid-template-columns:1fr}}
+
+.steps{list-style:none;margin:30px 0 0;padding:0;display:grid;gap:12px}
+.steps li{display:flex;gap:18px;align-items:flex-start;padding:20px 22px;
+  border:1px solid var(--rule);border-radius:var(--r);background:var(--wash)}
+.num{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:var(--brand);color:var(--on-brand);font-weight:800;font-size:14px}
+.steps h3{font-size:15.5px;font-weight:650;letter-spacing:-.012em}
+.steps p{font-size:13.5px;color:var(--ink3);line-height:1.68;margin-top:5px}
+.howcta{margin-top:22px;text-align:center}
+
+/* ── faq ─────────────────────────────────────────────────────── */
+.faq{margin-top:28px;border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;background:var(--wash)}
+.faq details{border-bottom:1px solid var(--rule)}
+.faq details:last-child{border-bottom:0}
+.faq summary{list-style:none;cursor:pointer;padding:18px 22px;font-size:14.5px;font-weight:600;
+  display:flex;align-items:center;gap:14px;letter-spacing:-.01em}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:'';margin-left:auto;flex:none;width:9px;height:9px;
+  border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);
+  transform:rotate(45deg) translateY(-2px);transition:transform .2s ease}
+.faq details[open] summary::after{transform:rotate(225deg) translateY(-2px)}
+.faq summary:hover{color:var(--brand)}
+.faq details > p,.faq details > div{padding:0 22px 6px;font-size:13.5px;color:var(--ink3);line-height:1.72;max-width:78ch}
+.faq details > p:last-of-type{padding-bottom:20px}
+.faq details b{color:var(--ink2)}
+.qc{font:inherit;font-size:11.5px;padding:6px 12px;border-radius:999px;cursor:pointer;flex:none;
+  background:var(--wash2);border:1px solid var(--rule2);color:var(--ink2)}
+.qc:hover{color:var(--ink)}
+
+.dl{scroll-margin-top:90px}
+
 /* footer */
 .how{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:46px;
   background:var(--rule);border:1px solid var(--rule);border-radius:var(--r);overflow:hidden}
@@ -394,6 +492,9 @@ a.btn{text-decoration:none}
 
 /* `hidden` has to beat the display rules above */
 [hidden]{display:none!important}
+html[data-mode="app"] .shell{display:none}
+html[data-mode="app"] #wizClose{display:none}
+html[data-mode="app"] .scrim{pointer-events:none}
 
 /* ─────────── iPhone: behave like an app ─────────── */
 @media(max-width:620px){
@@ -557,15 +658,31 @@ a.btn{text-decoration:none}
 
 <div class="shell">
 
-<header class="mast">
-  <div class="brand">
-    <div class="glyph"><svg class="ic-mac" viewBox="0 0 80 80"><use href="#i-macfolder"/></svg></div>
-    <div>
-      <div class="wordmark">SORT</div>
-      <div class="byline">by <span class="cdav">CDAV<span class="d">.</span>IO</span></div>
-    </div>
-  </div>
-  <div class="caps" id="caps">
+<header class="mast" id="top">
+  <a class="brand" href="#top">
+    <span class="glyph">
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <rect class="lgFile" x="19" y="4" width="10" height="12" rx="2" fill="#ffffff"/>
+        <path class="lgBack" d="M6 14.5A3.5 3.5 0 0 1 9.5 11h8.2a2 2 0 0 1 1.6.8l2.1 2.8a2 2 0 0 0 1.6.8H38.5A3.5 3.5 0 0 1 42 18.9v15.6A3.5 3.5 0 0 1 38.5 38h-29A3.5 3.5 0 0 1 6 34.5z" fill="#f2994a"/>
+        <rect class="lgFront" x="6" y="19" width="36" height="19" rx="3.5" fill="#f2c94c"/>
+      </svg>
+      <i class="lgDot"></i>
+    </span>
+    <span class="bw">
+      <span class="wordmark">SORT</span>
+      <span class="byline">by <span class="cdav">CDAV<span class="d">.</span>IO</span></span>
+    </span>
+  </a>
+
+  <nav class="nav">
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+
+  <a class="btn btn-solid navdl" href="#download"><svg class="ic"><use href="#i-down"/></svg> Download</a>
+
+  <div class="caps" id="caps" hidden>
     <button type="button" class="cap" id="bFS"><svg class="ic"><use href="#i-drive"/></svg><span></span></button>
     <button type="button" class="cap" id="bEX"><svg class="ic"><use href="#i-tag"/></svg><span></span></button>
     <button type="button" class="cap" id="bHE"><svg class="ic"><use href="#i-image"/></svg><span></span></button>
@@ -576,8 +693,15 @@ a.btn{text-decoration:none}
 </header>
 
 <section class="hero">
+  <p class="eyebrow">Free photo organizer for macOS and Windows</p>
   <h1>Your camera roll, in folders that make sense.</h1>
-  <p class="lede">SORT opens every file, reads who shot it, when and where, and files it where you said it should go. It runs on your computer — no upload, no account.</p>
+  <p class="lede">SORT opens every photo and video, reads which camera shot it, when and where, and files it exactly where you said it should go.</p>
+
+  <div class="heroact">
+    <a class="btn btn-solid btn-lg" href="#download"><svg class="ic"><use href="#i-down"/></svg> <span id="heroDlLabel">Download SORT</span></a>
+    <button class="btn btn-lg" id="btnDemo"><svg class="ic"><use href="#i-play"/></svg> Watch the demo</button>
+  </div>
+  <p class="herofoot">Free forever · no account · nothing leaves your computer</p>
 
   <div class="kinds">
     <div class="kind"><span class="ka" id="kPhoto"></span><div><b>Photos</b><i>camera · date · place</i></div></div>
@@ -590,33 +714,68 @@ a.btn{text-decoration:none}
     <div class="cue"><svg class="ic"><use href="#i-folder"/></svg> Where a file ends up</div>
     <div class="pathline" id="heroPath"></div>
   </div>
+  <div class="banner" id="compat" hidden></div>
+</section>
 
-  <div class="heroact">
-    <button class="btn btn-solid btn-lg" id="btnSrcHero"><svg class="ic"><use href="#i-folder-in"/></svg> Choose a folder</button>
-    <button class="btn btn-lg" id="btnDemo"><svg class="ic"><use href="#i-play"/></svg> Watch a demo</button>
-  </div>
-  <div class="banner" id="compat" style="margin-top:22px"></div>
-
-  <div class="how">
-    <div class="howitem">
-      <svg class="ic"><use href="#i-tag"/></svg>
-      <h3>It reads the file, not the folder</h3>
-      <p>Camera model, capture time and GPS come straight out of EXIF, HEIC and QuickTime metadata.</p>
+<section class="band" id="save">
+  <div class="bandGrid">
+    <div>
+      <h2>An afternoon of dragging, done while the kettle boils.</h2>
+      <p>Sorting four thousand holiday photos by hand is an afternoon lost, and you still end up with <i>New Folder (3)</i>. SORT reads the metadata the camera already wrote and does the filing in one pass.</p>
     </div>
-    <div class="howitem">
-      <svg class="ic ic-mac" viewBox="0 0 80 80"><use href="#i-macfolder"/></svg>
-      <h3>You decide the shape</h3>
-      <p>Device, year, month, day, place — in any order. A file missing one of them just loses that level.</p>
-    </div>
-    <div class="howitem">
-      <svg class="ic"><use href="#i-eye"/></svg>
-      <h3>Look before you commit</h3>
-      <p>Preview builds the whole tree and writes nothing. Copy keeps your originals; Move frees the space.</p>
+    <div class="stats">
+      <div class="stat"><b>2–4 min</b><span>to scan a 100 GB library</span></div>
+      <div class="stat"><b>seconds</b><span>to Move on the same drive — nothing is rewritten</span></div>
+      <div class="stat"><b>0 bytes</b><span>sent anywhere, ever</span></div>
     </div>
   </div>
 </section>
 
-<section class="dl" id="dlBlock">
+<section class="sec" id="features">
+  <p class="kicker">Features</p>
+  <h2 class="secH">Everything the camera already knew.</h2>
+  <div class="grid3">
+    <div class="feat"><svg class="ic"><use href="#i-tag"/></svg><h3>It reads the file, not the folder</h3><p>Camera model, capture time and GPS come straight out of EXIF, HEIC and QuickTime metadata — not from whatever the file happens to be called.</p></div>
+    <div class="feat"><svg class="ic ic-mac" viewBox="0 0 80 80"><use href="#i-macfolder"/></svg><h3>You decide the shape</h3><p>Device, year, month, day, place — in any order you like. A file missing one of them simply loses that level instead of landing in a junk folder.</p></div>
+    <div class="feat"><svg class="ic"><use href="#i-eye"/></svg><h3>Look before you commit</h3><p>Preview builds the whole tree and writes nothing at all. Copy keeps your originals untouched. Move frees the space.</p></div>
+    <div class="feat"><svg class="ic"><use href="#i-pin"/></svg><h3>Place names without the internet</h3><p>GPS coordinates are matched to a city from a list built into the app. No lookup leaves your machine, so no one learns where your photos were taken.</p></div>
+    <div class="feat"><svg class="ic"><use href="#i-type"/></svg><h3>Rename, or don't</h3><p>Keep every filename byte for byte, or rebuild them from the date, the device, the city and a counter. The extension is never touched.</p></div>
+    <div class="feat"><svg class="ic"><use href="#i-box"/></svg><h3>Built for big libraries</h3><p>100 GB uses about as much memory as 100 MB, because files are streamed rather than loaded. Scanning reads only each file's header.</p></div>
+  </div>
+</section>
+
+<section class="sec" id="how">
+  <p class="kicker">How it works</p>
+  <h2 class="secH">Four steps, and you are done.</h2>
+  <ol class="steps">
+    <li><span class="num">1</span><div><h3>Point it at a folder</h3><p>Your camera roll, a backup drive, a messy Downloads folder — whatever holds the pile.</p></div></li>
+    <li><span class="num">2</span><div><h3>Choose the shape</h3><p>Click tokens together: device, year, month, day, place. Watch the example path update as you build it.</p></div></li>
+    <li><span class="num">3</span><div><h3>Preview</h3><p>SORT builds the entire tree and shows you, without writing a single byte. Change your mind as often as you like.</p></div></li>
+    <li><span class="num">4</span><div><h3>Copy or Move</h3><p>Copy leaves your originals where they are. Move on the same drive finishes in seconds, because nothing is rewritten.</p></div></li>
+  </ol>
+  <div class="howcta">
+    <button class="btn btn-lg" id="btnDemo2"><svg class="ic"><use href="#i-play"/></svg> Watch it run</button>
+  </div>
+</section>
+
+<section class="sec" id="faq">
+  <p class="kicker">Questions</p>
+  <h2 class="secH">The ten things people ask.</h2>
+  <div class="faq">
+    <details><summary>Do my photos get uploaded anywhere?</summary><p>No. There is no server, no account and no analytics. SORT makes no network request at all once it is on your computer — you can switch off the internet and it behaves exactly the same.</p></details>
+    <details><summary>Is it really free?</summary><p>Yes. No trial, no limits, no paid version, no advertising. It is a tool CDAV.IO built and gives away.</p></details>
+    <details><summary>Which files does it understand?</summary><p>23 photo formats — JPEG, HEIC, PNG, WebP, TIFF and the usual RAW files — and 16 video formats including MOV, MP4 and MKV. Documents and music are left exactly where they are.</p></details>
+    <details><summary>What happens to a photo with no date or no GPS?</summary><p>That level disappears from its path. A photo with no location still gets its device and date folders; it is not dumped in an "unknown" bin unless you ask for one.</p></details>
+    <details><summary>Will it rename my files?</summary><p>Only if you ask. By default every name comes through byte for byte, capital letters and all. If you do rename, you compose the pattern yourself and the extension is never changed.</p></details>
+    <details><summary>Can it overwrite or lose a photo?</summary><p>No. Copy never touches your originals. If two files would land on the same name, the second becomes _2, the third _3. Move copies, checks the size matches, and only then removes the original — if the write fails, the original stays put.</p></details>
+    <details><summary>How large a library can it handle?</summary><p>100 GB is fine. Files are streamed rather than loaded into memory, so a huge library uses about as much RAM as a small one. Expect two to four minutes to scan 100 GB, then your disk's own speed.</p></details>
+    <details><summary>Why does macOS say SORT is blocked or damaged?</summary><p>Because the app carries no paid Apple certificate — $99 a year that a free tool does not justify. Open Terminal and run this once:</p><div class="term"><code>xattr -dr com.apple.quarantine /Applications/SORT.app</code><button type="button" class="qc" data-copy="xattr -dr com.apple.quarantine /Applications/SORT.app">Copy</button></div><p>After that it opens normally, forever.</p></details>
+    <details><summary>Why does Windows warn me about the publisher?</summary><p>Same reason — no paid certificate. Choose <b>More info</b>, then <b>Run anyway</b>. Only the first time.</p></details>
+    <details><summary>Do I need to keep the app updated?</summary><p>No. It does what it does and it does not phone home. When there is something worth adding, a new version appears on this page and you install it if you want it.</p></details>
+  </div>
+</section>
+
+<section class="dl" id="download">
   <h2>Download SORT</h2>
   <p class="dlLede">A real app in its own window. Free, no account, and it keeps working with the internet off.</p>
 
@@ -665,7 +824,7 @@ a.btn{text-decoration:none}
 
       <section class="wstep" data-step="1">
         <h2>Pick the folder</h2>
-        <p class="note">Your browser will ask permission once. SORT then reads each file's metadata locally — the bytes never leave the page.</p>
+        <p class="note" id="pickNote">Your browser will ask permission once. SORT then reads each file's metadata locally — the bytes never leave the page.</p>
         <div class="row">
           <button class="btn btn-solid" id="btnSrc"><svg class="ic"><use href="#i-folder-in"/></svg> Choose a folder</button>
           <button class="btn" id="btnScan"><svg class="ic"><use href="#i-search"/></svg> Scan again</button>
@@ -2459,9 +2618,11 @@ function initBadges(){
 }
 
 $('btnSrc').onclick=pickSource;
-$('btnSrcHero').onclick=()=>wizOpen(1);
+const _src=$('btnSrcHero'); if(_src) _src.onclick=()=>wizOpen(1);
 $('btnScan').onclick=doScan;
-$('btnDemo').onclick=()=>{ wizOpen(5); runDemo(); };
+const _demo=()=>{ wizOpen(5); runDemo(); };
+$('btnDemo').onclick=_demo;
+const _demo2=$('btnDemo2'); if(_demo2) _demo2.onclick=_demo;
 $('btnCancelScan').onclick=()=>{ ST.abort=true; };
 $('btnStop').onclick=()=>{ ST.abort=true; };
 $('btnOrg').onclick=runOrganize;
@@ -2510,6 +2671,15 @@ $('stLock').onclick=()=>{ ST.cfg.mask=!ST.cfg.mask; renderMaskBtn(); };
 renderMaskBtn();
 
 initBadges();
+
+/* copy buttons in the FAQ */
+document.querySelectorAll('.qc').forEach(b=>{
+  b.onclick=async()=>{
+    try{ await navigator.clipboard.writeText(b.dataset.copy); b.textContent='Copied'; }
+    catch(e){ b.textContent='Select it'; }
+    setTimeout(()=>{ b.textContent='Copy'; },1800);
+  };
+});
 // tap a capability on a touch screen to read its name
 $('caps').addEventListener('click',e=>{
   const c=e.target.closest('.cap'); if(!c) return;
@@ -2615,9 +2785,19 @@ $('caps').addEventListener('click',e=>{
   }
 })();
 
+/* in the desktop app the window IS the tool, so skip the sales page */
+if(window.__sortNative){
+  document.documentElement.dataset.mode='app';
+  const c=$('caps'); if(c) c.hidden=false;
+  const pn=$('pickNote');
+  if(pn) pn.textContent="SORT asks for the folder once, then reads each file's metadata on this machine \u2014 the bytes never go anywhere.";
+}
+
 renderPresets(); renderSegs(); renderRnPresets(); renderStructPreview();
 Stage.init();
 setMode('copy');
+// wait for the whole script to finish evaluating: WIZ is declared further down
+if(window.__sortNative) setTimeout(()=>wizOpen(1),0);
 
 /* ============================================================
    RESULT TILES — count up
@@ -2727,7 +2907,8 @@ function wizUpdate(){
   const scanned=ST.items.length>0;
   const settled=(n===5&&WIZ.finished);
   $('wizFoot').hidden=ST.busy;          // while it runs, Stop is the only control
-  back.hidden=(n===5);
+  const native=!!window.__sortNative;
+  back.hidden=(n===5)||(n===1&&native);   // in the app there is nothing to close into
   back.querySelector('span').textContent=n===1?'Close':'Back';
   next.hidden=(n>=4);
   next.disabled=(n===1&&!scanned);
