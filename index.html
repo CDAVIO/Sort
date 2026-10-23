@@ -1223,7 +1223,7 @@ html[data-mode="app"] .scrim{pointer-events:none}
   <h2 class="secH" id="repTitle">Tell me what broke.</h2>
   <p class="repLede">A photo SORT could not read, a folder that came out wrong, an update that would not install. It comes straight to me, and I write back when the fix is out.</p>
 
-  <form class="rep" id="repForm" name="sort-issue" method="POST" action="/?sent=1" data-netlify="true" netlify-honeypot="bot-field">
+  <form class="rep" id="repForm" name="sort-issue" method="POST" action="/" data-netlify="true" netlify-honeypot="bot-field">
     <input type="hidden" name="form-name" value="sort-issue">
     <p class="hp"><label>Leave this empty <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
     <div class="repRow">
@@ -3164,27 +3164,53 @@ function reportClose(){
 (function(){
   const f=$('repForm'); if(!f) return;
   const ver=$('repVer');
-  if(ver) ver.value = (window.__sortNative && window.__sortNative.version)
-                      ? ('app '+window.__sortNative.version) : 'website';
-  // No fetch here on purpose. Netlify handles a normal post itself and sends
-  // the browser to the action URL, which brings the thank you back with it.
-  f.addEventListener('submit',()=>{
-    const send=$('repSend');
-    if(send){ send.disabled=true; send.textContent=tStr('Sending\u2026'); }
-  });
-})();
+  const setVer=()=>{ if(ver) ver.value=(window.__sortNative && window.__sortNative.version)
+                                       ? ('app '+window.__sortNative.version) : 'website'; };
+  setVer();
+  function thanks(){
+    const note=$('repNote');
+    if(note){ note.hidden=false; note.classList.remove('bad');
+              note.textContent=tStr('Thank you. I read every report, and I write back when the fix is out.'); }
+  }
 
-/* back from Netlify after a report went through */
-(function(){
-  if(location.search.indexOf('sent=1')<0) return;
-  try{ history.replaceState(null,'',location.pathname); }catch(e){}
-  addEventListener('load',()=>{
+  let handing=false;
+  f.addEventListener('submit', async e=>{
+    if(handing) return;                       // the browser's own post: let it go
+    e.preventDefault();
+    const send=$('repSend'), note=$('repNote');
+    if(send) send.disabled=true;
+    if(note){ note.hidden=false; note.classList.remove('bad'); note.textContent=tStr('Sending\u2026'); }
+
+    let taken=false;
     try{
-      reportOpen();
-      const note=$('repNote');
-      if(note){ note.hidden=false; note.classList.remove('bad');
-                note.textContent=tStr('Thank you. I read every report, and I write back when the fix is out.'); }
-    }catch(e){}
+      // redirect:'manual' on purpose. Netlify answers a recorded submission
+      // with a redirect to the action url; following it would hand back our own
+      // page and make a success look like a failure.
+      const r=await fetch('/',{method:'POST', redirect:'manual',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:new URLSearchParams(new FormData(f)).toString()});
+      if(r.type==='opaqueredirect' || (r.status>=300 && r.status<400)){
+        taken=true;                                   // Netlify took it
+      }else if(r.ok){
+        const body=await r.text();
+        // its own small page means recorded; our page coming back means the
+        // post was served as a file and nothing was saved
+        taken = body.indexOf('id="repForm"')<0;
+      }
+    }catch(err){}
+
+    if(taken){
+      f.reset(); setVer();
+      if(send) send.disabled=false;
+      thanks();
+      return;
+    }
+
+    // Nothing was recorded. Hand it to the browser, which posts the form the
+    // plain way Netlify always accepts. That ends on Netlify's own page, which
+    // is not pretty, but it is true: thanking anyone here would be a lie.
+    handing=true;
+    f.submit();
   });
 })();
 $('btnDst').onclick=async()=>{

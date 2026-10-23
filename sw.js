@@ -1,6 +1,6 @@
 /* SORT service worker — keeps the app usable with the network off.
    Bump CACHE whenever index.html changes so installed copies refresh. */
-const CACHE = 'sort-2026-10-23a';
+const CACHE = 'sort-2026-10-23b';
 const SHELL = [
   './',
   './index.html',
@@ -35,7 +35,17 @@ self.addEventListener('fetch', e => {
   if (req.mode === 'navigate' || req.destination === 'document') {
     e.respondWith(
       fetch(req)
-        .then(res => { const cp = res.clone(); caches.open(CACHE).then(c => c.put('./index.html', cp)); return res; })
+        .then(res => {
+          // Only the page itself is worth keeping. Caching any navigation here
+          // meant one visit to a 404 replaced the app with "page not found"
+          // for anyone offline afterwards.
+          const path = new URL(req.url).pathname;
+          if (res.ok && (path === '/' || path.endsWith('/index.html'))) {
+            const cp = res.clone();
+            caches.open(CACHE).then(c => c.put('./index.html', cp));
+          }
+          return res;
+        })
         .catch(() => caches.match('./index.html').then(r => r || caches.match('./')))
     );
     return;
