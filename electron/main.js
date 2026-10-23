@@ -31,7 +31,16 @@ function createWindow() {
   win.webContents.setWindowOpenHandler(({ url }) => { shell.openExternal(url); return { action: 'deny' }; });
 }
 
+// the copy the last update replaced, left behind on purpose until it is safe to go
+function sweepOldBundle() {
+  try {
+    const here = bundlePath();
+    if (here) fs.rmSync(here + '.old', { recursive: true, force: true });
+  } catch (e) {}
+}
+
 app.whenReady().then(() => {
+  sweepOldBundle();
   Menu.setApplicationMenu(Menu.buildFromTemplate(
     process.platform === 'darwin'
       ? [{ role: 'appMenu' }, { role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' }]
@@ -188,7 +197,8 @@ function installMac(dmg) {
     fs.renameSync(here, old);                 // allowed while running: the inode stays open
     try { fs.renameSync(staged, here); }
     catch (e) { fs.renameSync(old, here); throw e; }   // put the working copy back
-    try { fs.rmSync(old, { recursive: true, force: true }); } catch (e) {}
+    // the old bundle is still mapped into this process: clearing it now can kill
+    // us before the relaunch, so it waits for the next start
   } finally {
     try { execFileSync('hdiutil', ['detach', mount, '-quiet']); } catch (e) {}
   }
