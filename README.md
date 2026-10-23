@@ -398,4 +398,4 @@ Your photos and their GPS coordinates never leave your computer.
 
 ---
 
-Built by [CDAV.IO](https://cdav.io)
+Built by [CDAV.IO](https://cdav.io) 
