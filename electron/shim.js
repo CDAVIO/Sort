@@ -87,6 +87,15 @@
     isSameEntry(o) { return !!o && o._p === this._p; }
   }
 
+  // an older main process answered a missing path with an error instead of a
+  // null, which stopped every folder from being created; treat both the same
+  async function statOf(p) {
+    const r = await N.stat(p);
+    if (r && r.ok) return r.v;
+    if (r && /ENOENT|ENOTDIR|no such file/i.test(String(r.e || ''))) return null;
+    return unwrap(r);
+  }
+
   class NativeDirHandle {
     constructor(p) { this.kind = 'directory'; this._p = p; this.name = base(p) || p; }
     async *values() {
@@ -101,7 +110,7 @@
 
     async getDirectoryHandle(name, opts) {
       const full = join(this._p, name);
-      const st = unwrap(await N.stat(full));
+      const st = await statOf(full);
       if (st && st.dir) return new NativeDirHandle(full);
       if (st && !st.dir) { const e = new Error(name + ' is a file'); e.name = 'TypeMismatchError'; throw e; }
       if (!opts || !opts.create) throw notFound(full);
@@ -111,7 +120,7 @@
     async getFileHandle(name, opts) {
       const full = join(this._p, name);
       if (!opts || !opts.create) {
-        const st = unwrap(await N.stat(full));
+        const st = await statOf(full);
         if (!st) throw notFound(full);          // SORT relies on this to spot a clash
         if (st.dir) { const e = new Error(name + ' is a directory'); e.name = 'TypeMismatchError'; throw e; }
       }

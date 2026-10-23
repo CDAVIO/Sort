@@ -17,7 +17,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1200, height: 860, minWidth: 380, minHeight: 540,
     backgroundColor: '#f7f7f5',
-    title: 'SORT',
+    title: 'SORT by CDAV.IO',
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -26,6 +26,9 @@ function createWindow() {
       sandbox: false
     }
   });
+  // the page's own <title> is written for search engines; the window keeps its name
+  win.on('page-title-updated', e => e.preventDefault());
+  win.setTitle('SORT by CDAV.IO');
   win.loadFile(path.join(__dirname, 'app', 'index.html'));
   // links go to the real browser, never to a second app window
   win.webContents.setWindowOpenHandler(({ url }) => { shell.openExternal(url); return { action: 'deny' }; });
@@ -75,10 +78,15 @@ ipcMain.handle('list', async (_e, { dir }) => {
   } catch (e) { return err(e); }
 });
 
+// Not being there is an answer, not a failure: SORT asks about a folder
+// before it creates one, and about a file to find out whether a name clashes.
 ipcMain.handle('stat', async (_e, { p }) => {
   try { const st = await fsp.stat(p);
     return ok({ size: st.size, mtime: st.mtimeMs, dir: st.isDirectory() });
-  } catch (e) { return err(e); }
+  } catch (e) {
+    if (e && (e.code === 'ENOENT' || e.code === 'ENOTDIR')) return ok(null);
+    return err(e);
+  }
 });
 
 ipcMain.handle('read', async (_e, { p, start, end }) => {
@@ -139,21 +147,38 @@ function tmpDir() {
 function fetchToFile(url, dest, onProgress) {
   const { net } = require('electron');
   return new Promise((resolve, reject) => {
+    let done = false;
+    const finish = (e, v) => { if (done) return; done = true; clearTimeout(stall); e ? reject(e) : resolve(v); };
+
+    // a download that goes quiet forever used to leave the bar stuck at nothing
+    let stall = setTimeout(() => finish(new Error('the download stopped responding')), 60000);
+    const alive = () => { clearTimeout(stall); stall = setTimeout(() => finish(new Error('the download stopped responding')), 60000); };
+
     const req = net.request({ url, redirect: 'follow' });
     req.on('response', res => {
-      if (res.statusCode >= 400) { reject(new Error('HTTP ' + res.statusCode)); return; }
+      if (res.statusCode >= 400) { finish(new Error('the server answered ' + res.statusCode)); return; }
       const total = parseInt(res.headers['content-length'] || res.headers['Content-Length'] || 0, 10) || 0;
       let got = 0, last = 0;
+
       const out = fs.createWriteStream(dest);
+      // without this the stream throws where nothing is listening and the
+      // promise never settles, which looks exactly like a frozen button
+      out.on('error', e => { try { res.destroy(); } catch (x) {} finish(e); });
+
       res.on('data', c => {
-        out.write(c); got += c.length;
+        alive();
+        got += c.length;
+        if (!out.write(c)) { try { res.pause(); out.once('drain', () => { try { res.resume(); } catch (x) {} }); } catch (x) {} }
         const now = Date.now();
         if (onProgress && (now - last > 120 || got === total)) { last = now; onProgress(got, total); }
       });
-      res.on('end',   () => out.end(() => resolve(dest)));
-      res.on('error', e  => { out.destroy(); reject(e); });
+      res.on('end',   () => out.end(() => {
+        if (total && got < total) { finish(new Error('the download was cut short')); return; }
+        finish(null, dest);
+      }));
+      res.on('error', e => { out.destroy(); finish(e); });
     });
-    req.on('error', reject);
+    req.on('error', finish);
     req.end();
   });
 }
@@ -206,23 +231,40 @@ function installMac(dmg) {
 
 ipcMain.handle('updateInstall', async (_e, { file }) => {
   try {
+    // a truncated or missing file is not an installer, whatever its name says
+    let size = 0;
+    try { size = fs.statSync(file).size; } catch (e) {}
+    if (size < 1024 * 1024) return { ok: false, e: 'the downloaded file is not complete' };
+
     if (process.platform === 'darwin') {
       try {
         installMac(file);
         app.relaunch(); setTimeout(() => app.exit(0), 200);
         return ok('relaunch');
       } catch (e) {
-        // no write permission, or an unexpected image: hand them the .dmg instead
+        // no write permission, a locked folder, an unexpected image: hand over the .dmg
         await shell.openPath(file);
-        return ok('opened');
+        return { ok: true, v: 'opened', why: (e && e.message) || String(e) };
       }
     }
+
     if (process.platform === 'win32') {
-      // the arguments electron-updater uses: install without questions, then start SORT again
-      spawn(file, ['/S', '--force-run'], { detached: true, stdio: 'ignore' }).unref();
-      setTimeout(() => app.exit(0), 600);
-      return ok('relaunch');
+      try {
+        // the arguments electron-updater uses: install without questions, then start SORT again
+        const child = spawn(file, ['/S', '--force-run'], { detached: true, stdio: 'ignore' });
+        let failed = null;
+        child.on('error', e => { failed = e; });
+        child.unref();
+        await new Promise(r => setTimeout(r, 400));     // long enough for a spawn error to arrive
+        if (failed) throw failed;
+        setTimeout(() => app.exit(0), 600);
+        return ok('relaunch');
+      } catch (e) {
+        await shell.openPath(file);
+        return { ok: true, v: 'opened', why: (e && e.message) || String(e) };
+      }
     }
+
     await shell.openPath(file);
     return ok('opened');
   } catch (e) { return err(e); }
