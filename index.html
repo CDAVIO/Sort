@@ -2,10 +2,42 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script data-boot="theme">
+/* runs before anything renders, so the page never flashes the wrong theme */
+(function(){
+  var t=null;
+  try{ t=localStorage.getItem('sort-theme'); }catch(e){}
+  if(t!=='light'&&t!=='dark'){
+    t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  }
+  document.documentElement.setAttribute('data-theme',t);
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>SORT - organize photos by device, date and place</title>
-<meta name="description" content="Sort your camera roll into folders by device, date and place. A free app for macOS and Windows that runs entirely on your own computer.">
-<meta name="theme-color" content="#ffffff">
+<title>SORT — free photo organizer for macOS and Windows | CDAV.IO</title>
+<meta name="description" content="Free photo organizer that sorts your camera roll into folders by camera, date and place. Reads EXIF, HEIC and video metadata on your own computer. No upload, no account, works offline. macOS and Windows.">
+<meta name="keywords" content="photo organizer, sort photos by date, organize photos by camera, EXIF photo sorter, HEIC organizer, free photo management software, bulk photo rename, offline photo organizer, macOS photo organizer, Windows photo organizer">
+<link rel="canonical" href="https://sort.cdav.io/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="CDAV.IO">
+<meta name="theme-color" content="#000000">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SORT by CDAV.IO">
+<meta property="og:url" content="https://sort.cdav.io/">
+<meta property="og:title" content="SORT — free photo organizer for macOS and Windows">
+<meta property="og:description" content="Sorts your camera roll into folders by camera, date and place. Everything happens on your own computer: no upload, no account, works offline.">
+<meta property="og:image" content="https://sort.cdav.io/icons/og-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="SORT by CDAV.IO — your camera roll, in folders that make sense">
+<meta property="og:locale" content="en">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@cdav_io">
+<meta name="twitter:title" content="SORT — free photo organizer for macOS and Windows">
+<meta name="twitter:description" content="Sorts your camera roll into folders by camera, date and place. Nothing leaves your computer.">
+<meta name="twitter:image" content="https://sort.cdav.io/icons/og-card.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="SORT">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -19,6 +51,7 @@
 
 
 :root{
+  color-scheme:dark;
   --paper:#000000;        /* the page itself */
   --wash:#121212;         /* panels raised off it */
   --wash2:#1e1e1e;
@@ -37,8 +70,62 @@
   --bad-bg:#1f1210;
   --ok:#4fc08d;
   --ok-bg:#0f1a14;
+  /* the canvas cannot read CSS, so the animation's palette lives here too
+     and the Stage copies it out on load and whenever the theme changes */
+  --c-label:#f3f3f3;
+  --c-dim:#8a8a8a;
+  --c-faint:#7d7d7d;
+  --c-count:#9a9a9a;
+  --c-line:rgba(255,255,255,0.20);
+  --c-edge:rgba(255,255,255,0.30);
+  --c-ring:255,255,255;
+  --c-bubble:#1b1b1b;
+  --c-stroke:#4a4a4a;
+  --c-off-a:#3a3a3a;
+  --c-off-b:#4a4a4a;
+  --glow-a:rgba(255,217,5,.05);
+  --glow-b:rgba(255,217,5,.028);
+  --bar:rgba(0,0,0,.88);
+  --screen:#0b0b0b;
   --r:18px; --r2:12px; --r3:10px;
   --shadow:0 1px 2px rgba(0,0,0,.6), 0 18px 40px -24px rgba(0,0,0,.9);
+}
+:root[data-theme="light"]{
+  color-scheme:light;
+  --paper:#ffffff;
+  --wash:#f7f7f5;
+  --wash2:#efeeea;
+  --rule:#e4e3de;
+  --rule2:#cfcec7;
+  --ink:#15140f;
+  --ink2:#5f5c56;
+  --ink3:#8d8a83;
+  --brand:#ffd905;
+  --on-brand:#15140f;
+  --photo:#15140f;
+  --video:#33489e;
+  --shot:#1d6e52;
+  --other:#a3a099;
+  --bad:#b3261e;
+  --bad-bg:#fdf3f2;
+  --ok:#1d6e52;
+  --ok-bg:#f1f8f4;
+  --c-label:#15140f;
+  --c-dim:#a3a099;
+  --c-faint:#8d8a83;
+  --c-count:#6b6862;
+  --c-line:rgba(21,20,15,0.22);
+  --c-edge:rgba(21,20,15,0.30);
+  --c-ring:21,20,15;
+  --c-bubble:#ffffff;
+  --c-stroke:#bdbbb4;
+  --c-off-a:#dedcd6;
+  --c-off-b:#ebe9e3;
+  --glow-a:rgba(255,217,5,.16);
+  --glow-b:rgba(255,217,5,.09);
+  --bar:rgba(255,255,255,.9);
+  --screen:#fbfbf9;
+  --shadow:0 1px 2px rgba(21,20,15,.05), 0 8px 24px -16px rgba(21,20,15,.18);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
@@ -66,7 +153,9 @@ body{
 /* CDAV.IO must render with neutral tracking or the period collides with the I */
 .cdav{font-family:'Montserrat',sans-serif;font-weight:800;font-size:12.5px;
   letter-spacing:0;color:var(--ink);white-space:nowrap}
-.cdav .d{color:#c9a800;padding:0 .5px}
+.cdav .d{padding:0 .5px}
+.cw{color:var(--ink)}
+.cy{color:var(--brand)}
 
 .caps{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
 @media(max-width:620px){.caps{justify-content:flex-start}.mast{gap:14px}}
@@ -374,12 +463,12 @@ a.btn{text-decoration:none}
 /* ── the soft glow behind everything ─────────────────────────── */
 body::before{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;
   background:
-    radial-gradient(130vw 78vh at 50% -26%, rgba(255,217,5,.05), transparent 72%),
-    radial-gradient(100vw 64vh at 50% 124%, rgba(255,217,5,.028), transparent 72%)}
+    radial-gradient(130vw 78vh at 50% -26%, var(--glow-a), transparent 72%),
+    radial-gradient(100vw 64vh at 50% 124%, var(--glow-b), transparent 72%)}
 
 /* ── masthead ────────────────────────────────────────────────── */
 .topbar{position:sticky;top:0;z-index:40;
-  background:rgba(0,0,0,.88);backdrop-filter:blur(18px) saturate(140%);
+  background:var(--bar);backdrop-filter:blur(18px) saturate(140%);
   -webkit-backdrop-filter:blur(18px) saturate(140%);
   border-bottom:1px solid var(--rule)}
 /* the row lines up with the page column, the bar behind it spans the window */
@@ -391,6 +480,14 @@ body::before{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;
 .nav a{font-size:13.5px;color:var(--ink2);text-decoration:none;padding:8px 13px;border-radius:999px}
 .nav a:hover{color:var(--ink);background:var(--wash)}
 .navdl{flex:none}
+.tglBtn{flex:none;width:38px;height:38px;border-radius:50%;cursor:pointer;
+  display:grid;place-items:center;background:transparent;
+  border:1px solid var(--rule);color:var(--ink2)}
+.tglBtn:hover{color:var(--ink);border-color:var(--rule2)}
+.tglBtn .ic{font-size:17px;grid-area:1/1}
+.tglSun{display:none}
+:root[data-theme="light"] .tglSun{display:block}
+:root[data-theme="light"] .tglMoon{display:none}
 @media(max-width:760px){.nav{display:none}.mast{gap:14px}}
 
 /* the logo: a file drops into the folder, the dot breathes */
@@ -489,7 +586,7 @@ html[data-mode="app"] .updbar{bottom:80px}
 .heroCopy{min-width:0}
 .hero h1{max-width:15ch}
 .lede{max-width:46ch}
-.pill{display:inline-flex;align-items:center;gap:9px;padding:7px 15px 7px 11px;margin-bottom:22px;
+.pill{display:inline-flex;align-items:center;gap:9px;padding:7px 15px;margin-bottom:22px;
   border:1px solid var(--rule2);border-radius:999px;background:var(--wash);
   font-size:12.5px;color:var(--ink2);text-decoration:none}
 .pill:hover{border-color:var(--brand);color:var(--ink)}
@@ -500,8 +597,8 @@ html[data-mode="app"] .updbar{bottom:80px}
 @media(max-width:940px){.heroGrid{grid-template-columns:1fr;gap:34px}.hero h1,.lede{max-width:none}}
 
 /* the window that shows before and after */
-.shot{border:1px solid var(--rule2);border-radius:16px;overflow:hidden;background:#0b0b0b;
-  box-shadow:0 40px 90px -50px rgba(255,217,5,.22), 0 24px 60px -40px rgba(0,0,0,.9)}
+.shot{border:1px solid var(--rule2);border-radius:16px;overflow:hidden;background:var(--screen);
+  box-shadow:0 40px 90px -50px rgba(255,217,5,.22), 0 24px 60px -40px rgba(0,0,0,.35)}
 .shotBar{display:flex;align-items:center;gap:7px;padding:11px 14px;background:var(--wash);
   border-bottom:1px solid var(--rule)}
 .shotBar i{width:9px;height:9px;border-radius:50%;background:var(--rule2);flex:none}
@@ -586,7 +683,7 @@ html[data-mode="app"] .updbar{bottom:80px}
 .howitem h3{font-size:14px;font-weight:620;margin:11px 0 5px;letter-spacing:-.008em}
 .howitem p{font-size:12.5px;color:var(--ink3);line-height:1.65}
 @media(max-width:700px){.how{grid-template-columns:1fr}}
-.foot .d{color:#c9a800}
+
 .foot{margin-top:68px;padding:26px 0 8px;border-top:1px solid var(--rule);text-align:center}
 .foot .fb{font-size:13px;color:var(--ink2);font-family:'Montserrat',sans-serif;
   font-weight:800;letter-spacing:.005em}
@@ -740,6 +837,51 @@ html[data-mode="app"] .scrim{pointer-events:none}
 .cap:nth-child(5){animation-delay:320ms}.cap:nth-child(6){animation-delay:390ms}
 
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "SORT",
+      "alternateName": "SORT by CDAV.IO",
+      "applicationCategory": "MultimediaApplication",
+      "applicationSubCategory": "Photo organizer",
+      "operatingSystem": "macOS 12+, Windows 10, Windows 11",
+      "url": "https://sort.cdav.io/",
+      "downloadUrl": "https://github.com/CDAVIO/Sort/releases/latest",
+      "softwareVersion": "1.2.0",
+      "inLanguage": "en",
+      "description": "Free photo organizer that sorts a camera roll into folders by camera, date and place, reading EXIF, HEIC and QuickTime metadata entirely on the user's own computer.",
+      "featureList": [
+        "Sorts by camera model, capture date and GPS location",
+        "Reads EXIF, HEIC, PNG and QuickTime metadata",
+        "Offline reverse geocoding to city names",
+        "Optional filename rebuilding from date, device and place",
+        "Preview, Copy and Move modes",
+        "Handles libraries of 100 GB and more"
+      ],
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+      "author": { "@type": "Organization", "name": "CDAV.IO", "url": "https://cdav.io" }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Do my photos get uploaded anywhere?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No. SORT has no server, no account and no analytics, and makes no network request once it is on your computer. It behaves identically with the internet switched off." } },
+        { "@type": "Question", "name": "Is SORT really free?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. There is no trial, no limit, no paid tier and no advertising." } },
+        { "@type": "Question", "name": "Which file types does SORT understand?",
+          "acceptedAnswer": { "@type": "Answer", "text": "23 photo formats including JPEG, HEIC, PNG, WebP, TIFF and common RAW files, and 16 video formats including MOV, MP4 and MKV. Documents and music are left where they are." } },
+        { "@type": "Question", "name": "Can SORT overwrite or lose a photo?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No. Copy never touches the originals, duplicate names are numbered rather than overwritten, and Move only removes an original after verifying the copy's size." } },
+        { "@type": "Question", "name": "How large a photo library can SORT handle?",
+          "acceptedAnswer": { "@type": "Answer", "text": "100 GB works comfortably. Files are streamed rather than loaded into memory, so a large library uses about as much RAM as a small one." } }
+      ]
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -748,6 +890,8 @@ html[data-mode="app"] .scrim{pointer-events:none}
 <symbol id="i-apple" viewBox="0 0 26 26"><path fill="currentColor" stroke="none" d="M23.934 18.947c-.598 1.324-.884 1.916-1.652 3.086c-1.073 1.634-2.588 3.673-4.461 3.687c-1.666.014-2.096-1.087-4.357-1.069c-2.261.011-2.732 1.089-4.4 1.072c-1.873-.017-3.307-1.854-4.381-3.485c-3.003-4.575-3.32-9.937-1.464-12.79C4.532 7.425 6.61 6.237 8.561 6.237c1.987 0 3.236 1.092 4.879 1.092c1.594 0 2.565-1.095 4.863-1.095c1.738 0 3.576.947 4.889 2.581c-4.296 2.354-3.598 8.49.742 10.132M16.559 4.408c.836-1.073 1.47-2.587 1.24-4.131c-1.364.093-2.959.964-3.891 2.092c-.844 1.027-1.544 2.553-1.271 4.029c1.488.048 3.028-.839 3.922-1.99"/></symbol>
 <symbol id="i-windows" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M6.555 1.375L0 2.237v5.45h6.555zM0 13.795l6.555.933V8.313H0zm7.278-5.4l.026 6.378L16 16V8.395zM16 0L7.33 1.244v6.414H16z"/></symbol>
 <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11m0 0 4.5-4.5M12 15l-4.5-4.5M4.5 19.5h15"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2.2M12 19.4v2.2M4.2 12H2M22 12h-2.2M6.1 6.1 4.5 4.5M19.5 19.5l-1.6-1.6M17.9 6.1l1.6-1.6M4.5 19.5l1.6-1.6"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.3A8.6 8.6 0 0 1 9.7 3.5a8.6 8.6 0 1 0 10.8 10.8"/></symbol>
 <symbol id="i-macfolder" viewBox="0 0 80 80"><path fill="#f2994a" stroke="none" fill-rule="evenodd" clip-rule="evenodd" d="M16 17a4 4 0 0 0-4 4v38a4 4 0 0 0 4 4h48a4 4 0 0 0 4-4V29a4 4 0 0 0-4-4H35.4c-.367 0-.711-.177-.924-.475l-.34-.474l-.376-.526l-.377-.525l-3.099-4.329A4 4 0 0 0 27.032 17z"/><rect width="56" height="38" x="12" y="25" fill="#f2c94c" stroke="none" rx="4"/></symbol>
 <symbol id="i-folder-in" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 10v5m0 0 2-2m-2 2-2-2"/></symbol>
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
@@ -794,7 +938,7 @@ html[data-mode="app"] .scrim{pointer-events:none}
       </span>
       <span class="bw">
         <span class="wordmark">SORT</span>
-        <span class="byline">by <span class="cdav">CDAV<span class="d">.</span>IO</span></span>
+        <span class="byline">by <span class="cdav"><span class="cw">CDAV<span class="d">.</span></span><span class="cy">IO</span></span></span>
       </span>
     </a>
     <nav class="nav">
@@ -802,7 +946,12 @@ html[data-mode="app"] .scrim{pointer-events:none}
       <a href="#features">Features</a>
       <a href="#faq">FAQ</a>
     </nav>
-    <a class="btn btn-solid navdl" href="#download"><svg class="ic"><use href="#i-down"/></svg> Download</a>
+    <button type="button" class="tglBtn" id="themeBtn" aria-label="Switch between light and dark">
+    <svg class="ic tglSun"><use href="#i-sun"/></svg>
+    <svg class="ic tglMoon"><use href="#i-moon"/></svg>
+  </button>
+
+  <a class="btn btn-solid navdl" href="#download"><svg class="ic"><use href="#i-down"/></svg> Download</a>
   </header>
 </div>
 
@@ -811,14 +960,14 @@ html[data-mode="app"] .scrim{pointer-events:none}
 <section class="hero">
   <div class="heroGrid">
     <div class="heroCopy">
-      <a class="pill" href="#download"><i class="pdot"></i> SORT 1.0 is out for macOS and Windows <b>&rsaquo;</b></a>
+      <a class="pill" href="#download" id="relPill">SORT <span id="relV">1.2</span> is out for macOS and Windows <b>&rsaquo;</b></a>
       <h1>Your camera roll, in folders that make sense.</h1>
       <p class="lede">SORT reads which camera shot each photo, when, and where, then files everything exactly the way you asked. Free, and it never sends a byte anywhere.</p>
       <div class="heroact">
         <a class="btn btn-solid btn-lg" href="#download"><svg class="ic"><use href="#i-down"/></svg> Download SORT</a>
         <button class="btn btn-lg" id="btnDemo"><svg class="ic"><use href="#i-play"/></svg> Watch the demo</button>
       </div>
-      <p class="herofoot">v1.0 &middot; macOS 12+ and Windows 10/11 &middot; free, no account</p>
+      <p class="herofoot">v<span id="heroV">1.2</span> &middot; macOS 12+ and Windows 10/11 &middot; free, no account</p>
     </div>
 
     <div class="shot" aria-hidden="true">
@@ -966,7 +1115,7 @@ html[data-mode="app"] .scrim{pointer-events:none}
     <a href="https://www.linkedin.com/in/cristea-david" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05a3.74 3.74 0 0 1 3.37-1.85c3.6 0 4.27 2.37 4.27 5.46zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14M7.12 20.45H3.56V9h3.56zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0"/></svg></a>
     <a href="https://www.instagram.com/cdav.io" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9s.68.82.9 1.38c.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38s-.82.68-1.38.9c-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.8 3.8 0 0 1-1.38-.9 3.8 3.8 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38s.82-.68 1.38-.9c.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63a5.9 5.9 0 0 0-2.13 1.38A5.9 5.9 0 0 0 .63 4.14c-.3.76-.5 1.64-.56 2.91C.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91a5.9 5.9 0 0 0 1.38 2.13 5.9 5.9 0 0 0 2.13 1.38c.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56a5.9 5.9 0 0 0 2.13-1.38 5.9 5.9 0 0 0 1.38-2.13c.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.9 5.9 0 0 0-1.38-2.13A5.9 5.9 0 0 0 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0m0 5.84A6.16 6.16 0 1 0 18.16 12 6.16 6.16 0 0 0 12 5.84M12 16a4 4 0 1 1 4-4 4 4 0 0 1-4 4m7.85-10.4a1.44 1.44 0 1 1-1.44-1.44 1.44 1.44 0 0 1 1.44 1.44"/></svg></a>
   </div>
-  <div class="fb">Developed by <a href="https://cdav.io" target="_blank" rel="noopener">CDAV<span class="d">.</span>IO</a></div>
+  <div class="fb">Developed by <a href="https://cdav.io" target="_blank" rel="noopener"><span class="cw">CDAV<span class="d">.</span></span><span class="cy">IO</span></a></div>
   <div class="fc">&copy; <span id="yr">2026</span> CDAV.IO, all rights reserved</div>
 </footer>
 </div>
@@ -1144,7 +1293,14 @@ const IMG_VIDEO=svgImg(ART_VIDEO_F);
 const IMG_DOC=svgImg(ART_DOC_F);
 const IMG_MUSIC=svgImg(ART_MUSIC_F);
 const IMG_FOLDER=svgImg(ART_FOLDER('#f2994a','#f2c94c'));
-const IMG_FOLDER_OFF=svgImg(ART_FOLDER('#3a3a3a','#4a4a4a'));
+let IMG_FOLDER_OFF=svgImg(ART_FOLDER('#3a3a3a','#4a4a4a'));
+function themeVar(name,fallback){
+  try{ return getComputedStyle(document.documentElement).getPropertyValue(name).trim()||fallback; }
+  catch(e){ return fallback; }      // no CSS engine (tests, server-side): take the default
+}
+function rebuildFolderOff(){
+  IMG_FOLDER_OFF=svgImg(ART_FOLDER(themeVar('--c-off-a','#3a3a3a'), themeVar('--c-off-b','#4a4a4a')));
+}
 const ready=i=>i.complete&&i.naturalWidth>0;
 /* what drifts above the line: mostly photos, then video, then the rest */
 const FILE_ART=[IMG_PHOTO,IMG_PHOTO,IMG_PHOTO,IMG_PHOTO,IMG_VIDEO,IMG_VIDEO,IMG_DOC,IMG_MUSIC];
@@ -2056,7 +2212,29 @@ function renderRnPreview(){
    ANIMATION STAGE
    ============================================================ */
 const Stage={
+  /* canvas colours cannot be CSS, so they are read out of the tokens once and
+     re-read whenever the theme flips */
+  readPalette(){
+    const v=n=>themeVar(n,'');
+    this.C={
+      label:v('--c-label')||'#f3f3f3',
+      dim:v('--c-dim')||'#8a8a8a',
+      faint:v('--c-faint')||'#7d7d7d',
+      count:v('--c-count')||'#9a9a9a',
+      line:v('--c-line')||'rgba(255,255,255,.2)',
+      edge:v('--c-edge')||'rgba(255,255,255,.3)',
+      ring:v('--c-ring')||'255,255,255',
+      bubble:v('--c-bubble')||'#1b1b1b',
+      stroke:v('--c-stroke')||'#4a4a4a',
+      brand:v('--brand')||'#ffd905',
+      photo:v('--photo')||'#e8e8e8',
+      video:v('--video')||'#6f86ef',
+      shot:v('--shot')||'#3fae84',
+      other:v('--other')||'#8a8a8a'
+    };
+  },
   init(){
+    this.readPalette();
     this.c=$('stage'); this.ctx=this.c.getContext('2d');
     this.nodes=[]; this.map=new Map(); this.over=null;
     this.parts=[]; this.floats=[]; this.sparks=[]; this.rings=[];
@@ -2137,7 +2315,7 @@ const Stage={
     }
     return nd;
   },
-  catColor(c){ return c==='Videos'?'#6f86ef':c==='Screenshots'?'#3fae84':c==='Others'?'#8a8a8a':'#e8e8e8'; },
+  catColor(c){ const C=this.C||{}; return c==='Videos'?(C.video||'#6f86ef'):c==='Screenshots'?(C.shot||'#3fae84'):c==='Others'?(C.other||'#8a8a8a'):(C.photo||'#e8e8e8'); },
   send(label,cat,name){
     this.note(cat,name);
     const nd=this.folder(label);
@@ -2158,10 +2336,10 @@ const Stage={
     g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); },
   // folder drawn from a 24-unit path, centred on (x,y)
   drawFolder(x,y,s,filled){
-    const g=this.ctx, img=filled?IMG_FOLDER:IMG_FOLDER_OFF;
+    const g=this.ctx, img=filled?IMG_FOLDER:IMG_FOLDER_OFF;   // re-read: it changes with the theme
     if(ready(img)){ g.drawImage(img,x-s/2,y-s/2,s,s); return; }
     if(filled){ g.fillStyle='#f2c94c'; this.folderPath(x,y,s*0.76); g.fill(); }
-    else{ g.strokeStyle='rgba(255,255,255,0.30)'; g.lineWidth=1.3; this.folderPath(x,y,s*0.76); g.stroke(); }
+    else{ g.strokeStyle=this.C.edge; g.lineWidth=1.3; this.folderPath(x,y,s*0.76); g.stroke(); }
   },
   folderPath(x,y,s){
     const g=this.ctx, k=s/24;
@@ -2196,7 +2374,7 @@ const Stage={
       const s=(this.narrow?21:25)*(f.sp||1);
       g.globalAlpha=0.94*fade;
       if(ready(f.img)) g.drawImage(f.img,x-s/2,f.y-s/2,s,s);
-      else{ g.fillStyle='#1b1b1b'; g.strokeStyle='#4a4a4a'; g.lineWidth=1.3; g.lineJoin='round';
+      else{ g.fillStyle=this.C.bubble; g.strokeStyle=this.C.stroke; g.lineWidth=1.3; g.lineJoin='round';
             this.docPath(x,f.y,s*0.9); g.fill(); g.stroke(); }
       g.globalAlpha=1;
     }
@@ -2218,9 +2396,9 @@ const Stage={
       g.globalAlpha=1;
     }
     g.font="9.5px 'JetBrains Mono',monospace"; g.textBaseline='middle';
-    g.fillStyle='#8a8a8a'; g.textAlign='left';
+    g.fillStyle=this.C.dim; g.textAlign='left';
     g.fillText(this.kind==='scan'?'reading each file':'where does it go?',this.pad,this.divY+13);
-    g.textAlign='right'; g.fillStyle='#9a9a9a';
+    g.textAlign='right'; g.fillStyle=this.C.count;
     const verb=this.kind==='scan'?'read':(ST.mode==='preview'?'planned':ST.mode==='move'?'moved':'copied');
     g.fillText(this.done?`${verb} × ${fmtN(this.done)}`:'',W-this.pad,this.divY+13);
 
@@ -2230,7 +2408,7 @@ const Stage={
     if(list.length){
       const xs=list.map(n=>n.x);
       const lo=Math.min(...xs), hi=Math.max(...xs);
-      g.strokeStyle='rgba(255,255,255,0.20)'; g.lineWidth=1;
+      g.strokeStyle=this.C.line; g.lineWidth=1;
       g.beginPath();
       g.moveTo(rootX,this.rootY+37); g.lineTo(rootX,this.busY);
       if(hi>lo){ g.moveTo(lo,this.busY); g.lineTo(hi,this.busY); }
@@ -2241,7 +2419,7 @@ const Stage={
     // root
     this.drawFolder(rootX,this.rootY,55,true);
     g.font="700 11px 'JetBrains Mono',monospace"; g.textAlign='center'; g.textBaseline='top';
-    g.fillStyle='#f3f3f3';
+    g.fillStyle=this.C.label;
     let rl=(this.kind==='scan'?'YOUR LIBRARY':(ST.mode==='preview'?'PREVIEW':this.maskLabel(ST.dstLabel||'DESTINATION'))).toUpperCase();
     if(rl.length>22) rl=rl.slice(0,21)+'…';
     g.fillText(rl,rootX,this.rootY+21);
@@ -2260,13 +2438,13 @@ const Stage={
       this.drawFolder(nd.x,nd.y,s,filled);
       const lw=Math.max(56,(nd.slot||this.slotW)-8);
       g.font="9.5px 'JetBrains Mono',monospace"; g.textAlign='center'; g.textBaseline='top';
-      g.fillStyle=filled?'#f3f3f3':'#6f6f6f';
+      g.fillStyle=filled?this.C.label:this.C.faint;
       let lb=nd.isOver?`+${nd.extra} more`:this.maskLabel(nd.label);
       const maxc=Math.max(7,Math.floor(lw/5.6));
       if(lb.length>maxc) lb=lb.slice(0,maxc-1)+'…';
       g.fillText(lb,nd.x,nd.y+s*0.46);
       if(nd.n){
-        g.font="9px 'JetBrains Mono',monospace"; g.fillStyle='#7d7d7d';
+        g.font="9px 'JetBrains Mono',monospace"; g.fillStyle=this.C.faint;
         g.fillText(fmtN(nd.n),nd.x,nd.y+s*0.46+12);
       }
       g.globalAlpha=1;
@@ -2295,13 +2473,13 @@ const Stage={
       }
       const a=p.t>0.72?(1-p.t)/0.28:1;
       const s=this.narrow?23:26, rad=s*0.72;
-      g.globalAlpha=a*0.95; g.fillStyle='#1b1b1b';
+      g.globalAlpha=a*0.95; g.fillStyle=this.C.bubble;
       g.beginPath(); g.arc(x,y,rad,0,Math.PI*2); g.fill();
       g.globalAlpha=a*0.38; g.strokeStyle=col; g.lineWidth=1.2;
       g.beginPath(); g.arc(x,y,rad,0,Math.PI*2); g.stroke();
       g.globalAlpha=a;
       if(ready(p.img)) g.drawImage(p.img,x-s/2,y-s/2,s,s);
-      else{ g.fillStyle='#1b1b1b'; g.strokeStyle=col; g.lineWidth=1.2; g.lineJoin='round';
+      else{ g.fillStyle=this.C.bubble; g.strokeStyle=col; g.lineWidth=1.2; g.lineJoin='round';
             this.docPath(x,y,s*0.86); g.fill(); g.stroke(); }
       g.globalAlpha=1;
     }
@@ -2310,7 +2488,7 @@ const Stage={
     for(let i=this.rings.length-1;i>=0;i--){
       const r=this.rings[i]; r.t+=0.06;
       if(r.t>=1){ this.rings.splice(i,1); continue; }
-      g.strokeStyle=`rgba(255,255,255,${0.30*(1-r.t)})`; g.lineWidth=1.3;
+      g.strokeStyle=`rgba(${this.C.ring},${0.30*(1-r.t)})`; g.lineWidth=1.3;
       g.beginPath(); g.arc(r.x,r.y,8+r.t*22,0,Math.PI*2); g.stroke();
     }
 
@@ -2984,8 +3162,36 @@ $('caps').addEventListener('click',e=>{
 
   fetch('https://api.github.com/repos/'+REPO+'/releases/latest',{headers:{Accept:'application/vnd.github+json'}})
     .then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
-    .then(d=>{ release=d; render(); })
+    .then(d=>{
+      release=d; render();
+      const v=String(d.tag_name||'').replace(/^v/,'');
+      if(v){ const a=$('relV'), b=$('heroV');
+             if(a) a.textContent=v.split('.').slice(0,2).join('.');
+             if(b) b.textContent=v.split('.').slice(0,2).join('.'); }
+    })
     .catch(()=>{ failed=true; render(); });
+})();
+
+/* ---------- light and dark ---------- */
+(function(){
+  const root=document.documentElement, btn=$('themeBtn');
+  function apply(t,remember){
+    root.setAttribute('data-theme',t);
+    if(remember){ try{ localStorage.setItem('sort-theme',t); }catch(e){} }
+    rebuildFolderOff();
+    if(window.Stage&&Stage.readPalette) Stage.readPalette();
+    const m=document.querySelector('meta[name="theme-color"]');
+    if(m) m.setAttribute('content', t==='light' ? '#ffffff' : '#000000');
+  }
+  if(btn) btn.onclick=()=>apply(root.getAttribute('data-theme')==='light'?'dark':'light', true);
+  // follow the system until the reader states a preference of their own
+  try{
+    matchMedia('(prefers-color-scheme: light)').addEventListener('change',e=>{
+      let saved=null; try{ saved=localStorage.getItem('sort-theme'); }catch(x){}
+      if(!saved) apply(e.matches?'light':'dark', false);
+    });
+  }catch(e){}
+  rebuildFolderOff();
 })();
 
 /* ---------- is there a newer build than the one running? ---------- */
