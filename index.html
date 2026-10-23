@@ -3174,9 +3174,13 @@ function reportClose(){
     if(send) send.disabled=true;
     say(tStr('Sending\u2026'));
     try{
-      const r=await fetch('/',{method:'POST',
-        headers:{'Content-Type':'application/x-www-form-urlencoded'},
-        body:new URLSearchParams(new FormData(f)).toString()});
+      const body=new URLSearchParams(new FormData(f)).toString();
+      const post=where=>fetch(where,{method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'}, body});
+      let r=await post('/');
+      // Netlify answers 404 until it has registered the form; __forms.html is
+      // the file it reads at publish time, so try that before giving up
+      if(r.status===404) r=await post('/__forms.html');
       if(!r.ok) throw new Error(String(r.status));
       f.reset();
       if(ver) ver.value=(window.__sortNative&&window.__sortNative.version)

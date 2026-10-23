@@ -2,7 +2,7 @@
 # so the Electron sources and the README stay out of the published site.
 
 [build]
-  command = "rm -rf dist && mkdir -p dist && cp index.html sw.js robots.txt sitemap.xml dist/ && cp -r icons dist/icons"
+  command = "rm -rf dist && mkdir -p dist && cp index.html sw.js robots.txt sitemap.xml __forms.html dist/ && cp -r icons dist/icons"
   publish = "dist"
 
 # The worker and the page must never be served stale, or an installed copy

@@ -1,5 +1,6 @@
 # SORT by CDAV.IO — everything here is meant to be found.
 User-agent: *
 Allow: /
+Disallow: /__forms.html
 
 Sitemap: https://sort.cdav.io/sitemap.xml

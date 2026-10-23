@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex, nofollow">
+  <title>SORT forms</title>
+</head>
+<body>
+  <!-- Netlify reads this file when the site is published and registers the form
+       from it. Nobody is meant to visit this page: the form people actually use
+       lives in index.html and posts to the same name. Keep the fields in step. -->
+  <form name="sort-issue" method="POST" data-netlify="true" netlify-honeypot="company">
+    <input type="hidden" name="form-name" value="sort-issue">
+    <input name="company">
+    <input type="text" name="name">
+    <input type="email" name="email">
+    <input type="tel" name="phone">
+    <input type="hidden" name="version">
+    <textarea name="message"></textarea>
+    <button type="submit">Send</button>
+  </form>
+</body>
+</html>
