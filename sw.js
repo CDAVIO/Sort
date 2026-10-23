@@ -1,6 +1,6 @@
 /* SORT service worker — keeps the app usable with the network off.
    Bump CACHE whenever index.html changes so installed copies refresh. */
-const CACHE = 'sort-2026-10-21b';
+const CACHE = 'sort-2026-10-23a';
 const SHELL = [
   './',
   './index.html',
