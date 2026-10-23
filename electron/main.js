@@ -113,3 +113,107 @@ ipcMain.handle('rename', async (_e, { from, to }) => {
 ipcMain.handle('unlink', async (_e, { p }) => {
   try { await fsp.unlink(p); return ok(true); } catch (e) { return err(e); }
 });
+
+/* ---------------- updating itself ----------------
+   The old bar sent people to the GitHub releases page and left them there.
+   Most never worked out what to do with a .dmg. Now SORT fetches the right
+   file itself, shows the progress, and puts the new version in place. */
+const { spawn, execFileSync } = require('child_process');
+
+function tmpDir() {
+  const d = path.join(app.getPath('temp'), 'sort-update');
+  try { fs.mkdirSync(d, { recursive: true }); } catch (e) {}
+  return d;
+}
+
+// Chromium's stack, so it follows GitHub's redirect to the CDN and honours any proxy
+function fetchToFile(url, dest, onProgress) {
+  const { net } = require('electron');
+  return new Promise((resolve, reject) => {
+    const req = net.request({ url, redirect: 'follow' });
+    req.on('response', res => {
+      if (res.statusCode >= 400) { reject(new Error('HTTP ' + res.statusCode)); return; }
+      const total = parseInt(res.headers['content-length'] || res.headers['Content-Length'] || 0, 10) || 0;
+      let got = 0, last = 0;
+      const out = fs.createWriteStream(dest);
+      res.on('data', c => {
+        out.write(c); got += c.length;
+        const now = Date.now();
+        if (onProgress && (now - last > 120 || got === total)) { last = now; onProgress(got, total); }
+      });
+      res.on('end',   () => out.end(() => resolve(dest)));
+      res.on('error', e  => { out.destroy(); reject(e); });
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+ipcMain.handle('updateDownload', async (_e, { url, name }) => {
+  try {
+    const dest = path.join(tmpDir(), name || 'SORT-update');
+    try { fs.unlinkSync(dest); } catch (e) {}
+    await fetchToFile(url, dest, (got, total) => {
+      if (win && !win.isDestroyed()) win.webContents.send('updateProgress', { got, total });
+    });
+    return ok(dest);
+  } catch (e) { return err(e); }
+});
+
+// /Applications/SORT.app/Contents/MacOS/SORT  ->  /Applications/SORT.app
+function bundlePath() {
+  const p = path.resolve(app.getPath('exe'), '..', '..', '..');
+  return p.endsWith('.app') ? p : null;
+}
+
+function installMac(dmg) {
+  // no -quiet here: the mount point is the last tab-separated field it prints
+  const out = execFileSync('hdiutil', ['attach', '-nobrowse', '-noautoopen', dmg]).toString();
+  const mount = out.split('\n').map(l => l.split('\t').pop().trim())
+                   .filter(l => l.indexOf('/Volumes/') === 0).pop();
+  if (!mount) throw new Error('the disk image did not mount');
+  try {
+    const src = path.join(mount, 'SORT.app');
+    if (!fs.existsSync(src)) throw new Error('no SORT.app inside the disk image');
+    const here = bundlePath();
+    if (!here) throw new Error('SORT is not running from an app bundle');
+
+    const staged = here + '.new', old = here + '.old';
+    try { fs.rmSync(staged, { recursive: true, force: true }); } catch (e) {}
+    execFileSync('ditto', [src, staged]);
+    // the copy arrives quarantined, which is what makes macOS call it damaged
+    try { execFileSync('xattr', ['-dr', 'com.apple.quarantine', staged]); } catch (e) {}
+
+    try { fs.rmSync(old, { recursive: true, force: true }); } catch (e) {}
+    fs.renameSync(here, old);                 // allowed while running: the inode stays open
+    try { fs.renameSync(staged, here); }
+    catch (e) { fs.renameSync(old, here); throw e; }   // put the working copy back
+    try { fs.rmSync(old, { recursive: true, force: true }); } catch (e) {}
+  } finally {
+    try { execFileSync('hdiutil', ['detach', mount, '-quiet']); } catch (e) {}
+  }
+}
+
+ipcMain.handle('updateInstall', async (_e, { file }) => {
+  try {
+    if (process.platform === 'darwin') {
+      try {
+        installMac(file);
+        app.relaunch(); setTimeout(() => app.exit(0), 200);
+        return ok('relaunch');
+      } catch (e) {
+        // no write permission, or an unexpected image: hand them the .dmg instead
+        await shell.openPath(file);
+        return ok('opened');
+      }
+    }
+    if (process.platform === 'win32') {
+      // the arguments electron-updater uses: install without questions, then start SORT again
+      spawn(file, ['/S', '--force-run'], { detached: true, stdio: 'ignore' }).unref();
+      setTimeout(() => app.exit(0), 600);
+      return ok('relaunch');
+    }
+    await shell.openPath(file);
+    return ok('opened');
+  } catch (e) { return err(e); }
+});

@@ -8,6 +8,7 @@ const call = (ch, args) => ipcRenderer.invoke(ch, args);
 contextBridge.exposeInMainWorld('__sortNative', {
   version  : process.env.SORT_VERSION || '',
   platform : process.platform,
+  arch     : process.arch,
   sep      : process.platform === 'win32' ? '\\' : '/',
   pick     : title             => call('pick',       { title }),
   list     : dir               => call('list',       { dir }),
@@ -17,5 +18,13 @@ contextBridge.exposeInMainWorld('__sortNative', {
   copy     : (from, to)        => call('copy',       { from, to }),
   write    : (to, bytes)       => call('writeBytes', { to, bytes }),
   rename   : (from, to)        => call('rename',     { from, to }),
-  unlink   : p                 => call('unlink',     { p })
+  unlink   : p                 => call('unlink',     { p }),
+
+  // updating itself: fetch the installer with progress, then put it in place
+  updDownload : (url, name) => call('updateDownload', { url, name }),
+  updInstall  : file        => call('updateInstall',  { file }),
+  onUpdProgress : cb => {
+    ipcRenderer.removeAllListeners('updateProgress');
+    ipcRenderer.on('updateProgress', (_e, d) => cb(d));
+  }
 });

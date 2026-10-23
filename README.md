@@ -1,14 +1,61 @@
-# SORT
+<p align="center">
+  <img src="icons/og-card.png" alt="SORT by CDAV.IO, your camera roll, in folders that make sense" width="820">
+</p>
 
-Organize photos and videos by **device, date and place** — entirely in your browser.
+<p align="center">
+  A free photo organizer for <b>macOS</b> and <b>Windows</b>.<br>
+  It files your camera roll by <b>device, date and place</b>, on your own machine, offline.
+</p>
 
-No server. No upload. No install. No account.
+<p align="center">
+  <a href="https://sort.cdav.io"><b>sort.cdav.io</b></a> &nbsp;·&nbsp;
+  <a href="https://github.com/CDAVIO/Sort/releases/latest"><b>Download</b></a> &nbsp;·&nbsp;
+  <a href="LICENSE">MIT</a>
+</p>
+
+---
+
+## Download
+
+| System | File |
+|---|---|
+| macOS 12+, Apple chip | `SORT-<version>-arm64.dmg` |
+| macOS 12+, Intel | `SORT-<version>.dmg` |
+| Windows 10 / 11 | `SORT.Setup.<version>.exe` |
+
+**[Get the latest release →](https://github.com/CDAVIO/Sort/releases/latest)**
+
+Free. No account, no upload, no subscription, no telemetry.
+
+SORT keeps itself up to date: when a newer version exists, a bar appears at the bottom
+of the window, and one click downloads it and puts it in place.
+
+### First run on macOS
+
+The builds carry no paid Apple certificate, so macOS refuses the first launch and calls
+the app damaged. Drag **SORT** into **Applications**, then run this once in **Terminal**:
+
+```bash
+xattr -dr com.apple.quarantine /Applications/SORT.app
+```
+
+It opens normally from then on, and updates never ask again.
+
+### First run on Windows
+
+SmartScreen says the publisher is unknown, for the same reason. Choose **More info**,
+then **Run anyway**. If Windows refuses to open the file at all, run this once in
+**PowerShell**:
+
+```powershell
+Get-ChildItem "$env:USERPROFILE\Downloads\SORT*.exe" | Unblock-File
+```
 
 ---
 
 ## What it does
 
-SORT reads the metadata inside each photo and video — camera model, capture time, GPS —
+SORT reads the metadata inside each photo and video (camera model, capture time, GPS)
 then files everything into the folder structure you choose.
 
 ```
@@ -26,12 +73,12 @@ directly on your disk. Nothing is ever sent anywhere.
 
 ## How to use it
 
-1. **Open `index.html`** — double-click it, or put it on a web address
-2. **Choose a folder** — your browser asks permission once
-3. **Build the structure** — pick a preset or compose your own from tokens
-4. **Rename** (optional) — keep the camera's names or rebuild them from the date
-5. **Choose destination and mode** — Copy, Move or Preview
-6. **Sort** — watch the tree fill up
+1. **Open SORT**: from Applications, or the Start menu
+2. **Choose a folder**: SORT asks for it once
+3. **Build the structure**: pick a preset or compose your own from tokens
+4. **Rename** (optional): keep the camera's names or rebuild them from the date
+5. **Choose destination and mode**: Copy, Move or Preview
+6. **Sort**: watch the tree fill up
 
 ---
 
@@ -79,7 +126,7 @@ metadata it read, and always keeps the file extension.
 
 ### Example patterns
 
-All of these show the same photo — `IMG_9497.HEIC`, taken on an iPhone 16 Pro Max in
+All of these show the same photo, `IMG_9497.HEIC`, taken on an iPhone 16 Pro Max in
 Bucharest on 31 March 2025 at 14:22:05.
 
 | Pattern | Result |
@@ -121,16 +168,16 @@ immediately rather than having them silently blend in:
 | no camera model | `{device}` | `UnknownDevice` |
 
 If you would rather not see placeholders in your filenames, keep `{orig}` and let the
-folder structure carry the sorting instead — a missing folder level simply disappears,
+folder structure carry the sorting instead. A missing folder level simply disappears,
 while a missing token in a filename has to be filled with something.
 
 ## Copy, Move, Preview
 
-- **Copy** — every file is written to the new folder, originals untouched. Nothing can be lost.
-- **Move** — on the same drive the file is renamed in place, so nothing is rewritten and a
+- **Copy**: every file is written to the new folder, originals untouched. Nothing can be lost.
+- **Move**: on the same drive the file is renamed in place, so nothing is rewritten and a
   100 GB library moves in seconds. Across drives it copies, verifies the size, then deletes
   the original. If a write fails, that original stays put.
-- **Preview** — builds the whole tree and shows it. Writes nothing, deletes nothing. Run this first.
+- **Preview**: builds the whole tree and shows it. Writes nothing, deletes nothing. Run this first.
 
 ---
 
@@ -141,7 +188,7 @@ while a missing token in a filename has to be filled with something.
 | JPEG, TIFF, DNG, WebP | EXIF (APP1 / TIFF IFD) |
 | HEIC, HEIF, AVIF | ISO-BMFF `meta` / `iinf` / `iloc` → Exif item |
 | PNG | `eXIf` chunk |
-| MOV, MP4, M4V | QuickTime `moov` — `mvhd`, `keys`+`ilst`, `udta` |
+| MOV, MP4, M4V | QuickTime `moov`: `mvhd`, `keys`+`ilst`, `udta` |
 | anything else | filename date, then file modified date |
 
 GPS coordinates are matched to a city **offline**, against a built-in list of ~220 cities
@@ -161,14 +208,15 @@ Writing directly to folders uses the **File System Access API**, which needs Chr
 Brave on a desktop, served over **HTTPS** (or opened as a local file).
 
 Elsewhere SORT still reads everything and hands you the organized library as a ZIP download.
-A ZIP cannot exceed 4 GB — for a large library, use Chrome.
+A ZIP cannot exceed 4 GB, so for a large library, use Chrome.
 
 ---
 
-## The desktop app
+## How it is built
 
-`electron/` wraps the same `index.html` in a native window — no browser, its own
-icon, its own Dock/Start-menu entry.
+SORT is **one `index.html` file**, the whole program, including the landing page at
+[sort.cdav.io](https://sort.cdav.io). `electron/` wraps that same file in a native
+window, so the app and the page are never out of step.
 
 It does **not** use Chromium's File System Access API. Iterating a directory picked
 with `showDirectoryPicker` hangs in Electron ([electron#45225][e]), and that is
@@ -196,16 +244,16 @@ git tag v1.0.0 && git push origin v1.0.0
 `.github/workflows/build-apps.yml` runs on GitHub's own macOS and Windows runners
 and attaches the installers to the release.
 
-The builds are **unsigned** — no Apple or Windows certificate is configured. macOS
-refuses a plain double-click on first run (right-click → Open instead) and Windows
-SmartScreen warns that the publisher is unknown. Signing costs about $99/year for
-Apple and $200/year for a Windows certificate.
+The builds are **unsigned**: no Apple or Windows certificate is configured, which is
+why the two commands above exist. On Apple Silicon, right-click → Open does not help:
+macOS removed that bypass, and the `xattr` command is the only way through. Signing
+costs about $99/year for Apple and $200/year for a Windows certificate.
 
 ---
 
 ## Running it offline
 
-The page carries everything it needs — fonts included — so it makes **no network
+The page carries everything it needs, fonts included, so it makes **no network
 request at all**, not even on first load. The desktop app and the page behave the
 same way here: once SORT is on your machine, the internet is never touched again.
 
@@ -217,7 +265,7 @@ Safari cannot write to folders, so there it falls back to a ZIP.
 ## Large libraries
 
 100 GB works. Files are **streamed**, never loaded into memory, so 100 GB uses about as much
-RAM as 100 MB. Scanning reads only the header of each file — 256 KB for a photo, about a
+RAM as 100 MB. Scanning reads only the header of each file: 256 KB for a photo, about a
 megabyte for a video.
 
 Expect roughly 2–4 minutes to scan a 100 GB library, then the copy runs at your disk's speed.
@@ -232,8 +280,8 @@ Keep the tab open and the computer awake while it runs.
 It is one file. Put `index.html` anywhere that serves HTTPS:
 
 - Drag it into **Netlify** or **Cloudflare Pages**
-- **GitHub Pages** — Settings → Pages → Branch `main`, folder `/ (root)`
-- Your own server — upload `index.html`
+- **GitHub Pages**: Settings → Pages → Branch `main`, folder `/ (root)`
+- Your own server: upload `index.html`
 
 Opening it straight from disk also works, but the browser asks permission on every open,
 because a local file has no stable identity to remember.
@@ -250,7 +298,7 @@ This section is for working on the code.
 
 ### Get a copy and open it
 
-**Mac — Terminal**
+**Mac, in Terminal**
 
 ```bash
 cd ~/Documents
@@ -259,7 +307,7 @@ cd Sort
 open -a "Google Chrome" index.html
 ```
 
-**Windows — PowerShell**
+**Windows, in PowerShell**
 
 The git commands are identical everywhere. Only the paths are written differently:
 
@@ -309,14 +357,14 @@ Password: a personal access token
 ```
 
 **Your GitHub password does not work here.** It only works for logging into the website.
-Git has needed a token since 2021 — the field is still labelled *Password*, which is the
+Git has needed a token since 2021, and the field is still labelled *Password*, which is the
 confusing part.
 
 Make a token at **github.com/settings/tokens** → *Tokens (classic)* → *Generate new token*:
 
 - Tick only **repo**
 - Set an expiration, for example 90 days
-- Copy it immediately — GitHub shows it once and never again
+- Copy it immediately, because GitHub shows it once and never again
 
 Nothing appears on screen while you paste it. That is normal. Press Enter.
 
@@ -336,7 +384,7 @@ cd ~/Documents/Sort && git add . && git commit -m "update" && git push
 ```
 
 With `&&`, a failed step stops the rest. Without it, a failed `cd` leaves you in the wrong
-folder and every following command runs there anyway — which is how people accidentally turn
+folder and every following command runs there anyway, which is how people accidentally turn
 their home folder into a git repository.
 
 ---
