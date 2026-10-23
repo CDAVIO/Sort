@@ -589,6 +589,12 @@ html[data-mode="app"] .appCtl{display:flex}
   border:1px solid var(--rule2);border-radius:999px;background:var(--bar);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);overflow:hidden;
   box-shadow:0 18px 50px -20px rgba(0,0,0,.9)}
+/* the SORT mark keeps filing while the new version comes down */
+.updMark{width:22px;height:22px;flex:none;display:none;margin-right:-4px}
+.updMark svg{width:100%;height:100%;display:block;overflow:hidden}
+.updbar[data-busy="1"] .updMark{display:block}
+.updMark .lgFall{animation-duration:1.5s}
+.updMark .lgFront{animation-duration:1.5s;transform-origin:22px 40px}
 /* fills left to right while the new version comes down */
 .updProg{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--brand);
   border-radius:0 3px 3px 0;transition:width .2s linear;pointer-events:none}
@@ -1144,6 +1150,17 @@ html[data-mode="app"] .scrim{pointer-events:none}
 </div>
 
 <div class="updbar" id="updBar" hidden>
+  <span class="updMark" aria-hidden="true">
+    <svg viewBox="0 0 44 44">
+      <g class="lgFall">
+        <rect x="16.5" y="2" width="11" height="13" rx="2.5" fill="#ffffff"/>
+        <rect x="19" y="5.5" width="6" height="1.6" rx=".8" fill="#cfcfcf"/>
+        <rect x="19" y="9" width="6" height="1.6" rx=".8" fill="#cfcfcf"/>
+      </g>
+      <path d="M3 13.5A3.5 3.5 0 0 1 6.5 10h8.1a2 2 0 0 1 1.63.84l2.2 3.06a2 2 0 0 0 1.62.84H37.5A3.5 3.5 0 0 1 41 18.24V36.5A3.5 3.5 0 0 1 37.5 40h-31A3.5 3.5 0 0 1 3 36.5z" fill="#f2994a"/>
+      <rect class="lgFront" x="3" y="18" width="38" height="22" rx="3.6" fill="#f2c94c"/>
+    </svg>
+  </span>
   <span class="updTxt">SORT <b id="updV"></b> is out. You have <span id="updNow"></span>.</span>
   <button type="button" class="btn btn-solid" id="updGet">Get it</button>
   <button type="button" class="btn" id="updLater">Later</button>
@@ -1155,19 +1172,19 @@ html[data-mode="app"] .scrim{pointer-events:none}
   <div class="scrim" id="wizScrim"></div>
   <div class="panel" role="dialog" aria-modal="true" aria-label="Sort your photos">
     <div class="wizhead">
-      <div class="appCtl">
-        <div class="langWrap"><button type="button" class="langBtn" id="langBtnApp" aria-haspopup="true" aria-expanded="false"><svg class="ic"><use href="#i-globe"/></svg><span id="langNowApp">English</span></button><div class="langMenu" id="langMenuApp" hidden><button type="button" data-l="en">English</button><button type="button" data-l="ro">Romana</button><button type="button" data-l="ko">한국어</button><button type="button" data-l="zh">中文</button><button type="button" data-l="fr">Français</button><button type="button" data-l="it">Italiano</button></div></div>
-        <button type="button" class="tglBtn" id="themeBtnApp" aria-label="Light or dark">
-          <svg class="ic tglSun"><use href="#i-sun"/></svg>
-          <svg class="ic tglMoon"><use href="#i-moon"/></svg>
-        </button>
-      </div>
       <div class="rail" id="rail">
         <button class="rstep" data-go="1"><i>1</i><span>Folder</span></button>
         <button class="rstep" data-go="2"><i>2</i><span>Structure</span></button>
         <button class="rstep" data-go="3"><i>3</i><span>Names</span></button>
         <button class="rstep" data-go="4"><i>4</i><span>Destination</span></button>
         <button class="rstep" data-go="5"><i>5</i><span>Sort</span></button>
+      </div>
+      <div class="appCtl">
+        <div class="langWrap"><button type="button" class="langBtn" id="langBtnApp" aria-haspopup="true" aria-expanded="false"><svg class="ic"><use href="#i-globe"/></svg><span id="langNowApp">English</span></button><div class="langMenu" id="langMenuApp" hidden><button type="button" data-l="en">English</button><button type="button" data-l="ro">Romana</button><button type="button" data-l="ko">한국어</button><button type="button" data-l="zh">中文</button><button type="button" data-l="fr">Français</button><button type="button" data-l="it">Italiano</button></div></div>
+        <button type="button" class="tglBtn" id="themeBtnApp" aria-label="Light or dark">
+          <svg class="ic tglSun"><use href="#i-sun"/></svg>
+          <svg class="ic tglMoon"><use href="#i-moon"/></svg>
+        </button>
       </div>
       <button class="xbtn" id="wizClose" aria-label="Close"><svg class="ic"><use href="#i-x"/></svg></button>
     </div>
@@ -2618,7 +2635,7 @@ async function doScan(){
     if(++tick%6===0||done===total){
       const pct=total?Math.round(done/total*100):0;
       $('pbar').style.width=pct+'%'; $('ppct').textContent=pct+'%';
-      $('ptext').textContent=fmtN(done)+' / '+fmtN(total)+' files';
+      $('ptext').textContent=fmtN(done)+' / '+fmtN(total)+' '+tStr('files');
       await sleep(0);
     }
   }
@@ -2948,7 +2965,7 @@ async function runDemo(){
     Stage.send(DEMO_DEV[k],cat,'IMG_'+pad(1000+Math.floor(Math.random()*8999),4)+'.'+ext);
     const pct=Math.round((i+1)/N*100);
     $('pbar').style.width=pct+'%'; $('ppct').textContent=pct+'%';
-    $('ptext').textContent=(i+1)+' / '+N+' files';
+    $('ptext').textContent=(i+1)+' / '+N+' '+tStr('files');
     await sleep(45);
   }
   $('pdot').className='dot done'; $('ptitle').textContent='Demo finished. Nothing on your disk was touched';
@@ -2969,7 +2986,7 @@ function setMode(m){
   $('opC').className='mode'+(m==='copy'?' on':'');
   $('opM').className='mode'+(m==='move'?' on':'');
   $('opP').className='mode'+(m==='preview'?' on':'');
-  $('opNote').innerHTML=MODE_NOTE[m];
+  $('opNote').innerHTML=tStr(MODE_NOTE[m]);
   $('btnOrg').querySelector('span').textContent=m==='preview'?'Build the preview':'Sort my photos';
 }
 function bindSwitch(id,key,after){
@@ -3130,20 +3147,27 @@ $('caps').addEventListener('click',e=>{
     'win':       {label:'Download for Windows', name:'Windows installer', match:n=>/\.exe$/i.test(n)&&/setup/i.test(n)},
     'win-portable':{label:'Download the portable app', name:'Windows, portable', match:n=>/\.exe$/i.test(n)&&!/setup/i.test(n)}
   };
+  /* Each sentence sits on one line, and the sentence beside a command lives in its own
+     span, so the translator can match it whole instead of guessing at line breaks. */
   const STEPS={
-    mac:`<ol><li>Open the <b>.dmg</b> and drag <b>SORT</b> into your <b>Applications</b> folder.</li>
-      <li>macOS blocks it the first time. That is normal for an app with no paid Apple certificate.
-      Open <b>Terminal</b> and run this once:
-      <div class="term"><code>${QUAR}</code><button type="button">Copy</button></div></li>
-      <li>Open SORT from Applications. It works normally from now on.</li></ol>`,
-    win:`<ol><li>Run the file you downloaded.</li>
-      <li>Windows says the publisher is unknown. Choose <b>More info</b>, then <b>Run anyway</b>. Only the first time.</li>
-      <li>If Windows refuses to open it at all, open <b>PowerShell</b> and run this once:
-      <div class="term"><code>${UNBLOCK}</code><button type="button">Copy</button></div></li>
-      <li>SORT opens in its own window.</li></ol>`
+    mac:`<ol>`
+      +`<li>Open the <b>.dmg</b> and drag <b>SORT</b> into your <b>Applications</b> folder.</li>`
+      +`<li><span>macOS blocks it the first time. That is normal for an app with no paid Apple certificate. Open <b>Terminal</b> and run this once:</span>`
+      +`<div class="term"><code>${QUAR}</code><button type="button">Copy</button></div></li>`
+      +`<li>Open SORT from Applications. It works normally from now on.</li>`
+      +`</ol>`,
+    win:`<ol>`
+      +`<li>Run the file you downloaded.</li>`
+      +`<li>Windows says the publisher is unknown. Choose <b>More info</b>, then <b>Run anyway</b>. Only the first time.</li>`
+      +`<li><span>If Windows refuses to open it at all, open <b>PowerShell</b> and run this once:</span>`
+      +`<div class="term"><code>${UNBLOCK}</code><button type="button">Copy</button></div></li>`
+      +`<li>SORT opens in its own window.</li>`
+      +`</ol>`
   };
 
   const $$=id=>document.getElementById(id);
+  // the dictionary is declared further down, so reading it early throws: fall back to English
+  const tr=en=>{ try{ const d=I18N[I18N.current]; return (d&&d[en])||en; }catch(e){ return en; } };
   const main=$$('dlMain'), label=$$('dlMainLabel'), status=$$('dlStatus'),
         steps=$$('dlSteps'), sw=$$('dlSwitch');
   if(!main||!sw||!steps) return;
@@ -3164,7 +3188,7 @@ $('caps').addEventListener('click',e=>{
 
   function render(){
     const t=TARGETS[current];
-    label.textContent=t.label;
+    label.textContent=tr(t.label);
     steps.innerHTML = current.indexOf('mac')===0 ? STEPS.mac : STEPS.win;
     steps.querySelectorAll('.term').forEach(term=>{
       const code=term.querySelector('code'), copy=term.querySelector('button');
@@ -3179,21 +3203,40 @@ $('caps').addEventListener('click',e=>{
     });
     const tabs=sw.children?[...sw.children]:[];
     tabs.forEach(b=>b.setAttribute&&b.setAttribute('aria-pressed', String(b.dataset.os===current)));
+    // the steps are rebuilt in English each time, so run the dictionary over them again
+    try{ if(typeof applyLang==='function' && typeof I18N!=='undefined' && I18N.current && I18N.current!=='en')
+           applyLang(I18N.current,false); }catch(e){}
 
     const asset=release&&release.assets&&release.assets.filter(a=>t.match(a.name))[0];
     if(asset){
       main.href=asset.browser_download_url;
-      status.textContent=t.name+' \u00b7 version '+String(release.tag_name).replace(/^v/,'')+' \u00b7 '+mb(asset.size);
+      status.textContent=tr(t.name)+' \u00b7 '+tr('version')+' '+String(release.tag_name).replace(/^v/,'')+' \u00b7 '+mb(asset.size);
     }else{
       main.href=RELEASES;
       status.textContent = failed
         ? 'Opens every file on GitHub.'
-        : release ? 'No '+t.name+' file in this release yet \u2014 the button opens them all on GitHub.'
+        : release ? 'No '+t.name+' file in this release yet. The button opens them all on GitHub.'
                   : 'Checking the latest version\u2026';
     }
+    relang();
+  }
+
+  /* These steps are written by JavaScript, after the page was already translated,
+     so they have to be put through the translator again. */
+  function relang(){
+    try{
+      forgetI18N(steps); forgetI18N(label); forgetI18N(status);
+      if(I18N.current && I18N.current!=='en') applyLang(I18N.current,false);
+    }catch(e){}
   }
 
   current=guess();
+  let redrawing=false;
+  addEventListener('sortlang',()=>{
+    if(redrawing) return;                    // render() translates, which fires this again
+    redrawing=true;
+    try{ render(); }catch(e){} finally{ redrawing=false; }
+  });
   sw.addEventListener('click',e=>{ const b=e.target.closest('button[data-os]'); if(!b) return;
                                    current=b.dataset.os; render(); });
   render();
@@ -3220,11 +3263,29 @@ Object.assign(I18N.ko,{"The installer is open. Follow its steps.":"\uc124\uce58 
 Object.assign(I18N.zh,{"The installer is open. Follow its steps.":"\u5b89\u88c5\u7a0b\u5e8f\u5df2\u6253\u5f00\u3002\u8bf7\u6309\u63d0\u793a\u64cd\u4f5c\u3002","Downloading":"\u6b63\u5728\u4e0b\u8f7d","Installing":"\u6b63\u5728\u5b89\u88c5","The installer is open. Drag SORT into Applications.":"\u5b89\u88c5\u7a0b\u5e8f\u5df2\u6253\u5f00\u3002\u8bf7\u5c06 SORT \u62d6\u5165\u5e94\u7528\u7a0b\u5e8f\u6587\u4ef6\u5939\u3002","That did not download. Opening the page instead.":"\u4e0b\u8f7d\u5931\u8d25\uff0c\u6b63\u5728\u6253\u5f00\u4e0b\u8f7d\u9875\u9762\u3002"});
 Object.assign(I18N.fr,{"The installer is open. Follow its steps.":"L'installeur est ouvert. Suivez ses etapes.","Downloading":"Telechargement","Installing":"Installation","The installer is open. Drag SORT into Applications.":"L'installeur est ouvert. Glissez SORT dans Applications.","That did not download. Opening the page instead.":"Le telechargement a echoue. Ouverture de la page."});
 Object.assign(I18N.it,{"The installer is open. Follow its steps.":"Il programma di installazione e aperto. Segui i passaggi.","Downloading":"Download in corso","Installing":"Installazione","The installer is open. Drag SORT into Applications.":"Il programma di installazione e aperto. Trascina SORT in Applicazioni.","That did not download. Opening the page instead.":"Download non riuscito. Apro la pagina."});
+/* download steps and wizard strings, keyed in English.
+   Only gaps are filled, so nothing already translated is overwritten. */
+(function(more){
+  for(const en in more){ const row=more[en];
+    for(const l in row){ if(I18N[l] && I18N[l][en]===undefined) I18N[l][en]=row[l]; } }
+})({"<b>Copy.</b> Every file is written to the new folder and the original is left untouched. Nothing can be lost.":{"fr":"<b>Copie.</b> Chaque fichier est ecrit dans le nouveau dossier et l'original reste intact. Rien ne peut etre perdu.","it":"<b>Copia.</b> Ogni file viene scritto nella nuova cartella e l'originale resta intatto. Non si puo perdere nulla.","ko":"<b>복사.</b> 모든 파일이 새 폴더에 기록되고 원본은 그대로 남습니다. 잃어버릴 것이 없습니다.","ro":"<b>Copiaza.</b> Fiecare fisier se scrie in folderul nou, iar originalul ramane neatins. Nu se poate pierde nimic.","zh":"<b>复制。</b>每个文件都会写入新文件夹，原件保持不动。什么都不会丢失。"},"<b>Move.</b> Each file is copied, its size is checked against the original, and only then is the original deleted. If a write fails, that original stays put.":{"fr":"<b>Deplacement.</b> Chaque fichier est copie, sa taille est comparee a l'original, et seulement ensuite l'original est supprime. Si une ecriture echoue, cet original reste en place.","it":"<b>Sposta.</b> Ogni file viene copiato, la dimensione viene confrontata con l'originale e solo allora l'originale viene eliminato. Se una scrittura fallisce, quell'originale resta dov'e.","ko":"<b>이동.</b> 파일을 복사하고 원본과 크기를 대조한 뒤에야 원본을 지웁니다. 쓰기에 실패하면 그 원본은 그대로 남습니다.","ro":"<b>Muta.</b> Fiecare fisier e copiat, i se verifica marimea fata de original, si abia apoi se sterge originalul. Daca o scriere esueaza, originalul ramane pe loc.","zh":"<b>移动。</b>先复制文件，再与原件核对大小，之后才删除原件。若写入失败，该原件会原样保留。"},"<b>Preview.</b> SORT works out the whole tree and shows it to you. Nothing is written, nothing is deleted. Run this first.":{"fr":"<b>Apercu.</b> SORT calcule toute l'arborescence et vous la montre. Rien n'est ecrit, rien n'est supprime. Lancez ceci en premier.","it":"<b>Anteprima.</b> SORT calcola l'intero albero e te lo mostra. Non scrive nulla e non elimina nulla. Fai prima questo.","ko":"<b>미리보기.</b> SORT가 전체 폴더 구조를 계산해 보여줍니다. 아무것도 기록하거나 지우지 않습니다. 이것부터 해 보세요.","ro":"<b>Previzualizare.</b> SORT calculeaza tot arborele si ti-l arata. Nu scrie nimic, nu sterge nimic. Ruleaza asta prima data.","zh":"<b>预览。</b>SORT 会算出整个目录树并展示给你。不写入，也不删除。先运行这个。"},"Two files with the same new name? The second becomes <code>_2</code>, the third <code>_3</code>. Extensions are always preserved.":{"fr":"Deux fichiers avec le meme nouveau nom ? Le second devient <code>_2</code>, le troisieme <code>_3</code>. L'extension est toujours conservee.","it":"Due file con lo stesso nome nuovo? Il secondo diventa <code>_2</code>, il terzo <code>_3</code>. L'estensione resta sempre.","ko":"새 이름이 같은 파일이 둘이라면? 두 번째는 <code>_2</code>, 세 번째는 <code>_3</code>이 됩니다. 확장자는 항상 그대로입니다.","ro":"Doua fisiere cu acelasi nume nou? Al doilea devine <code>_2</code>, al treilea <code>_3</code>. Extensia se pastreaza mereu.","zh":"两个文件的新名字相同怎么办？第二个变成 <code>_2</code>，第三个变成 <code>_3</code>。扩展名始终保留。"},"files":{"fr":"fichiers","it":"file","ko":"개 파일","ro":"fisiere","zh":"个文件"},"Apple chip":{"fr":"puce Apple","it":"chip Apple","ko":"Apple 칩","ro":"cip Apple","zh":"Apple 芯片"},"Back":{"fr":"Retour","it":"Indietro","ko":"뒤로","ro":"Inapoi","zh":"上一步"},"Build the folder structure":{"fr":"Construisez la structure des dossiers","it":"Costruisci la struttura delle cartelle","ko":"폴더 구조 만들기","ro":"Construieste structura de foldere","zh":"构建文件夹结构"},"Cancel":{"fr":"Annuler","it":"Annulla","ko":"취소","ro":"Anuleaza","zh":"取消"},"Choose a destination folder before sorting.":{"fr":"Choisissez un dossier de destination avant de trier.","it":"Scegli una cartella di destinazione prima di ordinare.","ko":"정리하기 전에 대상 폴더를 선택하세요.","ro":"Alege un folder destinatie inainte de sortare.","zh":"开始整理前请先选择目标文件夹。"},"Choose a folder":{"fr":"Choisir un dossier","it":"Scegli una cartella","ko":"폴더 선택","ro":"Alege un folder","zh":"选择文件夹"},"Choose a folder to continue.":{"fr":"Choisissez un dossier pour continuer.","it":"Scegli una cartella per continuare.","ko":"계속하려면 폴더를 선택하세요.","ro":"Alege un folder ca sa continui.","zh":"请选择文件夹以继续。"},"Choose destination":{"fr":"Choisir la destination","it":"Scegli destinazione","ko":"대상 폴더 선택","ro":"Alege destinatia","zh":"选择目标文件夹"},"Choose where it goes":{"fr":"Choisissez la destination","it":"Scegli dove finiscono","ko":"어디에 저장할지 선택","ro":"Alege unde ajung","zh":"选择保存位置"},"Close":{"fr":"Fermer","it":"Chiudi","ko":"닫기","ro":"Inchide","zh":"关闭"},"Copied":{"fr":"Copie","it":"Copiato","ko":"복사됨","ro":"Copiat","zh":"已复制"},"Copy":{"fr":"Copier","it":"Copia","ko":"복사","ro":"Copiaza","zh":"复制"},"Done":{"fr":"Termine","it":"Fatto","ko":"완료","ro":"Gata","zh":"完成"},"Download report":{"fr":"Telecharger le rapport","it":"Scarica il report","ko":"보고서 내려받기","ro":"Descarca raportul","zh":"下载报告"},"Download the portable app":{"fr":"Telecharger l'app portable","it":"Scarica l'app portatile","ko":"휴대용 앱 내려받기","ro":"Descarca aplicatia portabila","zh":"下载便携版"},"Folder":{"fr":"Dossier","it":"Cartella","ko":"폴더","ro":"Folder","zh":"文件夹"},"If Windows refuses to open it at all, open <b>PowerShell</b> and run this once:":{"fr":"Si Windows refuse totalement de l'ouvrir, ouvrez <b>PowerShell</b> et lancez ceci une fois :","it":"Se Windows si rifiuta proprio di aprirlo, apri <b>PowerShell</b> ed esegui questo una volta:","ko":"Windows가 아예 열지 못하게 하면 <b>PowerShell</b>을 열고 이 명령을 한 번 실행하세요:","ro":"Daca Windows refuza de tot sa il deschida, deschide <b>PowerShell</b> si ruleaza asta o data:","zh":"如果 Windows 完全不让它打开，请打开 <b>PowerShell</b> 运行一次这条命令："},"Intel Mac":{"fr":"Mac Intel","it":"Mac Intel","ko":"Intel Mac","ro":"Mac Intel","zh":"Intel Mac"},"Keep original":{"fr":"Garder l'original","it":"Mantieni l'originale","ko":"원본 유지","ro":"Pastreaza originalul","zh":"保留原名"},"Mac · Apple chip":{"fr":"Mac · puce Apple","it":"Mac · chip Apple","ko":"Mac · Apple 칩","ro":"Mac · cip Apple","zh":"Mac · Apple 芯片"},"Mac · Intel":{"fr":"Mac · Intel","it":"Mac · Intel","ko":"Mac · Intel","ro":"Mac · Intel","zh":"Mac · Intel"},"Next":{"fr":"Suivant","it":"Avanti","ko":"다음","ro":"Inainte","zh":"下一步"},"No destination chosen yet":{"fr":"Aucune destination choisie","it":"Nessuna destinazione scelta","ko":"아직 선택된 대상 없음","ro":"Nicio destinatie aleasa inca","zh":"尚未选择目标文件夹"},"No folder chosen yet":{"fr":"Aucun dossier choisi","it":"Nessuna cartella scelta","ko":"아직 선택된 폴더 없음","ro":"Niciun folder ales inca","zh":"尚未选择文件夹"},"OK":{"fr":"OK","it":"OK","ko":"확인","ro":"OK","zh":"好"},"Open SORT from Applications. It works normally from now on.":{"fr":"Ouvrez SORT depuis Applications. Il fonctionne normalement ensuite.","it":"Apri SORT da Applicazioni. Da ora in poi funziona normalmente.","ko":"응용 프로그램에서 SORT를 여세요. 이후로는 정상적으로 실행됩니다.","ro":"Deschide SORT din Applications. De acum merge normal.","zh":"从应用程序文件夹打开 SORT。之后就一切正常了。"},"Open the <b>.dmg</b> and drag <b>SORT</b> into your <b>Applications</b> folder.":{"fr":"Ouvrez le <b>.dmg</b> et glissez <b>SORT</b> dans votre dossier <b>Applications</b>.","it":"Apri il <b>.dmg</b> e trascina <b>SORT</b> nella cartella <b>Applicazioni</b>.","ko":"<b>.dmg</b> 파일을 열고 <b>SORT</b>를 <b>응용 프로그램</b> 폴더로 끌어다 놓으세요.","ro":"Deschide <b>.dmg</b> si trage <b>SORT</b> in folderul <b>Applications</b>.","zh":"打开 <b>.dmg</b>，把 <b>SORT</b> 拖进<b>应用程序</b>文件夹。"},"Opens every file on GitHub.":{"fr":"Ouvre tous les fichiers sur GitHub.","it":"Apre tutti i file su GitHub.","ko":"GitHub에서 모든 파일을 엽니다.","ro":"Deschide toate fisierele pe GitHub.","zh":"在 GitHub 上打开全部文件。"},"Optional. Keep the camera's names, or rebuild them from the capture date.":{"fr":"Optionnel. Gardez les noms de l'appareil, ou reconstruisez-les a partir de la date de prise de vue.","it":"Facoltativo. Mantieni i nomi della fotocamera, oppure ricostruiscili dalla data dello scatto.","ko":"선택 사항입니다. 카메라가 지은 이름을 그대로 두거나, 촬영 날짜로 새로 만듭니다.","ro":"Optional. Pastreaza numele date de aparat sau reconstruieste-le din data fotografiei.","zh":"可选。保留相机起的文件名，或按拍摄日期重新生成。"},"Pick a destination outside your source folder, then decide how careful you want to be.":{"fr":"Choisissez une destination hors du dossier source, puis decidez de votre niveau de prudence.","it":"Scegli una destinazione fuori dalla cartella di origine, poi decidi quanto vuoi essere prudente.","ko":"원본 폴더 바깥에 저장 위치를 고른 다음, 얼마나 조심할지 정하세요.","ro":"Alege o destinatie in afara folderului sursa, apoi decide cat de prudent vrei sa fii.","zh":"选择一个在源文件夹之外的目标位置，然后决定要多谨慎。"},"Pick the folder":{"fr":"Choisissez le dossier","it":"Scegli la cartella","ko":"폴더 선택","ro":"Alege folderul","zh":"选择文件夹"},"Rename as you go":{"fr":"Renommer au passage","it":"Rinomina strada facendo","ko":"이름도 함께 바꾸기","ro":"Redenumeste pe parcurs","zh":"顺便重命名"},"Run the file you downloaded.":{"fr":"Lancez le fichier telecharge.","it":"Esegui il file che hai scaricato.","ko":"내려받은 파일을 실행하세요.","ro":"Ruleaza fisierul descarcat.","zh":"运行你下载的文件。"},"SORT asks for the folder once, then reads each file's metadata on this machine. The bytes never go anywhere.":{"fr":"SORT demande le dossier une seule fois, puis lit les informations de chaque fichier sur cet ordinateur. Les octets ne vont nulle part.","it":"SORT chiede la cartella una sola volta, poi legge le informazioni di ogni file su questo computer. I byte non vanno da nessuna parte.","ko":"SORT는 폴더를 한 번만 요청한 뒤, 이 컴퓨터에서 각 파일의 정보를 읽습니다. 파일은 어디로도 전송되지 않습니다.","ro":"SORT cere folderul o singura data, apoi citeste informatiile fiecarui fisier pe acest calculator. Octetii nu pleaca nicaieri.","zh":"SORT 只请求一次文件夹，然后在这台电脑上读取每个文件的信息。数据不会发送到任何地方。"},"SORT opens in its own window.":{"fr":"SORT s'ouvre dans sa propre fenetre.","it":"SORT si apre nella sua finestra.","ko":"SORT가 자체 창에서 열립니다.","ro":"SORT se deschide in fereastra lui.","zh":"SORT 会在自己的窗口中打开。"},"Scan again":{"fr":"Rescanner","it":"Scansiona di nuovo","ko":"다시 검사","ro":"Scaneaza din nou","zh":"重新扫描"},"Sort another folder":{"fr":"Trier un autre dossier","it":"Ordina un'altra cartella","ko":"다른 폴더 정리하기","ro":"Sorteaza alt folder","zh":"整理另一个文件夹"},"Sort my photos":{"fr":"Trier mes photos","it":"Ordina le mie foto","ko":"사진 정리 시작","ro":"Sorteaza pozele","zh":"开始整理照片"},"Start from a preset or click tokens to compose your own. If a file has no GPS or no date, that level simply disappears from its path.":{"fr":"Partez d'un modele ou cliquez sur les jetons pour composer le votre. Si un fichier n'a ni GPS ni date, ce niveau disparait simplement de son chemin.","it":"Parti da un preset o tocca i token per comporre il tuo. Se un file non ha GPS o data, quel livello sparisce semplicemente dal percorso.","ko":"미리 준비된 구성에서 시작하거나 토큰을 눌러 직접 만드세요. 파일에 GPS나 날짜가 없으면 그 단계는 경로에서 그냥 사라집니다.","ro":"Porneste de la o varianta gata facuta sau apasa pe piese ca sa o compui pe a ta. Daca un fisier nu are GPS sau data, nivelul acela dispare pur si simplu din cale.","zh":"从预设开始，或点击标记自行组合。如果文件没有 GPS 或日期，该层级会直接从路径中消失。"},"Stop":{"fr":"Arreter","it":"Ferma","ko":"중지","ro":"Opreste","zh":"停止"},"Windows · portable":{"fr":"Windows · portable","it":"Windows · portatile","ko":"Windows · 휴대용","ro":"Windows · portabil","zh":"Windows · 便携版"},"Windows installer":{"fr":"installeur Windows","it":"installer Windows","ko":"Windows 설치 파일","ro":"installer Windows","zh":"Windows 安装程序"},"Windows says the publisher is unknown. Choose <b>More info</b>, then <b>Run anyway</b>. Only the first time.":{"fr":"Windows indique que l'editeur est inconnu. Choisissez <b>Informations complementaires</b>, puis <b>Executer quand meme</b>. Seulement la premiere fois.","it":"Windows dice che l'autore e sconosciuto. Scegli <b>Ulteriori informazioni</b>, poi <b>Esegui comunque</b>. Solo la prima volta.","ko":"Windows가 게시자를 알 수 없다고 알립니다. <b>추가 정보</b>를 누른 뒤 <b>실행</b>을 선택하세요. 처음 한 번만입니다.","ro":"Windows spune ca editorul e necunoscut. Alege <b>More info</b>, apoi <b>Run anyway</b>. Doar prima data.","zh":"Windows 会提示发布者未知。选择<b>更多信息</b>，然后点<b>仍要运行</b>。只有第一次需要。"},"Windows, portable":{"fr":"Windows, portable","it":"Windows, portatile","ko":"Windows, 휴대용","ro":"Windows, portabil","zh":"Windows，便携版"},"Working":{"fr":"En cours","it":"In corso","ko":"작업 중","ro":"Lucrez","zh":"正在处理"},"Your browser will ask permission once. SORT then reads each file's metadata locally, and the bytes never leave the page.":{"fr":"Le navigateur demande l'autorisation une seule fois. SORT lit ensuite les informations de chaque fichier en local, et les octets ne quittent jamais la page.","it":"Il browser chiede il permesso una sola volta. Poi SORT legge in locale le informazioni di ogni file, e i byte non lasciano mai la pagina.","ko":"브라우저가 한 번만 권한을 요청합니다. 그다음 SORT가 각 파일의 정보를 기기에서 읽으며, 파일은 페이지를 벗어나지 않습니다.","ro":"Browserul cere permisiunea o singura data. Apoi SORT citeste local informatiile fiecarui fisier, iar octetii nu parasesc pagina.","zh":"浏览器只会请求一次权限。之后 SORT 在本地读取每个文件的信息，数据不会离开页面。"},"becomes":{"fr":"devient","it":"diventa","ko":"→","ro":"devine","zh":"变成"},"hide folder names":{"fr":"masquer les noms de dossiers","it":"nascondi i nomi delle cartelle","ko":"폴더 이름 숨기기","ro":"ascunde numele folderelor","zh":"隐藏文件夹名称"},"macOS blocks it the first time. That is normal for an app with no paid Apple certificate. Open <b>Terminal</b> and run this once:":{"fr":"macOS le bloque la premiere fois. C'est normal pour une app sans certificat Apple payant. Ouvrez le <b>Terminal</b> et lancez ceci une fois :","it":"macOS lo blocca la prima volta. E normale per un'app senza certificato Apple a pagamento. Apri il <b>Terminale</b> ed esegui questo una volta sola:","ko":"macOS는 처음 한 번 실행을 막습니다. 유료 Apple 인증서가 없는 앱에서는 정상입니다. <b>터미널</b>을 열고 이 명령을 한 번만 실행하세요:","ro":"macOS il blocheaza prima data. E normal pentru o aplicatie fara certificat Apple platit. Deschide <b>Terminal</b> si ruleaza asta o singura data:","zh":"macOS 第一次会拦截它。对于没有付费 Apple 证书的应用，这很正常。打开<b>终端</b>，运行一次这条命令："},"turbo":{"fr":"turbo","it":"turbo","ko":"터보","ro":"turbo","zh":"极速"},"version":{"fr":"version","it":"versione","ko":"버전","ro":"versiunea","zh":"版本"}});
 const I18N_LANG={"en":"en","ro":"ro","ko":"ko","zh":"zh-CN","fr":"fr","it":"it"};
 const I18N_DESC={"en":"Free photo organizer that sorts your camera roll into folders by camera, date and place. No upload, no account, works offline.","ro":"Organizator de poze gratuit care iti aranjeaza pozele in foldere dupa aparat, data si loc. Fara upload, fara cont, merge offline.","ko":"카메라, 날짜, 장소별로 사진첩을 폴더로 정리하는 무료 사진 정리 도구. 업로드도 계정도 없이 오프라인에서 작동합니다.","zh":"免费照片整理工具，按相机、日期和地点把相册归入文件夹。无需上传、无需账号，离线可用。","fr":"Organisateur de photos gratuit qui range votre pellicule par appareil, date et lieu. Sans envoi, sans compte, fonctionne hors ligne.","it":"Organizzatore di foto gratuito che sistema il rullino in cartelle per fotocamera, data e luogo. Senza upload, senza account, funziona offline."};
 const I18N_ROOTS='.mast,.hero,.band,#seconds,#features,#faq,.dl,.foot,.wizhead,.wizfoot,.wizbody,.updbar';
 const I18N_SEL='h1,h2,h3,p,li,summary,span,b,i,a,button,option';
 const ORIG=new WeakMap();
+// when a block rewrites its own English, the cached original has to go with it
+function i18nForget(el){ try{ ORIG.delete(el); el.childNodes.forEach(n=>ORIG.delete(n)); }catch(e){} }
+
+/* A block that JavaScript rewrote holds new English, so its remembered original
+   is stale. Forget it, or the next pass would put the old sentence back. */
+function forgetI18N(el){
+  if(!el||!el.nodeType) return;
+  const wipe=n=>{ ORIG.delete(n);
+    if(n.childNodes) n.childNodes.forEach(c=>{ if(c.nodeType===3) ORIG.delete(c); }); };
+  wipe(el);
+  if(el.querySelectorAll) el.querySelectorAll('*').forEach(wipe);
+}
 
 function applyLang(code,remember){
   const dict = code==='en' ? null : I18N[code];
@@ -3271,6 +3332,8 @@ function applyLang(code,remember){
     b.setAttribute('aria-current', String(b.dataset.l===code)));
   if(remember){ try{ localStorage.setItem('sort-lang',code); }catch(e){} }
   I18N.current=code;
+  // blocks that write their own text, like the download panel, redraw on this
+  try{ dispatchEvent(new CustomEvent('sortlang',{detail:code})); }catch(e){}
 }
 
 (function(){
@@ -3446,7 +3509,12 @@ if(window.__sortNative){
   // so they say nothing and only add clutter
 
   const pn=$('pickNote');
-  if(pn) pn.textContent="SORT asks for the folder once, then reads each file's metadata on this machine. The bytes never go anywhere.";
+  if(pn){
+    pn.textContent="SORT asks for the folder once, then reads each file's metadata on this machine. The bytes never go anywhere.";
+    // this is new English, so the dictionary has to look at it again
+    i18nForget(pn);
+    try{ if(I18N.current && I18N.current!=='en') applyLang(I18N.current,false); }catch(e){}
+  }
 }
 
 renderPresets(); renderSegs(); renderRnPresets(); renderStructPreview();
@@ -3529,11 +3597,24 @@ heroInit();
    WIZARD
    ============================================================ */
 const WIZ={step:1,max:1,open:false,finished:false,ran:false};
+/* hints and notes are written from JavaScript, so they pass through the
+   dictionary here; anything with a number in it falls through unchanged */
+function tStr(en){
+  try{ const d=I18N[I18N.current]; return (d&&d[en]!==undefined)?d[en]:en; }catch(e){ return en; }
+}
+let LAST_HINT={t:'',bad:false};
 function wizSay(text,bad){
+  LAST_HINT={t:text||'',bad:!!bad};          // kept so it can be said again in another language
   const h=$('wizHint');
-  h.textContent=text||'';
+  h.textContent=tStr(text||'');
   h.style.color=bad?'var(--bad)':'';
 }
+
+// these two write their own text, so they say it again when the language changes
+addEventListener('sortlang',()=>{
+  try{ wizSay(LAST_HINT.t, LAST_HINT.bad); }catch(e){}
+  try{ if(ST&&ST.mode) $('opNote').innerHTML=tStr(MODE_NOTE[ST.mode]); }catch(e){}
+});
 function wizOpen(step){
   WIZ.open=true;
   $('wiz').hidden=false;

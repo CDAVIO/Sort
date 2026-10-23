@@ -6,7 +6,7 @@
   const N = window.__sortNative;
   if (!N) return;                       // plain browser: leave the real API alone
 
-  const SEP = N.sep;
+  const SEP = N.sep || (N.platform === 'win32' ? '\\' : '/');
   const join = (a, b) => a.endsWith(SEP) ? a + b : a + SEP + b;
   const base = p => { const i = Math.max(p.lastIndexOf('/'), p.lastIndexOf('\\')); return i < 0 ? p : p.slice(i + 1); };
 
@@ -121,6 +121,18 @@
     async queryPermission() { return 'granted'; }
     async requestPermission() { return 'granted'; }
     isSameEntry(o) { return !!o && o._p === this._p; }
+
+    // SORT asks whether the destination sits inside the source before it writes
+    // anything. [] is the same folder, null is unrelated.
+    async resolve(child) {
+      if (!child || typeof child._p !== 'string') return null;
+      const strip = p => p.replace(/[\\/]+$/, '');
+      const fold  = p => N.platform === 'linux' ? p : p.toLowerCase();  // mac and Windows ignore case
+      const here = strip(this._p), there = strip(child._p);
+      if (fold(here) === fold(there)) return [];
+      if (fold(there).indexOf(fold(here) + SEP) !== 0) return null;
+      return there.slice(here.length + SEP.length).split(/[\\/]/).filter(Boolean);
+    }
   }
 
   window.showDirectoryPicker = async function (opts) {
