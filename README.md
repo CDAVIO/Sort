@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <a href="https://sort.cdav.io"><b>sort.cdav.io</b></a> &nbsp;·&nbsp;
+  <a href="https://sortcdav.netlify.app"><b>sortcdav.netlify.app</b></a> &nbsp;·&nbsp;
   <a href="https://github.com/CDAVIO/Sort/releases/latest"><b>Download</b></a> &nbsp;·&nbsp;
   <a href="LICENSE">MIT</a>
 </p>
@@ -66,8 +66,8 @@ DJI Osmo Pocket 2 / 2026 / February / DJI_0035.MP4
 2025 / March / whatsapp.jpg          ← no device, no GPS
 ```
 
-Everything happens on your own computer. The files are read and written by the browser,
-directly on your disk. Nothing is ever sent anywhere.
+Everything happens on your own computer. SORT reads and writes the files directly on your
+disk. Nothing is ever sent anywhere.
 
 ---
 
@@ -197,25 +197,29 @@ no API key to manage.
 
 ---
 
-## Browser support
+## It also runs in a browser
+
+The app is the way to use SORT, and nothing here needs a browser. But the same
+`index.html` opens in one, which is useful for a quick look without installing anything.
 
 | | Folder to folder (Copy / Move) | Metadata + ZIP download |
 |---|---|---|
 | Chrome, Edge, Brave, Opera (desktop) | yes | yes |
 | Safari, Firefox | no | yes |
 
-Writing directly to folders uses the **File System Access API**, which needs Chrome, Edge or
-Brave on a desktop, served over **HTTPS** (or opened as a local file).
+Writing straight into folders uses the **File System Access API**, which only Chrome, Edge
+and Brave have on the desktop. Elsewhere SORT still reads everything and hands back the
+organized library as a ZIP, and a ZIP cannot exceed 4 GB.
 
-Elsewhere SORT still reads everything and hands you the organized library as a ZIP download.
-A ZIP cannot exceed 4 GB, so for a large library, use Chrome.
+The app does not use that API at all. It reads and writes through Node, which is both
+faster and free of the browser's limits.
 
 ---
 
 ## How it is built
 
 SORT is **one `index.html` file**, the whole program, including the landing page at
-[sort.cdav.io](https://sort.cdav.io). `electron/` wraps that same file in a native
+[sortcdav.netlify.app](https://sortcdav.netlify.app). `electron/` wraps that same file in a native
 window, so the app and the page are never out of step.
 
 It does **not** use Chromium's File System Access API. Iterating a directory picked
@@ -257,8 +261,8 @@ The page carries everything it needs, fonts included, so it makes **no network
 request at all**, not even on first load. The desktop app and the page behave the
 same way here: once SORT is on your machine, the internet is never touched again.
 
-Opening `index.html` straight from disk works too, in Chrome, Edge or Brave.
-Safari cannot write to folders, so there it falls back to a ZIP.
+The app never asks for the network. Opening `index.html` from disk in a browser behaves
+the same way, in Chrome, Edge or Brave.
 
 ---
 
@@ -271,7 +275,7 @@ megabyte for a video.
 Expect roughly 2–4 minutes to scan a 100 GB library, then the copy runs at your disk's speed.
 With **Move** on the same drive it finishes in seconds, because nothing is rewritten.
 
-Keep the tab open and the computer awake while it runs.
+Leave SORT open and the computer awake while it runs.
 
 ---
 
@@ -349,7 +353,39 @@ git push
 
 ### Signing in
 
-Git will ask for a username and a password:
+Making the repository public changed who can **read** it. It did not change who can
+**write** to it, and it never will: without that, anyone on the internet could push to
+SORT. So `git push` still has to prove it is you.
+
+**The easy way: an SSH key.** Set it up once and git never asks for anything again.
+
+If you already made a key for signing commits, it is the same key. GitHub keeps
+authentication and signing apart, so the same key has to be added twice, once for each
+job. Copy it:
+
+```bash
+pbcopy < ~/.ssh/id_ed25519.pub                       # Mac
+```
+
+If there is no key yet, make one first, pressing Enter at all three questions:
+
+```bash
+ssh-keygen -t ed25519 -C "your@email"
+```
+
+Then on **github.com/settings/keys** → *New SSH key* → **Key type: Authentication Key** →
+paste → *Add SSH key*.
+
+Tell the repository to use it:
+
+```bash
+git remote set-url origin git@github.com:CDAVIO/Sort.git
+```
+
+That is all. `git push` works from now on with nothing to type and nothing to expire.
+
+**The other way: a personal access token.** It works, but it expires, and it has to be
+made again every few months.
 
 ```
 Username: your GitHub username
@@ -360,7 +396,7 @@ Password: a personal access token
 Git has needed a token since 2021, and the field is still labelled *Password*, which is the
 confusing part.
 
-Make a token at **github.com/settings/tokens** → *Tokens (classic)* → *Generate new token*:
+Make one at **github.com/settings/tokens** → *Tokens (classic)* → *Generate new token*:
 
 - Tick only **repo**
 - Set an expiration, for example 90 days
@@ -375,7 +411,28 @@ git config --global credential.helper osxkeychain      # Mac
 git config --global credential.helper manager          # Windows
 ```
 
-Treat a token like a password. Never paste it into a chat, a file, or your code.
+Treat a token like a password. Never paste it into a chat, a file, or your code. A public
+key, the one ending in `.pub`, is the opposite: it is meant to be handed out, and nothing
+can be done with it alone.
+
+### Signing your commits
+
+A signed commit carries the green **Verified** mark on GitHub, which says the commit really
+came from whoever holds the key. It is optional, and a repository is perfectly normal
+without it.
+
+```bash
+git config --global gpg.format ssh
+git config --global user.signingkey ~/.ssh/id_ed25519.pub
+git config --global commit.gpgsign true
+```
+
+The same key goes on **github.com/settings/keys** a second time, with **Key type: Signing
+Key**. Commits made through github.com in the browser are signed by GitHub itself and come
+out verified with no setup at all.
+
+Leave *Vigilant mode* alone unless every commit in the repository is signed: it stamps
+every unsigned commit as **Unverified**, which includes anything built by a workflow.
 
 ### Chain commands with `&&`
 
