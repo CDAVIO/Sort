@@ -1629,7 +1629,7 @@ const sleep = ms => new Promise(r=>setTimeout(r,ms));
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTHS_RO=['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
 
-const PHOTO_EXT=new Set(['jpg','jpeg','jpe','png','heic','heif','webp','tif','tiff','bmp','gif','avif','dng','cr2','cr3','nef','arw','raf','orf','rw2','srw','pef','jxl']);
+const PHOTO_EXT=new Set(['jpg','jpeg','jpe','png','heic','heif','webp','tif','tiff','bmp','gif','avif','dng','cr2','cr3','nef','nrw','arw','srf','sr2','raf','orf','rw2','srw','pef','3fr','erf','kdc','mef','mos','iiq','rwl','jxl']);
 const VIDEO_EXT=new Set(['mov','mp4','m4v','avi','mkv','3gp','3g2','webm','mts','m2ts','mpg','mpeg','wmv','flv','insv','hevc']);
 const SIDE_EXT=new Set(['aae','xmp','thm','lrv','json']);
 const MUSIC_EXT=new Set(['mp3','m4a','aac','wav','flac','ogg','oga','opus','aiff','aif','wma','alac','amr','caf','mid','midi']);
@@ -2014,7 +2014,9 @@ function parseTiffBlock(dv,tiff){
   const bom=dv.getUint16(tiff);
   let le;
   if(bom===0x4949) le=true; else if(bom===0x4D4D) le=false; else return null;
-  if(dv.getUint16(tiff+2,le)!==42) return null;
+  // 42 is TIFF and DNG; Panasonic RW2 says 0x55 and Olympus ORF says RO or RS
+  const magic=dv.getUint16(tiff+2,le);
+  if(magic!==42&&magic!==0x55&&magic!==0x4F52&&magic!==0x5352) return null;
   const p0=dv.getUint32(tiff+4,le);
   const ifd0=readIFD(dv,tiff,tiff+p0,le);
   const r={make:ifd0[0x010F],model:ifd0[0x0110],soft:ifd0[0x0131]};
@@ -2055,9 +2057,27 @@ async function readJpeg(file){
   if(!buf.byteLength) return null;
   const u8=new Uint8Array(buf), dv=new DataView(buf);
   const off=jpegExifOffset(u8);
-  if(off<0) return null;
+  if(off<0) return parseTiffBlock(dv,0);      // a TIFF wearing a .jpg name, or the other way round
   return parseTiffBlock(dv,off);
 }
+/* ---------- TIFF, and the raw formats built on it ----------
+   DNG (iPhone ProRAW too), NEF, CR2, ARW, ORF, RW2, PEF and SRW all open with a
+   TIFF header, so the camera sits in the first IFD like any TIFF. */
+async function readTiff(file){
+  const buf=await slab(file,0,262144);
+  if(buf.byteLength<16) return null;
+  const dv=new DataView(buf);
+  const r=parseTiffBlock(dv,0);
+  if(r) return r;
+  // Fuji RAF: a JPEG with full EXIF sits inside, its offset at byte 84
+  if(s4(dv,0)==='FUJI'&&buf.byteLength>=92){
+    const jb=await slab(file,dv.getUint32(84),262144);
+    const off=jpegExifOffset(new Uint8Array(jb));
+    if(off>=0) return parseTiffBlock(new DataView(jb),off);
+  }
+  return readJpeg(file);
+}
+const TIFF_RAW=new Set(['tif','tiff','dng','nef','nrw','cr2','arw','srf','sr2','orf','rw2','pef','srw','raf','3fr','erf','kdc','mef','mos','iiq','rwl']);
 /* ---------- PNG (eXIf chunk, rare) ---------- */
 async function readPng(file){
   const buf=await slab(file,0,131072);
@@ -2275,7 +2295,8 @@ async function extractMeta(file,name,relPath){
   const m={name,ext,size:file.size,relPath,device:'',brand:'',date:null,dateSrc:'',lat:null,lon:null,city:'',country:''};
   let raw=null;
   try{
-    if(ext==='jpg'||ext==='jpeg'||ext==='jpe'||ext==='tif'||ext==='tiff'||ext==='dng'||ext==='webp') raw=await readJpeg(file);
+    if(TIFF_RAW.has(ext)) raw=await readTiff(file);
+    else if(ext==='jpg'||ext==='jpeg'||ext==='jpe'||ext==='webp') raw=await readJpeg(file);
     else if(ext==='heic'||ext==='heif'||ext==='avif') raw=await readHeic(file);
     else if(ext==='png') raw=await readPng(file);
     else if(VIDEO_EXT.has(ext)) raw=await readVideo(file);
