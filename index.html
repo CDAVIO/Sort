@@ -1062,14 +1062,14 @@ html[data-mode="app"] .scrim:not(#reportScrim){pointer-events:none}
 <section class="hero">
   <div class="heroGrid">
     <div class="heroCopy">
-      <a class="pill" href="#download" id="relPill">SORT <span id="relV">1.2</span> is out for macOS and Windows <b>&rsaquo;</b></a>
+      <a class="pill" href="#download" id="relPill">SORT <span id="relV">1.9</span> is out for macOS and Windows <b>&rsaquo;</b></a>
       <h1>Your camera roll, in folders that make sense.</h1>
       <p class="lede">SORT reads which camera shot each photo, when, and where, then files everything exactly the way you asked. Free, and it never sends a byte anywhere.</p>
       <div class="heroact">
         <a class="btn btn-solid btn-lg" href="#download"><svg class="ic"><use href="#i-down"/></svg> Download SORT</a>
         <button class="btn btn-lg" id="btnDemo"><svg class="ic"><use href="#i-play"/></svg> Watch the demo</button>
       </div>
-      <p class="herofoot">v<span id="heroV">1.2</span> &middot; macOS 12+ and Windows 10/11 &middot; free, no account</p>
+      <p class="herofoot">v<span id="heroV">1.9</span> &middot; macOS 12+ and Windows 10/11 &middot; free, no account</p>
     </div>
 
     <div class="shot" aria-hidden="true">
@@ -4003,21 +4003,29 @@ function applyLang(code,remember){
     return null;
   }
 
-  let dismissed=false;
-  try{ dismissed = localStorage.getItem('sort-skip-update')===String(N.version); }catch(e){}
+  // "Later" skips that one release, so the next one still shows
+  let skipped='';
+  try{ skipped = localStorage.getItem('sort-skip-update')||''; }catch(e){}
 
+  // asked at launch, then again every few hours and when the window comes back,
+  // so a SORT left open all week still hears about a new build
+  let lastCheck=0, shown='';
+  function check(){
+    if(bar.hasAttribute('data-busy')) return;
+    lastCheck=Date.now();
   fetch('https://api.github.com/repos/CDAVIO/Sort/releases/latest',
-        {headers:{Accept:'application/vnd.github+json'}})
+        {headers:{Accept:'application/vnd.github+json'},cache:'no-store'})
     .then(r=>r.ok?r.json():Promise.reject(r.status))
     .then(d=>{
       const latest=String(d.tag_name||'').replace(/^v/,'');
-      if(!latest||!newer(latest,N.version)) return;
+      if(!latest||!newer(latest,N.version)||latest===shown) return;
+      shown=latest;
       $('updV').textContent=latest;
       $('updNow').textContent=N.version;
-      if(!dismissed) bar.hidden=false;
+      if(skipped!==latest) bar.hidden=false;
       $('updLater').onclick=()=>{
-        bar.hidden=true;
-        try{ localStorage.setItem('sort-skip-update',String(N.version)); }catch(e){}
+        bar.hidden=true; skipped=latest;
+        try{ localStorage.setItem('sort-skip-update',latest); }catch(e){}
       };
 
       const asset=assetFor(d.assets);
@@ -4081,6 +4089,10 @@ function applyLang(code,remember){
       };
     })
     .catch(()=>{});                          // offline is the normal case, stay quiet
+  }
+  check();
+  setInterval(check,4*3600*1000);
+  addEventListener('focus',()=>{ if(Date.now()-lastCheck>30*60*1000) check(); });
 })();
 
 /* the worker only makes the site itself load fast and survive a dropout */
