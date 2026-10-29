@@ -2,7 +2,9 @@
 # so the Electron sources and the README stay out of the published site.
 
 [build]
-  command = "rm -rf dist && mkdir -p dist && cp index.html 404.html sw.js robots.txt sitemap.xml __forms.html dist/ && cp -r icons dist/icons"
+# The version in electron/package.json is written into the page, so the download
+# button links straight to this release's files even when GitHub's API says no.
+  command = '''rm -rf dist && mkdir -p dist && cp index.html 404.html sw.js robots.txt sitemap.xml __forms.html dist/ && cp -r icons dist/icons && V=$(node -p "require('./electron/package.json').version") && sed -i "s/const KNOWN_VER='[^']*'/const KNOWN_VER='$V'/; s|<span id=\"relV\">[^<]*|<span id=\"relV\">${V%.*}|; s|<span id=\"heroV\">[^<]*|<span id=\"heroV\">${V%.*}|" dist/index.html'''
   publish = "dist"
 
 # The worker and the page must never be served stale, or an installed copy

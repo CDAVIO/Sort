@@ -3719,6 +3719,12 @@ $('caps').addEventListener('click',e=>{
 /* ---------- pick the right installer for whoever is reading ---------- */
 (function(){
   const REPO='CDAVIO/Sort', RELEASES='https://github.com/'+REPO+'/releases/latest';
+  /* The newest build this page knows of. Netlify writes the version from
+     electron/package.json here on every deploy, so the button downloads the file
+     directly even when GitHub's API is out of reach (it allows 60 asks an hour). */
+  const KNOWN_VER='1.9.0';
+  const KNOWN_FILE={'mac-arm':v=>'SORT-'+v+'-arm64.dmg','mac-intel':v=>'SORT-'+v+'.dmg',
+                    'win':v=>'SORT.Setup.'+v+'.exe','win-portable':v=>'SORT.'+v+'.exe'};
   const QUAR='xattr -dr com.apple.quarantine /Applications/SORT.app';
   const UNBLOCK='Get-ChildItem "$env:USERPROFILE\\Downloads\\SORT*.exe" | Unblock-File';
 
@@ -3794,6 +3800,10 @@ $('caps').addEventListener('click',e=>{
     if(asset){
       main.href=asset.browser_download_url;
       status.textContent=tr(t.name)+' \u00b7 '+tr('version')+' '+String(release.tag_name).replace(/^v/,'')+' \u00b7 '+mb(asset.size);
+    }else if(failed&&KNOWN_FILE[current]){
+      const f=KNOWN_FILE[current](KNOWN_VER);
+      main.href='https://github.com/'+REPO+'/releases/download/v'+KNOWN_VER+'/'+f;
+      status.textContent=tr(t.name)+' \u00b7 '+tr('version')+' '+KNOWN_VER;
     }else{
       main.href=RELEASES;
       status.textContent = failed
@@ -3824,8 +3834,22 @@ $('caps').addEventListener('click',e=>{
                                    current=b.dataset.os; render(); });
   render();
 
-  fetch('https://api.github.com/repos/'+REPO+'/releases/latest',{headers:{Accept:'application/vnd.github+json'}})
-    .then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
+  let saved=null;
+  try{ saved=JSON.parse(localStorage.getItem('sort-release')||'null'); }catch(e){}
+  const vnum=v=>String(v||'').replace(/^v/,'').split('.').map(n=>parseInt(n,10)||0);
+  const behind=(a,b)=>{ const x=vnum(a),y=vnum(b); for(let i=0;i<3;i++){ if((x[i]||0)!==(y[i]||0)) return (x[i]||0)<(y[i]||0); } return false; };
+  const fresh=saved&&saved.at>Date.now()-6*3600*1000&&saved.d&&!behind(saved.d.tag_name,KNOWN_VER);
+  (fresh ? Promise.resolve(saved.d)
+         : fetch('https://api.github.com/repos/'+REPO+'/releases/latest',{headers:{Accept:'application/vnd.github+json'},cache:'no-store'})
+             .then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
+             .then(d=>{
+               // an answer older than this page (a stale cache somewhere): trust the page
+               if(behind(d.tag_name,KNOWN_VER)) throw new Error('stale');
+               const keep={tag_name:d.tag_name,html_url:d.html_url,
+                 assets:(d.assets||[]).map(a=>({name:a.name,size:a.size,browser_download_url:a.browser_download_url}))};
+               try{ localStorage.setItem('sort-release',JSON.stringify({at:Date.now(),d:keep})); }catch(e){}
+               return keep;
+             }))
     .then(d=>{
       release=d; render();
       const v=String(d.tag_name||'').replace(/^v/,'');
