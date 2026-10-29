@@ -249,6 +249,35 @@ select:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(21,2
 .msg.e{display:flex;align-items:flex-start;gap:2px;background:var(--bad-bg);border-color:#f0d4d1;color:var(--bad)}
 .msg.i{display:flex;align-items:flex-start;gap:2px;background:var(--wash);border-color:var(--rule2);color:var(--ink2)}
 
+.scanfx{margin-top:13px;border:1px solid var(--rule2);border-radius:var(--r2);background:var(--wash);
+  overflow:hidden;max-height:620px;transition:max-height .55s ease,opacity .45s ease,margin .55s ease;
+  animation:scanIn .45s cubic-bezier(.2,.8,.2,1)}
+.scanfx.out{max-height:0;opacity:0;margin-top:0;border-color:transparent}
+@keyframes scanIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.scanfx canvas{display:block;width:100%;height:320px}
+.scanhud{padding:4px 18px 16px}
+.scanph{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--ink2);min-height:20px}
+.scandot{width:7px;height:7px;border-radius:50%;background:var(--brand);flex:none;
+  box-shadow:0 0 0 0 rgba(255,217,5,.55);animation:scanPing 1.4s ease-out infinite}
+.scanfx.done .scandot{animation:none}
+@keyframes scanPing{0%{box-shadow:0 0 0 0 rgba(255,217,5,.55)}100%{box-shadow:0 0 0 9px rgba(255,217,5,0)}}
+.scannums{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0 12px}
+.scannums div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.scannums b{font:700 22px/1.1 'JetBrains Mono',monospace;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.scannums span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+.scantrack{height:4px;border-radius:99px;background:var(--rule2);overflow:hidden;position:relative}
+.scantrack i{position:absolute;inset:0 auto 0 0;width:0;border-radius:99px;background:var(--brand);transition:width .25s ease}
+.scantrack.ind i{width:32%!important;animation:scanSlide 1.15s ease-in-out infinite}
+@keyframes scanSlide{0%{left:-32%}100%{left:100%}}
+.scandevs{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;min-height:0}
+.scandevs span{display:inline-flex;align-items:center;gap:7px;padding:4px 10px;border-radius:99px;
+  border:1px solid var(--rule2);background:var(--paper);font-size:12px;color:var(--ink2);
+  animation:chipIn .35s cubic-bezier(.3,1.4,.5,1)}
+.scandevs span em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink3)}
+@keyframes chipIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+@media (max-width:520px){ .scanfx canvas{height:250px} .scannums b{font-size:18px} .scanhud{padding:2px 14px 14px} }
+@media (prefers-reduced-motion:reduce){ .scanfx,.scandevs span{animation:none} .scantrack.ind i{animation:none;left:0} }
+
 .banner{padding:14px 16px;border-radius:var(--r2);font-size:13.5px;line-height:1.6;
   margin:0 0 4px;display:none;border:1px solid}
 .banner.on{display:block}
@@ -1296,6 +1325,20 @@ html[data-mode="app"] .scrim:not(#reportScrim){pointer-events:none}
           <button class="btn btn-danger" id="btnCancelScan" disabled><svg class="ic"><use href="#i-x"/></svg> Cancel</button>
         </div>
         <div class="slot empty" id="srcDisp"><svg class="ic"><use href="#i-folder"/></svg><span>No folder chosen yet</span></div>
+        <div class="scanfx" id="scanFx" hidden>
+          <canvas id="scanCv"></canvas>
+          <div class="scanhud">
+            <div class="scanph"><span class="scandot"></span><span id="snPh"></span></div>
+            <div class="scannums">
+              <div><b id="snFiles">0</b><span id="snFilesL">files</span></div>
+              <div><b id="snPhotos">0</b><span id="snPhotosL">photos</span></div>
+              <div><b id="snVideos">0</b><span id="snVideosL">videos</span></div>
+              <div><b id="snDev">0</b><span id="snDevL">devices</span></div>
+            </div>
+            <div class="scantrack"><i id="snBar"></i></div>
+            <div class="scandevs" id="snDevList"></div>
+          </div>
+        </div>
         <div class="msg" id="scanMsg"></div>
 
         <div class="hidden" id="facetCard">
@@ -1445,7 +1488,7 @@ function themeVar(name,fallback){
 function rebuildFolderOff(){
   IMG_FOLDER_OFF=svgImg(ART_FOLDER(themeVar('--c-off-a','#3a3a3a'), themeVar('--c-off-b','#4a4a4a')));
 }
-const ready=i=>i.complete&&i.naturalWidth>0;
+const ready=i=>!!i&&(i.tile||i.complete&&i.naturalWidth>0);
 /* what drifts above the line: mostly photos, then video, then the rest */
 const FILE_ART=[IMG_PHOTO,IMG_PHOTO,IMG_PHOTO,IMG_PHOTO,IMG_VIDEO,IMG_VIDEO,IMG_DOC,IMG_MUSIC];
 function imgForCat(cat,name){
@@ -1456,6 +1499,128 @@ function imgForCat(cat,name){
   }
   return IMG_PHOTO;
 }
+
+/* ---------- real thumbnails: a small rounded tile of the actual photo or clip ----------
+   Made on this machine from the file already in hand; nothing leaves the page.
+   Work is dropped rather than queued when it falls behind, so a fast run stays fast. */
+const THUMB_DECODE=new Set(['jpg','jpeg','jpe','png','webp','gif','avif','bmp']);
+const THUMB_EMBED=new Set(['jpg','jpeg','jpe','dng','cr2','nef','arw','raf','orf','rw2','srw','pef','tif','tiff']);
+const IS_SAFARI=typeof navigator!=='undefined'&&/^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent||'');
+function rrPath(g,x,y,w,h,r){
+  g.beginPath(); g.moveTo(x+r,y);
+  g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r);
+  g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath();
+}
+const Thumbs={
+  busy:0, q:[], MAX:2, QMAX:3, last:0, GAP:120,
+  /* cb(tile) runs only when a thumbnail could be made; src is a File, a Blob,
+     the app's native file, or a handle with getFile() */
+  want(src,name,cb){
+    if(!src||typeof document==='undefined') return;
+    const now=performance.now();
+    if(now-this.last<this.GAP) return;               // a few per second is plenty to look real
+    this.last=now;
+    if(this.q.length>=this.QMAX) this.q.shift();     // the freshest file wins
+    this.q.push({src,name,cb}); this.pump();
+  },
+  free(){ return this.busy<this.MAX&&!this.q.length&&performance.now()-this.last>=this.GAP; },
+  pump(){
+    while(this.busy<this.MAX&&this.q.length){
+      const j=this.q.pop(); this.busy++;
+      this.make(j.src,j.name).then(t=>{ if(t) j.cb(t); },()=>{})
+        .finally(()=>{ this.busy--; this.pump(); });
+    }
+  },
+  async make(src,name){
+    const f=typeof src.getFile==='function'?await src.getFile():src;
+    const ext=(String(name||f.name||'').split('.').pop()||'').toLowerCase();
+    if(VIDEO_EXT.has(ext)) return this.frame(f);
+    let t=null;
+    const big=f.size>25*1048576;
+    if(!big&&(THUMB_DECODE.has(ext)||(IS_SAFARI&&(ext==='heic'||ext==='heif')))) t=await this.image(f,false);
+    if(!t&&THUMB_EMBED.has(ext)) t=await this.embedded(f);
+    return t;
+  },
+  url(f){
+    if(typeof Blob!=='undefined'&&f instanceof Blob) return {u:URL.createObjectURL(f),own:true};
+    if(f&&f.__path){                                  // the desktop app: the page is file:// already
+      const p=f.__path.replace(/\\/g,'/');
+      return {u:'file://'+(p[0]==='/'?'':'/')+encodeURI(p).replace(/#/g,'%23').replace(/\?/g,'%3F'),own:false};
+    }
+    return null;
+  },
+  async image(f,video){
+    if(typeof Blob!=='undefined'&&f instanceof Blob&&window.createImageBitmap){
+      try{ return this.tile(await createImageBitmap(f,{resizeWidth:200,resizeQuality:'medium'}),video); }catch(e){}
+    }
+    const U=this.url(f); if(!U) return null;
+    try{ const i=new Image(); i.decoding='async'; i.src=U.u; await i.decode(); return this.tile(i,video); }
+    catch(e){ return null; }
+    finally{ if(U.own) URL.revokeObjectURL(U.u); }
+  },
+  /* cameras tuck a small JPEG preview near the start of the file */
+  async embedded(f){
+    try{
+      const u8=new Uint8Array(await f.slice(0,Math.min(f.size,786432)).arrayBuffer());
+      for(let i=2;i<u8.length-4;i++){
+        if(u8[i]!==0xFF||u8[i+1]!==0xD8||u8[i+2]!==0xFF) continue;
+        let j=i+3; while(j<u8.length-1&&!(u8[j]===0xFF&&u8[j+1]===0xD9)) j++;
+        if(j>=u8.length-1) break;
+        if(j-i>1500){ const t=await this.image(new Blob([u8.subarray(i,j+2)],{type:'image/jpeg'}),false); if(t) return t; }
+        i=j;
+      }
+    }catch(e){}
+    return null;
+  },
+  /* one frame from early in the clip */
+  frame(f){
+    const U=this.url(f); if(!U) return Promise.resolve(null);
+    return new Promise(res=>{
+      const v=document.createElement('video'); let over=false;
+      const end=t=>{ if(over) return; over=true; clearTimeout(to);
+        v.removeAttribute('src'); try{ v.load(); }catch(e){} if(U.own) URL.revokeObjectURL(U.u); res(t); };
+      const to=setTimeout(()=>end(null),3500);
+      v.muted=true; v.playsInline=true; v.preload='auto';
+      v.onloadedmetadata=()=>{ try{ v.currentTime=Math.min(1,(isFinite(v.duration)?v.duration:2)*0.15); }catch(e){ end(null); } };
+      v.onseeked=()=>end(v.videoWidth?this.tile(v,true):null);
+      v.onerror=()=>end(null);
+      v.src=U.u;
+    });
+  },
+  /* the tile carries its own white rim and soft shadow, so drawing it each frame is one drawImage */
+  tile(src,video){
+    const w=src.videoWidth||src.naturalWidth||src.width, h=src.videoHeight||src.naturalHeight||src.height;
+    if(!w||!h) return null;
+    const P=7, T=88, S=T+P*2, c=document.createElement('canvas');
+    c.width=c.height=S;
+    const g=c.getContext('2d');
+    g.save(); g.shadowColor='rgba(0,0,0,.28)'; g.shadowBlur=7; g.shadowOffsetY=2;
+    g.fillStyle='#fff'; rrPath(g,P,P,T,T,15); g.fill(); g.restore();
+    const b=4, k=Math.max((T-b*2)/w,(T-b*2)/h);
+    g.save(); rrPath(g,P+b,P+b,T-b*2,T-b*2,11); g.clip();
+    g.drawImage(src,P+T/2-w*k/2,P+T/2-h*k/2,w*k,h*k); g.restore();
+    if(video){
+      const cx=P+T-21, cy=P+T-21;
+      g.fillStyle='rgba(0,0,0,.42)'; g.beginPath(); g.arc(cx,cy,12,0,Math.PI*2); g.fill();
+      g.fillStyle='#fff'; g.beginPath(); g.moveTo(cx-4,cy-6.5); g.lineTo(cx+7,cy); g.lineTo(cx-4,cy+6.5); g.closePath(); g.fill();
+    }
+    if(src.close) src.close();
+    c.tile=true; c.video=!!video; c.k=S/T;          // k: drawn size / visible tile size
+    return c;
+  },
+  /* a stand-in tile for files the browser cannot open (HEIC in Chrome, most RAW) */
+  icon(img){
+    const P=7, T=88, S=T+P*2, c=document.createElement('canvas');
+    c.width=c.height=S;
+    const g=c.getContext('2d');
+    g.save(); g.shadowColor='rgba(0,0,0,.2)'; g.shadowBlur=6; g.shadowOffsetY=2;
+    g.fillStyle='#fff'; rrPath(g,P,P,T,T,15); g.fill(); g.restore();
+    if(ready(img)) g.drawImage(img,P+T*0.22,P+T*0.22,T*0.56,T*0.56);
+    c.tile=true; c.k=S/T; c.ph=true;
+    return c;
+  }
+};
+
 const pad = (n,l=2) => String(n).padStart(l,'0');
 const fmtN = n => n.toLocaleString('en-US');
 const fmtB = b => b<1024?b+' B':b<1048576?(b/1024).toFixed(0)+' KB':b<1073741824?(b/1048576).toFixed(1)+' MB':(b/1073741824).toFixed(2)+' GB';
@@ -2422,7 +2587,7 @@ const Stage={
     this.resize();
     this.kind=mode; this.mode=mode; this.parts=[]; this.sparks=[]; this.rings=[]; this.done=0;
     this.nodes=[]; this.map.clear(); this.over=null;
-    this.recentImg=[]; this.turbo=false;
+    this.recentImg=[]; this.tiles=[]; this.turbo=false;
     this.floats=[]; for(let i=0;i<11;i++) this.floats.push(this.newFloat(true));
     this.layout();
     if(!this.running){ this.running=true; requestAnimationFrame(t=>this.loop(t)); }
@@ -2433,17 +2598,26 @@ const Stage={
     return {x:this.pad+20+Math.random()*Math.max(40,this.W-this.pad*2-40),
             y:seed?Math.random()*(this.divY-46)+16:-14,
             vy:0.09+Math.random()*0.13, ph:Math.random()*6.3,
-            sp:0.9+Math.random()*0.35, img:this.pickImg()};
+            sp:0.9+Math.random()*0.35, rot:(Math.random()-0.5)*0.55, img:this.pickImg()};
   },
   /* the drifting icons echo what is actually flowing through right now */
   pickImg(){
+    const T=this.tiles;
+    if(T&&T.length&&Math.random()<0.9) return T[Math.floor(Math.random()*T.length)];
     const r=this.recentImg;
     if(r&&r.length&&Math.random()<0.7) return r[Math.floor(Math.random()*r.length)];
     return FILE_ART[Math.floor(Math.random()*FILE_ART.length)];
   },
-  note(cat,name){
+  note(cat,name,file){
     this.recentImg.unshift(imgForCat(cat,name));
     if(this.recentImg.length>6) this.recentImg.pop();
+    // the real photo replaces a drifting icon as soon as it is ready
+    if(file) Thumbs.want(file,name,t=>{
+      if(this.mode==='idle') return;
+      this.tiles.unshift(t); if(this.tiles.length>24) this.tiles.pop();
+      const f=this.floats.filter(f=>!(f.img&&f.img.tile)).sort((a,b)=>a.y-b.y)[0];
+      if(f) f.img=t;
+    });
   },
   maskLabel(l){ return ST.cfg.mask ? '*******' : l; },
   folder(label){
@@ -2460,8 +2634,8 @@ const Stage={
     return nd;
   },
   catColor(c){ const C=this.C||{}; return c==='Videos'?(C.video||'#6f86ef'):c==='Screenshots'?(C.shot||'#3fae84'):c==='Others'?(C.other||'#8a8a8a'):(C.photo||'#e8e8e8'); },
-  send(label,cat,name){
-    this.note(cat,name);
+  send(label,cat,name,file){
+    this.note(cat,name,file);
     const nd=this.folder(label);
     nd.n++; nd.glow=1; this.done++;
     if(this.parts.length>44){ this.turbo=true; return; }
@@ -2471,9 +2645,11 @@ const Stage={
     const ripe=this.divY*0.45;
     this.floats.forEach((f,i)=>{ if(f.y>ripe&&(src===null||f.y>src.y)){src=f;bi=i;} });
     const x0=src?src.x:this.pad+Math.random()*(this.W-this.pad*2), y0=src?src.y:this.divY*0.3;
-    const img=src?src.img:imgForCat(cat,name);
+    let img=src?src.img:imgForCat(cat,name);
+    if(!(img&&img.tile)&&this.tiles.length) img=this.tiles[Math.floor(Math.random()*this.tiles.length)];
+    const rot=src?src.rot:(Math.random()-0.5)*0.5;
     if(bi>=0) this.floats[bi]=this.newFloat(false);
-    this.parts.push({x0,y0,nd,cat,img,t:0,sp:1/(30+Math.random()*16),crossed:false});
+    this.parts.push({x0,y0,nd,cat,img,rot,t:0,sp:1/(30+Math.random()*16),crossed:false});
   },
   rr(x,y,w,h,r){ const g=this.ctx; g.beginPath(); g.moveTo(x+r,y);
     g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r);
@@ -2517,7 +2693,12 @@ const Stage={
       const fade=Math.min(1,(this.divY-20-f.y)/40)*Math.min(1,f.y/18+0.2);
       const s=(this.narrow?21:25)*(f.sp||1);
       g.globalAlpha=0.94*fade;
-      if(ready(f.img)) g.drawImage(f.img,x-s/2,f.y-s/2,s,s);
+      if(f.img&&f.img.tile){
+        const d=s*1.5*f.img.k;
+        g.save(); g.translate(x,f.y); g.rotate(f.rot+Math.sin(f.ph)*0.06);
+        g.drawImage(f.img,-d/2,-d/2,d,d); g.restore();
+      }
+      else if(ready(f.img)) g.drawImage(f.img,x-s/2,f.y-s/2,s,s);
       else{ g.fillStyle=this.C.bubble; g.strokeStyle=this.C.stroke; g.lineWidth=1.3; g.lineJoin='round';
             this.docPath(x,f.y,s*0.9); g.fill(); g.stroke(); }
       g.globalAlpha=1;
@@ -2617,6 +2798,15 @@ const Stage={
       }
       const a=p.t>0.72?(1-p.t)/0.28:1;
       const s=this.narrow?23:26, rad=s*0.72;
+      if(p.img&&p.img.tile){
+        // the photo itself travels, straightening and shrinking as it lands
+        const d=s*(1.55-0.55*p.t)*p.img.k;
+        g.globalAlpha=a;
+        g.save(); g.translate(x,y); g.rotate(p.rot*(1-p.t));
+        g.drawImage(p.img,-d/2,-d/2,d,d); g.restore();
+        g.globalAlpha=1;
+        continue;
+      }
       g.globalAlpha=a*0.95; g.fillStyle=this.C.bubble;
       g.beginPath(); g.arc(x,y,rad,0,Math.PI*2); g.fill();
       g.globalAlpha=a*0.38; g.strokeStyle=col; g.lineWidth=1.2;
@@ -2680,17 +2870,218 @@ async function* walkFSA(dir,rel){
   }
 }
 
+/* ============================================================
+   SCAN LOADER: the folder's own photos gather into a bloom while it is read
+   ============================================================ */
+const Scanner={
+  init(){
+    this.box=$('scanFx'); this.c=$('scanCv'); this.g=this.c.getContext('2d');
+    this.running=false; this.icons={};
+    addEventListener('resize',()=>{ if(!this.box.hidden) this.resize(); });
+  },
+  resize(){
+    const r=this.c.getBoundingClientRect();
+    if(r.width<2||r.height<2) return;
+    const dpr=Math.min(2,window.devicePixelRatio||1);
+    this.c.width=r.width*dpr; this.c.height=r.height*dpr;
+    this.g.setTransform(dpr,0,0,dpr,0,0);
+    this.W=r.width; this.H=r.height; this.cx=this.W/2; this.cy=this.H/2;
+    this.ts=this.W<520?34:42;                       // tile size
+    this.R0=this.ts*1.3;                            // keep the core clear
+    this.Rmax=Math.min(this.H/2-this.ts*0.55,this.W/2-this.ts*0.6);
+    this.A=Math.pow(this.ts*0.62,2)*Math.PI;        // area each tile claims
+    this.cap=Math.max(8,Math.floor((this.Rmax*this.Rmax-this.R0*this.R0)*Math.PI/this.A));
+  },
+  pal(){
+    const v=(n,f)=>themeVar(n,f);
+    this.C={paper:v('--paper','#fff'),rule:v('--rule2','#cfcec7'),ink3:v('--ink3','#8d8a83'),brand:v('--brand','#ffd905')};
+  },
+  icon(cat,name){
+    const img=imgForCat(cat,name), key=img===IMG_VIDEO?'v':img===IMG_PHOTO?'p':img===IMG_MUSIC?'m':'d';
+    if(!this.icons[key]&&ready(img)) this.icons[key]=Thumbs.icon(img);
+    return this.icons[key]||null;
+  },
+  start(){
+    if(!this.c) this.init();
+    clearTimeout(this.hideT); clearTimeout(this.hideT2);
+    this.box.hidden=false; this.box.classList.remove('out','done');
+    this.resize(); this.pal();
+    this.tiles=[]; this.wait=[]; this.k=0; this.lastAdd=0; this.lastPing=0; this.spin=0; this.phase='find'; this.doneAt=0;
+    this.n={files:0,photos:0,videos:0,found:0,total:0}; this.sh={files:0,photos:0,videos:0,dev:0};
+    this.devs=new Map(); this.chips=new Map(); this.lastChips=0;
+    $('snDevList').innerHTML='';
+    ['snFiles','snPhotos','snVideos','snDev'].forEach(id=>$(id).textContent='0');
+    $('snFilesL').textContent=tStr('files'); $('snPhotosL').textContent=tStr('photos');
+    $('snVideosL').textContent=tStr('videos'); $('snDevL').textContent=tStr('devices');
+    $('snBar').style.width='0'; $('snBar').parentNode.classList.add('ind');
+    this.say();
+    if(!this.running){ this.running=true; requestAnimationFrame(t=>this.loop(t)); }
+  },
+  say(){
+    const n=this.n;
+    $('snPh').textContent=this.phase==='find'
+      ? tStr('Looking through the folder')+(n.found?' · '+fmtN(n.found)+' '+tStr('found'):'')
+      : this.phase==='read' ? tStr('Reading each file')+' · '+fmtN(n.files)+' / '+fmtN(n.total)
+      : tStr('All read');
+  },
+  found(c){ this.n.found=c; this.say(); },
+  reading(total){
+    this.phase='read'; this.n.total=total;
+    $('snBar').parentNode.classList.remove('ind'); this.say();
+  },
+  add(m,file){
+    const n=this.n; n.files++;
+    if(m.category==='Videos') n.videos++;
+    else if(m.category!=='Others') n.photos++;
+    if(m.category!=='Others') this.devs.set(m.device,(this.devs.get(m.device)||0)+1);
+    const now=performance.now();
+    if(now-this.lastChips>160||n.files===n.total){ this.lastChips=now; this.chipsDraw(); this.say();
+      $('snBar').style.width=(n.total?Math.round(n.files/n.total*100):0)+'%'; }
+    if(m.category==='Others') return;
+    // small folders read faster than the eye: hold a few back and let them in on a beat
+    this.wait.push({m,file}); if(this.wait.length>this.cap) this.wait.shift();
+  },
+  spawn(now){
+    const {m,file}=this.wait.shift();
+    const slot=this.k%this.cap;
+    if(this.k>=this.cap){ const old=this.tiles.find(t=>t.slot===slot&&!t.gone); if(old) old.gone=now; }
+    this.k++;
+    const a=Math.random()*Math.PI*2, d=Math.max(this.W,this.H)*0.6;
+    const t={slot,img:this.icon(m.category,m.name),born:now,gone:0,
+      x0:this.cx+Math.cos(a)*d,y0:this.cy+Math.sin(a)*d,rot:(Math.random()-0.5)*0.6,ph:Math.random()*6.3,
+      flip:0,next:null,file,name:m.name,asked:false};
+    this.tiles.push(t);
+  },
+  /* whenever the decoder is free, the newest placeholder asks for its real photo */
+  upgrade(){
+    if(!Thumbs.free()) return;
+    for(let i=this.tiles.length-1;i>=0;i--){
+      const t=this.tiles[i];
+      if(t.asked||t.gone||!t.file) continue;
+      t.asked=true;
+      Thumbs.want(t.file,t.name,img=>{ if(!t.gone){ t.next=img; t.flip=performance.now(); } });
+      return;
+    }
+  },
+  chipsDraw(){
+    const top=[...this.devs.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6);
+    const box=$('snDevList'), keep=new Set(top.map(e=>e[0]));
+    for(const [k,el] of this.chips) if(!keep.has(k)){ el.remove(); this.chips.delete(k); }
+    for(const [name,c] of top){
+      let el=this.chips.get(name);
+      if(!el){ el=document.createElement('span'); el.innerHTML='<b></b><em></em>';
+        el.firstChild.textContent=name; this.chips.set(name,el); }
+      el.lastChild.textContent=fmtN(c);
+    }
+    // keep them in count order, touching the DOM only when it changes (moving a chip replays its pop)
+    top.forEach(([name],i)=>{ const el=this.chips.get(name); if(box.children[i]!==el) box.insertBefore(el,box.children[i]||null); });
+  },
+  finish(ok){
+    this.phase='done'; this.doneAt=performance.now();
+    $('snBar').parentNode.classList.remove('ind');
+    if(ok) $('snBar').style.width='100%';
+    this.chipsDraw(); this.say(); this.box.classList.add('done');
+    if(!ok) this.wait=[];
+    const hold=ok?Math.min(3200,1700+this.wait.length*60):250;
+    this.hideT=setTimeout(()=>{
+      this.box.classList.add('out');
+      this.hideT2=setTimeout(()=>{ this.box.hidden=true; this.running=false; },650);
+    },hold);
+  },
+  pos(slot){
+    const a=slot*2.39996323+this.spin;
+    const r=Math.sqrt(this.R0*this.R0+slot*this.A/Math.PI);
+    return [this.cx+Math.cos(a)*r,this.cy+Math.sin(a)*r];
+  },
+  loop(t){
+    if(!this.running) return;
+    const g=this.g, W=this.W, H=this.H, cx=this.cx, cy=this.cy, C=this.C;
+    g.clearRect(0,0,W,H);
+    const done=this.phase==='done', live=!done;
+    this.spin+=live?0.0016:0.0005;
+    if(this.wait.length&&t-this.lastAdd>75){ this.lastAdd=t; this.spawn(t); }
+    this.upgrade();
+
+    // soft light behind the bloom
+    const glow=g.createRadialGradient(cx,cy,0,cx,cy,this.Rmax*1.25);
+    glow.addColorStop(0,'rgba(255,217,5,.16)'); glow.addColorStop(1,'rgba(255,217,5,0)');
+    g.fillStyle=glow; g.fillRect(0,0,W,H);
+
+    // radar pings while it is still looking
+    if(this.phase==='find'||done){
+      if(!done&&(!this.lastPing||t-this.lastPing>1300)) this.lastPing=t;
+      const u=done?(t-this.doneAt)/900:(t-this.lastPing)/1300;
+      if(u<1){
+        g.strokeStyle=`rgba(255,217,5,${0.55*(1-u)})`; g.lineWidth=2;
+        g.beginPath(); g.arc(cx,cy,this.R0*0.55+u*this.Rmax*0.8,0,Math.PI*2); g.stroke();
+      }
+    }
+
+    // the tiles
+    const ease=u=>{ const c1=1.5,c3=c1+1; return 1+c3*Math.pow(u-1,3)+c1*Math.pow(u-1,2); };
+    for(let i=this.tiles.length-1;i>=0;i--){ const tl=this.tiles[i]; if(tl.gone&&t-tl.gone>450) this.tiles.splice(i,1); }
+    for(const tl of this.tiles){
+      if(!tl.img&&!tl.next) continue;
+      const [sx,sy]=this.pos(tl.slot);
+      const u=Math.min(1,(t-tl.born)/750), e=ease(u);
+      let x=tl.x0+(sx-tl.x0)*e, y=tl.y0+(sy-tl.y0)*e;
+      tl.ph+=0.02; y+=Math.sin(tl.ph)*1.6*u;
+      let sc=0.45+0.55*Math.min(1,u*1.4), al=Math.min(1,u*2.2);
+      if(tl.gone){ const v=Math.min(1,(t-tl.gone)/450); al*=1-v; sc*=1-0.35*v; }
+      // a placeholder flips over to the real photo
+      let fx=1;
+      if(tl.next){
+        const v=Math.min(1,(t-tl.flip)/320);
+        if(v>=0.5&&tl.img!==tl.next){ tl.img=tl.next; }
+        if(v>=1) tl.next=null;
+        fx=Math.abs(Math.cos(v*Math.PI));
+      }
+      if(!tl.img) continue;
+      const d=this.ts*sc*tl.img.k;
+      g.globalAlpha=al;
+      g.save(); g.translate(x,y); g.rotate(tl.rot*(done?1:0.9+0.1*Math.sin(tl.ph*0.5))); g.scale(Math.max(0.04,fx),1);
+      g.drawImage(tl.img,-d/2,-d/2,d,d); g.restore();
+    }
+    g.globalAlpha=1;
+
+    // the core: a folder with a sweeping arc
+    const rc=this.R0*0.62;
+    g.save(); g.shadowColor='rgba(0,0,0,.18)'; g.shadowBlur=14; g.shadowOffsetY=3;
+    g.fillStyle=C.paper; g.beginPath(); g.arc(cx,cy,rc,0,Math.PI*2); g.fill(); g.restore();
+    g.strokeStyle=C.rule; g.lineWidth=1; g.beginPath(); g.arc(cx,cy,rc,0,Math.PI*2); g.stroke();
+    const fs=rc*1.15;
+    if(ready(IMG_FOLDER)) g.drawImage(IMG_FOLDER,cx-fs/2,cy-fs/2,fs,fs);
+    const ra=rc+6, head=t/(this.phase==='find'?260:420);
+    g.lineCap='round'; g.lineWidth=3;
+    if(done){
+      const v=Math.min(1,(t-this.doneAt)/500);
+      g.strokeStyle=C.brand; g.beginPath(); g.arc(cx,cy,ra,-Math.PI/2,-Math.PI/2+Math.PI*2*v); g.stroke();
+    }else{
+      for(let k=0;k<14;k++){
+        g.strokeStyle=`rgba(255,217,5,${(k+1)/14})`;
+        g.beginPath(); g.arc(cx,cy,ra,head+k*0.12,head+k*0.12+0.13); g.stroke();
+      }
+    }
+    g.lineCap='butt';
+
+    // counters roll toward the real numbers
+    const sh=this.sh, n=this.n;
+    const roll=(key,val,id)=>{ const d=val-sh[key]; if(d){ sh[key]+=Math.abs(d)<1?d:d*0.22; $(id).textContent=fmtN(Math.round(sh[key])); } };
+    roll('files',n.files||n.found,'snFiles'); roll('photos',n.photos,'snPhotos');
+    roll('videos',n.videos,'snVideos'); roll('dev',this.devs.size,'snDev');
+
+    requestAnimationFrame(tt=>this.loop(tt));
+  }
+};
+
 async function doScan(){
   if(ST.busy) return;
   if(!ST.srcHandle&&!ST.fallbackFiles){ alertMsg('scanMsg','e','Choose a folder first.'); return; }
   ST.busy=true; ST.abort=false;
   $('btnCancelScan').disabled=false; $('btnScan').disabled=true; $('btnOrg').disabled=true;
   $('facetCard').classList.add('hidden'); $('sumCard').classList.add('hidden');
-  $('progCard').classList.remove('hidden');
-  if(WIZ.open) goStep(5,true);
-  Stage.start('scan');
-  $('pdot').className='dot run'; $('ptitle').textContent='Reading metadata';
-  alertMsg('scanMsg','i','Looking through the folder');
+  clearMsg('scanMsg');
+  Scanner.start();
 
   // 1. collect entries
   let entries=[];
@@ -2698,17 +3089,18 @@ async function doScan(){
     if(ST.srcHandle){
       for await (const e of walkFSA(ST.srcHandle,'')){
         entries.push(e);
-        if(entries.length%400===0){ $('ptext').textContent=fmtN(entries.length)+' files found'; await sleep(0); }
+        if(entries.length%400===0){ Scanner.found(entries.length); await sleep(0); }
         if(ST.abort) break;
         if(entries.length>=MAX_FILES) break;
       }
     }else{
       entries=ST.fallbackFiles.map(f=>({file:f,name:f.name,rel:(f.webkitRelativePath||'').split('/').slice(0,-1).join('/')}));
     }
-  }catch(e){ alertMsg('scanMsg','e','Could not read that folder: '+e.message); ST.busy=false; $('btnScan').disabled=false; $('btnCancelScan').disabled=true; return; }
+  }catch(e){ Scanner.finish(false); alertMsg('scanMsg','e','Could not read that folder: '+e.message); ST.busy=false; $('btnScan').disabled=false; $('btnCancelScan').disabled=true; return; }
 
   // 2. read metadata
   const items=[]; const total=entries.length; let done=0;
+  Scanner.found(total); Scanner.reading(total);
   const devices=new Map(), cities=new Map();
   let tick=0;
   for(const e of entries){
@@ -2722,16 +3114,13 @@ async function doScan(){
     else m={name:e.name,ext,size:file.size,relPath:e.rel,device:'Unknown Device',brand:'',date:file.lastModified?new Date(file.lastModified):null,dateSrc:'file',lat:null,lon:null,city:'',country:'',category:'Others'};
     m.src=e; m.file=e.file||null;
     items.push(m);
-    Stage.send(m.device,m.category,e.name);
+    Scanner.add(m,file);
     if(m.category!=='Others'||ST.cfg.others){
       devices.set(m.device,(devices.get(m.device)||0)+1);
       if(m.city) cities.set(m.city,(cities.get(m.city)||0)+1);
     }
     done++;
     if(++tick%6===0||done===total){
-      const pct=total?Math.round(done/total*100):0;
-      $('pbar').style.width=pct+'%'; $('ppct').textContent=pct+'%';
-      $('ptext').textContent=fmtN(done)+' / '+fmtN(total)+' '+tStr('files');
       await sleep(0);
     }
   }
@@ -2740,8 +3129,7 @@ async function doScan(){
   ST.items=items; ST.devices=devices; ST.cities=cities;
   ST.devOff=new Set(); ST.cityOff=new Set();
   ST.busy=false; $('btnCancelScan').disabled=true; $('btnScan').disabled=false; $('btnOrg').disabled=false;
-  $('pdot').className='dot done'; $('ptitle').textContent='Scan complete';
-  Stage.stop();
+  Scanner.finish(!ST.abort);
   renderFacets();
   renderStructPreview();
   if(WIZ.open&&WIZ.step===5&&!WIZ.ran) goStep(1); else wizUpdate();
@@ -2914,7 +3302,7 @@ async function runOrganize(){
       sum[it.category]=(sum[it.category]||0)+1;
       sum.bytes+=it.size||0;
       rows.push([it.relPath?it.relPath+'/'+it.name:it.name,path.join('/')+'/'+p.name,it.device,it.date?it.date.toISOString():'',it.dateSrc,it.city,it.category]);
-      Stage.send(top,it.category,it.name);
+      Stage.send(top,it.category,it.name,it.file||(it.src&&it.src.handle));
     }catch(err){
       sum.errors++; errs.push({f:it.name,e:err.message||String(err)});
     }
@@ -3451,7 +3839,7 @@ $('caps').addEventListener('click',e=>{
 /* ---------- six languages ----------
    Keyed by the English innerHTML rather than by data-i18n attributes, so the
    markup stays clean and newly rendered blocks translate on the next pass. */
-const I18N={"ro":{"All rights reserved.":"Toate drepturile rezervate.","Later":"Mai tarziu","Get it":"Ia-l"," · macOS 12+ and Windows 10/11 · free, no account":" · macOS 12+ si Windows 10/11 · gratuit, fara cont"," is out for macOS and Windows ":" e disponibil pentru macOS si Windows ","See it":"Vezi","Features":"Functii","FAQ":"Intrebari","Your camera roll, in folders that make sense.":"Pozele tale, in foldere care au sens.","SORT reads which camera shot each photo, when, and where, then files everything exactly the way you asked. Free, and it never sends a byte anywhere.":"SORT citeste ce aparat a facut fiecare poza, cand si unde, apoi aranjeaza totul exact cum ai cerut. Gratuit, si nu trimite niciun octet nicaieri.","Camera roll":"Pozele tale","Before":"Inainte","After":"Dupa","March":"Martie","February":"Februarie","Screenshots":"Capturi ecran","What it saves you":"Cat timp castigi","Four thousand photos, two ways.":"Patru mii de poze, doua variante.","By hand":"Cu mana","With SORT":"Cu SORT","3 to 5 hours":"3 pana la 5 ore","of dragging, one batch at a time":"de tras cu mouse-ul, grup dupa grup","You read dates off each file, or guess from the name":"Citesti data de pe fiecare fisier, sau ghicesti din nume","GPS stays locked inside the photo, so no place folders":"GPS-ul ramane blocat in poza, deci fara foldere de locuri","One slip and a folder lands inside another folder":"O greseala si un folder ajunge in alt folder","Next month's photos arrive and you start again":"Vin pozele de luna viitoare si o iei de la capat","About 4 minutes":"Cam 4 minute",", most of it the disk copying":", mai tot pentru copierea pe disc","Camera, date and place come out of the file itself":"Aparatul, data si locul ies din fisierul in sine","Coordinates become city names, offline":"Coordonatele devin nume de orase, offline","Preview shows the whole tree before anything is written":"Preview arata tot arborele inainte sa se scrie ceva","Next month, same settings, one click":"Luna viitoare, aceleasi setari, un click","Scanning 100 GB takes two to four minutes. Moving within the same drive finishes in seconds, because nothing is rewritten.":"Scanarea a 100 GB dureaza doua pana la patru minute. Mutarea pe acelasi disc se termina in secunde, pentru ca nu se rescrie nimic.","See it in seconds":"Vezi in cateva secunde","Five steps, and the pile is gone.":"Cinci pasi si gramada a disparut.","Folder":"Folder","Structure":"Structura","Names":"Nume","Destination":"Destinatie","Sort":"Sorteaza","Watch the whole thing run":"Vezi cum ruleaza tot","Watch the demo":"Vezi demo","Download SORT":"Descarca SORT","Download":"Descarca","Everything the camera already knew.":"Tot ce aparatul stia deja.","It reads the file, not the folder":"Citeste fisierul, nu folderul","Camera model, capture time and GPS come straight out of EXIF, HEIC and QuickTime metadata, not from whatever the file happens to be called.":"Modelul aparatului, ora si GPS-ul vin direct din metadatele EXIF, HEIC si QuickTime, nu din cum se intampla sa se numeasca fisierul.","You decide the shape":"Tu decizi forma","Device, year, month, day, place, in any order you like. A file missing one of them simply loses that level instead of landing in a junk folder.":"Aparat, an, luna, zi, loc, in ce ordine vrei. Un fisier caruia ii lipseste ceva pierde doar acel nivel, nu ajunge intr-un folder de gunoi.","Look before you commit":"Uita-te inainte sa confirmi","Preview builds the whole tree and writes nothing at all. Copy keeps your originals untouched. Move frees the space.":"Preview construieste tot arborele si nu scrie absolut nimic. Copy lasa originalele neatinse. Move elibereaza spatiul.","Place names without the internet":"Nume de locuri fara internet","GPS coordinates are matched to a city from a list built into the app. No lookup leaves your machine, so nobody learns where your photos were taken.":"Coordonatele GPS sunt potrivite cu un oras dintr-o lista inclusa in aplicatie. Nicio cautare nu pleaca de pe calculator, deci nimeni nu afla unde ai facut pozele.","Rename, or don't":"Redenumeste, sau nu","Keep every filename byte for byte, or rebuild them from the date, the device, the city and a counter. The extension is never touched.":"Pastreaza fiecare nume octet cu octet, sau reconstruieste-le din data, aparat, oras si un contor. Extensia nu e atinsa niciodata.","Built for big libraries":"Facut pentru biblioteci mari","100 GB uses about as much memory as 100 MB, because files are streamed rather than loaded. Scanning reads only each file's header.":"100 GB foloseste cam aceeasi memorie ca 100 MB, pentru ca fisierele sunt citite in flux, nu incarcate. Scanarea citeste doar antetul fiecarui fisier.","Questions":"Intrebari","Five things worth knowing.":"Cinci lucruri de stiut.","Do my photos get uploaded anywhere?":"Pozele mele ajung undeva pe internet?","Is it really free?":"Chiar e gratuit?","Yes. No trial, no limits, no paid version, no advertising. It is a tool CDAV.IO built and gives away.":"Da. Fara perioada de proba, fara limite, fara versiune platita, fara reclame. E o unealta pe care CDAV.IO a construit-o si o da gratis.","Can it overwrite or lose a photo?":"Poate sa suprascrie sau sa piarda o poza?","What happens to a photo with no date or no GPS?":"Ce se intampla cu o poza fara data sau fara GPS?","How large a library can it handle?":"Cat de mare poate fi biblioteca?","A real app in its own window. Free, no account, and it keeps working with the internet off.":"O aplicatie adevarata, in fereastra ei. Gratuita, fara cont, si merge si cu internetul oprit.","Download for Windows":"Descarca pentru Windows","Download for Mac":"Descarca pentru Mac","Download the portable app":"Descarca versiunea portabila","Windows":"Windows","Developed by":"Dezvoltat de"},"ko":{"All rights reserved.":"모든 권리 보유.","Later":"나중에","Get it":"받기"," · macOS 12+ and Windows 10/11 · free, no account":" · macOS 12+ 및 Windows 10/11 · 무료, 계정 불필요"," is out for macOS and Windows ":" macOS · Windows 출시 ","See it":"둘러보기","Features":"기능","FAQ":"자주 묻는 질문","Your camera roll, in folders that make sense.":"사진첩을 납득이 가는 폴더로.","SORT reads which camera shot each photo, when, and where, then files everything exactly the way you asked. Free, and it never sends a byte anywhere.":"SORT는 사진마다 어떤 카메라로, 언제, 어디서 찍었는지 읽어 원하는 방식 그대로 정리합니다. 무료이며, 단 1바이트도 밖으로 보내지 않습니다.","Camera roll":"사진첩","Before":"정리 전","After":"정리 후","March":"3월","February":"2월","Screenshots":"스크린샷","What it saves you":"무엇을 아껴 주는가","Four thousand photos, two ways.":"사진 4,000장, 두 가지 방법.","By hand":"손으로","With SORT":"SORT로","3 to 5 hours":"3~5시간","of dragging, one batch at a time":" 동안 한 묶음씩 끌어다 놓기","You read dates off each file, or guess from the name":"파일마다 날짜를 직접 확인하거나 이름으로 짐작해야 합니다","GPS stays locked inside the photo, so no place folders":"GPS 정보는 사진 안에 갇혀 있어 장소별 폴더를 만들 수 없습니다","One slip and a folder lands inside another folder":"손이 미끄러지면 폴더가 다른 폴더 안으로 들어갑니다","Next month's photos arrive and you start again":"다음 달 사진이 쌓이면 처음부터 다시 시작합니다","About 4 minutes":"약 4분",", most of it the disk copying":", 대부분은 디스크 복사 시간입니다","Camera, date and place come out of the file itself":"카메라, 날짜, 장소를 파일 자체에서 읽어 냅니다","Coordinates become city names, offline":"좌표는 오프라인에서 도시 이름으로 바뀝니다","Preview shows the whole tree before anything is written":"미리보기가 아무것도 쓰기 전에 전체 구조를 보여 줍니다","Next month, same settings, one click":"다음 달에도 같은 설정으로 클릭 한 번","Scanning 100 GB takes two to four minutes. Moving within the same drive finishes in seconds, because nothing is rewritten.":"100GB를 읽는 데 2~4분이 걸립니다. 같은 드라이브 안에서 옮기면 다시 쓰는 것이 없으므로 몇 초면 끝납니다.","See it in seconds":"몇 초 만에 확인","Five steps, and the pile is gone.":"다섯 단계면 산더미가 사라집니다.","Folder":"폴더","Structure":"구조","Names":"이름","Destination":"저장 위치","Sort":"정리","Watch the whole thing run":"전체 과정 보기","Watch the demo":"데모 보기","Download SORT":"SORT 내려받기","Download":"내려받기","Everything the camera already knew.":"카메라가 이미 알고 있던 모든 것.","It reads the file, not the folder":"폴더가 아니라 파일을 읽습니다","Camera model, capture time and GPS come straight out of EXIF, HEIC and QuickTime metadata, not from whatever the file happens to be called.":"카메라 모델, 촬영 시각, GPS를 EXIF·HEIC·QuickTime 메타데이터에서 직접 읽습니다. 파일 이름에 의존하지 않습니다.","You decide the shape":"구조는 당신이 정합니다","Device, year, month, day, place, in any order you like. A file missing one of them simply loses that level instead of landing in a junk folder.":"기기, 연, 월, 일, 장소를 원하는 순서로. 빠진 항목이 있는 파일은 그 단계만 건너뛸 뿐, 잡동사니 폴더로 가지 않습니다.","Look before you commit":"실행 전에 확인하세요","Preview builds the whole tree and writes nothing at all. Copy keeps your originals untouched. Move frees the space.":"미리보기는 전체 구조를 만들어 보여 주기만 하고 아무것도 쓰지 않습니다. 복사는 원본을 그대로 두고, 이동은 공간을 비워 줍니다.","Place names without the internet":"인터넷 없이 장소 이름","GPS coordinates are matched to a city from a list built into the app. No lookup leaves your machine, so nobody learns where your photos were taken.":"GPS 좌표는 앱에 내장된 목록에서 도시와 대조됩니다. 어떤 조회도 기기를 벗어나지 않으므로, 사진을 어디서 찍었는지 아무도 알 수 없습니다.","Rename, or don't":"이름을 바꾸거나, 그대로 두거나","Keep every filename byte for byte, or rebuild them from the date, the device, the city and a counter. The extension is never touched.":"파일 이름을 바이트 단위로 그대로 두거나, 날짜·기기·도시·번호로 새로 만듭니다. 확장자는 절대 건드리지 않습니다.","Built for big libraries":"대용량 라이브러리를 위해","100 GB uses about as much memory as 100 MB, because files are streamed rather than loaded. Scanning reads only each file's header.":"파일을 통째로 불러오지 않고 스트리밍하므로 100GB도 100MB와 메모리 사용량이 비슷합니다. 검사 단계에서는 각 파일의 헤더만 읽습니다.","Questions":"질문","Five things worth knowing.":"알아 둘 만한 다섯 가지.","Do my photos get uploaded anywhere?":"제 사진이 어딘가로 전송되나요?","Is it really free?":"정말 무료인가요?","Yes. No trial, no limits, no paid version, no advertising. It is a tool CDAV.IO built and gives away.":"네. 체험판도, 제한도, 유료 버전도, 광고도 없습니다. CDAV.IO가 만들어 무료로 제공하는 도구입니다.","Can it overwrite or lose a photo?":"사진을 덮어쓰거나 잃어버릴 수 있나요?","What happens to a photo with no date or no GPS?":"날짜나 GPS가 없는 사진은 어떻게 되나요?","How large a library can it handle?":"얼마나 큰 라이브러리까지 처리하나요?","A real app in its own window. Free, no account, and it keeps working with the internet off.":"자체 창에서 실행되는 진짜 앱입니다. 무료이고, 계정이 필요 없으며, 인터넷을 꺼도 작동합니다.","Download for Windows":"Windows용 내려받기","Download for Mac":"Mac용 내려받기","Download the portable app":"휴대용 버전 내려받기","Windows":"Windows","Developed by":"개발"},"zh":{"All rights reserved.":"保留所有权利。","Later":"稍后","Get it":"获取"," · macOS 12+ and Windows 10/11 · free, no account":" · macOS 12+ 和 Windows 10/11 · 免费，无需账号"," is out for macOS and Windows ":" 已支持 macOS 和 Windows ","See it":"演示","Features":"功能","FAQ":"常见问题","Your camera roll, in folders that make sense.":"让你的相册，变成有条理的文件夹。","SORT reads which camera shot each photo, when, and where, then files everything exactly the way you asked. Free, and it never sends a byte anywhere.":"SORT 会读取每张照片用哪台相机、在何时何地拍摄，然后完全按你的要求归类。完全免费，且不会向外发送任何数据。","Camera roll":"相册","Before":"整理前","After":"整理后","March":"三月","February":"二月","Screenshots":"截图","What it saves you":"为你省下什么","Four thousand photos, two ways.":"四千张照片，两种做法。","By hand":"手动","With SORT":"用 SORT","3 to 5 hours":"3 到 5 小时","of dragging, one batch at a time":"的拖拽，一批接一批","You read dates off each file, or guess from the name":"你要逐个查看文件日期，或者凭文件名猜","GPS stays locked inside the photo, so no place folders":"GPS 信息锁在照片里，做不出按地点分的文件夹","One slip and a folder lands inside another folder":"手一滑，文件夹就跑进了另一个文件夹","Next month's photos arrive and you start again":"下个月的照片一来，又得从头再来","About 4 minutes":"大约 4 分钟",", most of it the disk copying":"，其中大部分是磁盘复制的时间","Camera, date and place come out of the file itself":"相机、日期和地点直接从文件本身读出","Coordinates become city names, offline":"坐标在离线状态下变成城市名","Preview shows the whole tree before anything is written":"预览会在写入任何内容之前展示整棵目录树","Next month, same settings, one click":"下个月，同样的设置，一次点击","Scanning 100 GB takes two to four minutes. Moving within the same drive finishes in seconds, because nothing is rewritten.":"扫描 100 GB 需要两到四分钟。在同一块硬盘内移动只需几秒，因为不会重写任何数据。","See it in seconds":"几秒看懂","Five steps, and the pile is gone.":"五个步骤，一堆照片就消失了。","Folder":"文件夹","Structure":"结构","Names":"命名","Destination":"目标位置","Sort":"整理","Watch the whole thing run":"看完整运行过程","Watch the demo":"观看演示","Download SORT":"下载 SORT","Download":"下载","Everything the camera already knew.":"相机早就知道的一切。","It reads the file, not the folder":"读的是文件，不是文件夹","Camera model, capture time and GPS come straight out of EXIF, HEIC and QuickTime metadata, not from whatever the file happens to be called.":"相机型号、拍摄时间和 GPS 直接来自 EXIF、HEIC 和 QuickTime 元数据，而不是文件碰巧叫什么名字。","You decide the shape":"结构由你决定","Device, year, month, day, place, in any order you like. A file missing one of them simply loses that level instead of landing in a junk folder.":"设备、年、月、日、地点，顺序随你。缺少某一项的文件只会少一层，而不会被丢进杂项文件夹。","Look before you commit":"动手前先看一眼","Preview builds the whole tree and writes nothing at all. Copy keeps your originals untouched. Move frees the space.":"预览会构建整棵目录树，但不写入任何内容。复制保持原件不动，移动则释放空间。","Place names without the internet":"无需联网的地名","GPS coordinates are matched to a city from a list built into the app. No lookup leaves your machine, so nobody learns where your photos were taken.":"GPS 坐标会与应用内置的城市列表比对。查询不会离开你的电脑，因此没有人知道照片拍摄于何处。","Rename, or don't":"重命名，或者不改","Keep every filename byte for byte, or rebuild them from the date, the device, the city and a counter. The extension is never touched.":"文件名可以逐字节保留，也可以用日期、设备、城市和编号重新生成。扩展名永远不会被改动。","Built for big libraries":"为大型图库而生","100 GB uses about as much memory as 100 MB, because files are streamed rather than loaded. Scanning reads only each file's header.":"100 GB 占用的内存和 100 MB 差不多，因为文件是流式读取而非整体载入。扫描时只读取每个文件的头部。","Questions":"问题","Five things worth knowing.":"五件值得知道的事。","Do my photos get uploaded anywhere?":"我的照片会被上传吗？","Is it really free?":"真的免费吗？","Yes. No trial, no limits, no paid version, no advertising. It is a tool CDAV.IO built and gives away.":"是的。没有试用期、没有限制、没有付费版、没有广告。这是 CDAV.IO 做出来免费送出的工具。","Can it overwrite or lose a photo?":"它会覆盖或弄丢照片吗？","What happens to a photo with no date or no GPS?":"没有日期或 GPS 的照片会怎样？","How large a library can it handle?":"它能处理多大的图库？","A real app in its own window. Free, no account, and it keeps working with the internet off.":"一个拥有独立窗口的真正应用。免费、无需账号，断网也照常工作。","Download for Windows":"下载 Windows 版","Download for Mac":"下载 Mac 版","Download the portable app":"下载便携版","Windows":"Windows","Developed by":"开发"},"fr":{"All rights reserved.":"Tous droits réservés.","Later":"Plus tard","Get it":"Obtenir"," · macOS 12+ and Windows 10/11 · free, no account":" · macOS 12+ et Windows 10/11 · gratuit, sans compte"," is out for macOS and Windows ":" est disponible pour macOS et Windows ","See it":"Aperçu","Features":"Fonctions","FAQ":"FAQ","Your camera roll, in folders that make sense.":"Votre pellicule, dans des dossiers qui ont du sens.","SORT reads which camera shot each photo, when, and where, then files everything exactly the way you asked. Free, and it never sends a byte anywhere.":"SORT lit quel appareil a pris chaque photo, quand et où, puis range tout exactement comme vous l'avez demandé. Gratuit, et rien ne quitte votre ordinateur.","Camera roll":"Pellicule","Before":"Avant","After":"Après","March":"Mars","February":"Février","Screenshots":"Captures","What it saves you":"Ce que vous gagnez","Four thousand photos, two ways.":"Quatre mille photos, deux méthodes.","By hand":"À la main","With SORT":"Avec SORT","3 to 5 hours":"3 à 5 heures","of dragging, one batch at a time":"de glisser-déposer, lot par lot","You read dates off each file, or guess from the name":"Vous lisez la date sur chaque fichier, ou vous devinez d'après le nom","GPS stays locked inside the photo, so no place folders":"Le GPS reste enfermé dans la photo, donc aucun dossier par lieu","One slip and a folder lands inside another folder":"Un faux mouvement et un dossier atterrit dans un autre","Next month's photos arrive and you start again":"Les photos du mois suivant arrivent et vous recommencez","About 4 minutes":"Environ 4 minutes",", most of it the disk copying":", dont la plus grande partie est la copie disque","Camera, date and place come out of the file itself":"L'appareil, la date et le lieu sortent du fichier lui-même","Coordinates become city names, offline":"Les coordonnées deviennent des noms de villes, hors ligne","Preview shows the whole tree before anything is written":"L'aperçu montre toute l'arborescence avant la moindre écriture","Next month, same settings, one click":"Le mois suivant, mêmes réglages, un clic","Scanning 100 GB takes two to four minutes. Moving within the same drive finishes in seconds, because nothing is rewritten.":"Analyser 100 Go prend de deux à quatre minutes. Déplacer sur le même disque se termine en quelques secondes, car rien n'est réécrit.","See it in seconds":"À voir en quelques secondes","Five steps, and the pile is gone.":"Cinq étapes, et le tas a disparu.","Folder":"Dossier","Structure":"Structure","Names":"Noms","Destination":"Destination","Sort":"Trier","Watch the whole thing run":"Voir le processus complet","Watch the demo":"Voir la démo","Download SORT":"Télécharger SORT","Download":"Télécharger","Everything the camera already knew.":"Tout ce que l'appareil savait déjà.","It reads the file, not the folder":"Il lit le fichier, pas le dossier","Camera model, capture time and GPS come straight out of EXIF, HEIC and QuickTime metadata, not from whatever the file happens to be called.":"Le modèle, l'heure de prise de vue et le GPS viennent directement des métadonnées EXIF, HEIC et QuickTime, pas du nom du fichier.","You decide the shape":"Vous décidez de la forme","Device, year, month, day, place, in any order you like. A file missing one of them simply loses that level instead of landing in a junk folder.":"Appareil, année, mois, jour, lieu, dans l'ordre que vous voulez. Un fichier auquel il manque une donnée perd simplement ce niveau au lieu d'atterrir dans un dossier fourre-tout.","Look before you commit":"Regardez avant de valider","Preview builds the whole tree and writes nothing at all. Copy keeps your originals untouched. Move frees the space.":"L'aperçu construit toute l'arborescence sans rien écrire. Copier laisse vos originaux intacts. Déplacer libère de la place.","Place names without the internet":"Des noms de lieux sans internet","GPS coordinates are matched to a city from a list built into the app. No lookup leaves your machine, so nobody learns where your photos were taken.":"Les coordonnées GPS sont comparées à une liste de villes intégrée à l'application. Aucune requête ne quitte votre machine, personne n'apprend où vos photos ont été prises.","Rename, or don't":"Renommer, ou pas","Keep every filename byte for byte, or rebuild them from the date, the device, the city and a counter. The extension is never touched.":"Gardez chaque nom octet pour octet, ou reconstruisez-les à partir de la date, de l'appareil, de la ville et d'un compteur. L'extension n'est jamais touchée.","Built for big libraries":"Conçu pour les grandes bibliothèques","100 GB uses about as much memory as 100 MB, because files are streamed rather than loaded. Scanning reads only each file's header.":"100 Go consomment à peu près autant de mémoire que 100 Mo, car les fichiers sont lus en flux plutôt que chargés. L'analyse ne lit que l'en-tête de chaque fichier.","Questions":"Questions","Five things worth knowing.":"Cinq choses à savoir.","Do my photos get uploaded anywhere?":"Mes photos sont-elles envoyées quelque part ?","Is it really free?":"C'est vraiment gratuit ?","Yes. No trial, no limits, no paid version, no advertising. It is a tool CDAV.IO built and gives away.":"Oui. Pas d'essai, pas de limite, pas de version payante, pas de publicité. C'est un outil que CDAV.IO a construit et offre.","Can it overwrite or lose a photo?":"Peut-il écraser ou perdre une photo ?","What happens to a photo with no date or no GPS?":"Que devient une photo sans date ni GPS ?","How large a library can it handle?":"Quelle taille de bibliothèque peut-il gérer ?","A real app in its own window. Free, no account, and it keeps working with the internet off.":"Une vraie application, dans sa propre fenêtre. Gratuite, sans compte, et elle fonctionne sans internet.","Download for Windows":"Télécharger pour Windows","Download for Mac":"Télécharger pour Mac","Download the portable app":"Télécharger la version portable","Windows":"Windows","Developed by":"Développé par"},"it":{"All rights reserved.":"Tutti i diritti riservati.","Later":"Più tardi","Get it":"Scarica"," · macOS 12+ and Windows 10/11 · free, no account":" · macOS 12+ e Windows 10/11 · gratis, senza account"," is out for macOS and Windows ":" è disponibile per macOS e Windows ","See it":"Guarda","Features":"Funzioni","FAQ":"Domande","Your camera roll, in folders that make sense.":"Il tuo rullino, in cartelle che hanno senso.","SORT reads which camera shot each photo, when, and where, then files everything exactly the way you asked. Free, and it never sends a byte anywhere.":"SORT legge quale fotocamera ha scattato ogni foto, quando e dove, poi sistema tutto esattamente come hai chiesto. Gratis, e non invia un solo byte da nessuna parte.","Camera roll":"Rullino","Before":"Prima","After":"Dopo","March":"Marzo","February":"Febbraio","Screenshots":"Schermate","What it saves you":"Cosa ti fa risparmiare","Four thousand photos, two ways.":"Quattromila foto, due modi.","By hand":"A mano","With SORT":"Con SORT","3 to 5 hours":"Da 3 a 5 ore","of dragging, one batch at a time":"di trascinamenti, un gruppo alla volta","You read dates off each file, or guess from the name":"Leggi la data su ogni file, o la indovini dal nome","GPS stays locked inside the photo, so no place folders":"Il GPS resta chiuso nella foto, quindi niente cartelle per luogo","One slip and a folder lands inside another folder":"Una svista e una cartella finisce dentro un'altra","Next month's photos arrive and you start again":"Arrivano le foto del mese dopo e ricominci da capo","About 4 minutes":"Circa 4 minuti",", most of it the disk copying":", quasi tutti per la copia su disco","Camera, date and place come out of the file itself":"Fotocamera, data e luogo escono dal file stesso","Coordinates become city names, offline":"Le coordinate diventano nomi di città, offline","Preview shows the whole tree before anything is written":"L'anteprima mostra tutto l'albero prima che venga scritto qualcosa","Next month, same settings, one click":"Il mese prossimo, stesse impostazioni, un clic","Scanning 100 GB takes two to four minutes. Moving within the same drive finishes in seconds, because nothing is rewritten.":"Scansionare 100 GB richiede dai due ai quattro minuti. Spostare all'interno dello stesso disco finisce in pochi secondi, perché non viene riscritto nulla.","See it in seconds":"Guarda in pochi secondi","Five steps, and the pile is gone.":"Cinque passaggi e il mucchio sparisce.","Folder":"Cartella","Structure":"Struttura","Names":"Nomi","Destination":"Destinazione","Sort":"Ordina","Watch the whole thing run":"Guarda tutto il processo","Watch the demo":"Guarda la demo","Download SORT":"Scarica SORT","Download":"Scarica","Everything the camera already knew.":"Tutto quello che la fotocamera sapeva già.","It reads the file, not the folder":"Legge il file, non la cartella","Camera model, capture time and GPS come straight out of EXIF, HEIC and QuickTime metadata, not from whatever the file happens to be called.":"Modello, orario di scatto e GPS arrivano direttamente dai metadati EXIF, HEIC e QuickTime, non da come si chiama il file.","You decide the shape":"La forma la decidi tu","Device, year, month, day, place, in any order you like. A file missing one of them simply loses that level instead of landing in a junk folder.":"Dispositivo, anno, mese, giorno, luogo, nell'ordine che preferisci. A un file che ne manca uno salta solo quel livello, invece di finire in una cartella di scarto.","Look before you commit":"Guarda prima di confermare","Preview builds the whole tree and writes nothing at all. Copy keeps your originals untouched. Move frees the space.":"L'anteprima costruisce tutto l'albero senza scrivere niente. Copia lascia intatti gli originali. Sposta libera spazio.","Place names without the internet":"Nomi di luoghi senza internet","GPS coordinates are matched to a city from a list built into the app. No lookup leaves your machine, so nobody learns where your photos were taken.":"Le coordinate GPS vengono confrontate con un elenco di città incluso nell'app. Nessuna ricerca lascia il tuo computer, quindi nessuno scopre dove hai scattato.","Rename, or don't":"Rinomina, oppure no","Keep every filename byte for byte, or rebuild them from the date, the device, the city and a counter. The extension is never touched.":"Mantieni ogni nome byte per byte, oppure ricostruiscili da data, dispositivo, città e un contatore. L'estensione non viene mai toccata.","Built for big libraries":"Pensato per librerie grandi","100 GB uses about as much memory as 100 MB, because files are streamed rather than loaded. Scanning reads only each file's header.":"100 GB usano più o meno la memoria di 100 MB, perché i file vengono letti in streaming invece che caricati. La scansione legge solo l'intestazione di ogni file.","Questions":"Domande","Five things worth knowing.":"Cinque cose da sapere.","Do my photos get uploaded anywhere?":"Le mie foto vengono caricate da qualche parte?","Is it really free?":"È davvero gratis?","Yes. No trial, no limits, no paid version, no advertising. It is a tool CDAV.IO built and gives away.":"Sì. Nessuna prova, nessun limite, nessuna versione a pagamento, nessuna pubblicità. È uno strumento che CDAV.IO ha costruito e regala.","Can it overwrite or lose a photo?":"Può sovrascrivere o perdere una foto?","What happens to a photo with no date or no GPS?":"Cosa succede a una foto senza data o senza GPS?","How large a library can it handle?":"Quanto può essere grande la libreria?","A real app in its own window. Free, no account, and it keeps working with the internet off.":"Un'app vera, nella sua finestra. Gratis, senza account, e continua a funzionare con internet spento.","Download for Windows":"Scarica per Windows","Download for Mac":"Scarica per Mac","Download the portable app":"Scarica la versione portatile","Windows":"Windows","Developed by":"Sviluppato da"}};
+const I18N={"ro":{"All rights reserved.":"Toate drepturile rezervate.","Later":"Mai tarziu","Get it":"Ia-l"," · macOS 12+ and Windows 10/11 · free, no account":" · macOS 12+ si Windows 10/11 · gratuit, fara cont"," is out for macOS and Windows ":" e disponibil pentru macOS si Windows ","See it":"Vezi","Features":"Functii","FAQ":"Intrebari","Your camera roll, in folders that make sense.":"Pozele tale, in foldere care au sens.","SORT reads which camera shot each photo, when, and where, then files everything exactly the way you asked. Free, and it never sends a byte anywhere.":"SORT citeste ce aparat a facut fiecare poza, cand si unde, apoi aranjeaza totul exact cum ai cerut. Gratuit, si nu trimite niciun octet nicaieri.","Camera roll":"Pozele tale","Before":"Inainte","After":"Dupa","March":"Martie","February":"Februarie","Screenshots":"Capturi ecran","What it saves you":"Cat timp castigi","Four thousand photos, two ways.":"Patru mii de poze, doua variante.","By hand":"Cu mana","With SORT":"Cu SORT","3 to 5 hours":"3 pana la 5 ore","of dragging, one batch at a time":"de tras cu mouse-ul, grup dupa grup","You read dates off each file, or guess from the name":"Citesti data de pe fiecare fisier, sau ghicesti din nume","GPS stays locked inside the photo, so no place folders":"GPS-ul ramane blocat in poza, deci fara foldere de locuri","One slip and a folder lands inside another folder":"O greseala si un folder ajunge in alt folder","Next month's photos arrive and you start again":"Vin pozele de luna viitoare si o iei de la capat","About 4 minutes":"Cam 4 minute",", most of it the disk copying":", mai tot pentru copierea pe disc","Camera, date and place come out of the file itself":"Aparatul, data si locul ies din fisierul in sine","Coordinates become city names, offline":"Coordonatele devin nume de orase, offline","Preview shows the whole tree before anything is written":"Preview arata tot arborele inainte sa se scrie ceva","Next month, same settings, one click":"Luna viitoare, aceleasi setari, un click","Scanning 100 GB takes two to four minutes. Moving within the same drive finishes in seconds, because nothing is rewritten.":"Scanarea a 100 GB dureaza doua pana la patru minute. Mutarea pe acelasi disc se termina in secunde, pentru ca nu se rescrie nimic.","See it in seconds":"Vezi in cateva secunde","Five steps, and the pile is gone.":"Cinci pasi si gramada a disparut.","Folder":"Folder","Structure":"Structura","Names":"Nume","Destination":"Destinatie","Sort":"Sorteaza","Watch the whole thing run":"Vezi cum ruleaza tot","Watch the demo":"Vezi demo","Download SORT":"Descarca SORT","Download":"Descarca","Everything the camera already knew.":"Tot ce aparatul stia deja.","It reads the file, not the folder":"Citeste fisierul, nu folderul","Camera model, capture time and GPS come straight out of EXIF, HEIC and QuickTime metadata, not from whatever the file happens to be called.":"Modelul aparatului, ora si GPS-ul vin direct din metadatele EXIF, HEIC si QuickTime, nu din cum se intampla sa se numeasca fisierul.","You decide the shape":"Tu decizi forma","Device, year, month, day, place, in any order you like. A file missing one of them simply loses that level instead of landing in a junk folder.":"Aparat, an, luna, zi, loc, in ce ordine vrei. Un fisier caruia ii lipseste ceva pierde doar acel nivel, nu ajunge intr-un folder de gunoi.","Look before you commit":"Uita-te inainte sa confirmi","Preview builds the whole tree and writes nothing at all. Copy keeps your originals untouched. Move frees the space.":"Preview construieste tot arborele si nu scrie absolut nimic. Copy lasa originalele neatinse. Move elibereaza spatiul.","Place names without the internet":"Nume de locuri fara internet","GPS coordinates are matched to a city from a list built into the app. No lookup leaves your machine, so nobody learns where your photos were taken.":"Coordonatele GPS sunt potrivite cu un oras dintr-o lista inclusa in aplicatie. Nicio cautare nu pleaca de pe calculator, deci nimeni nu afla unde ai facut pozele.","Rename, or don't":"Redenumeste, sau nu","Keep every filename byte for byte, or rebuild them from the date, the device, the city and a counter. The extension is never touched.":"Pastreaza fiecare nume octet cu octet, sau reconstruieste-le din data, aparat, oras si un contor. Extensia nu e atinsa niciodata.","Built for big libraries":"Facut pentru biblioteci mari","100 GB uses about as much memory as 100 MB, because files are streamed rather than loaded. Scanning reads only each file's header.":"100 GB foloseste cam aceeasi memorie ca 100 MB, pentru ca fisierele sunt citite in flux, nu incarcate. Scanarea citeste doar antetul fiecarui fisier.","Questions":"Intrebari","Five things worth knowing.":"Cinci lucruri de stiut.","Do my photos get uploaded anywhere?":"Pozele mele ajung undeva pe internet?","Is it really free?":"Chiar e gratuit?","Yes. No trial, no limits, no paid version, no advertising. It is a tool CDAV.IO built and gives away.":"Da. Fara perioada de proba, fara limite, fara versiune platita, fara reclame. E o unealta pe care CDAV.IO a construit-o si o da gratis.","Can it overwrite or lose a photo?":"Poate sa suprascrie sau sa piarda o poza?","What happens to a photo with no date or no GPS?":"Ce se intampla cu o poza fara data sau fara GPS?","How large a library can it handle?":"Cat de mare poate fi biblioteca?","A real app in its own window. Free, no account, and it keeps working with the internet off.":"O aplicatie adevarata, in fereastra ei. Gratuita, fara cont, si merge si cu internetul oprit.","Download for Windows":"Descarca pentru Windows","Download for Mac":"Descarca pentru Mac","Download the portable app":"Descarca versiunea portabila","Windows":"Windows","Developed by":"Dezvoltat de","files":"fisiere","photos":"poze","videos":"clipuri","devices":"aparate","found":"gasite","Looking through the folder":"Caut prin folder","Reading each file":"Citesc fiecare fisier","All read":"Gata, tot e citit"},"ko":{"All rights reserved.":"모든 권리 보유.","Later":"나중에","Get it":"받기"," · macOS 12+ and Windows 10/11 · free, no account":" · macOS 12+ 및 Windows 10/11 · 무료, 계정 불필요"," is out for macOS and Windows ":" macOS · Windows 출시 ","See it":"둘러보기","Features":"기능","FAQ":"자주 묻는 질문","Your camera roll, in folders that make sense.":"사진첩을 납득이 가는 폴더로.","SORT reads which camera shot each photo, when, and where, then files everything exactly the way you asked. Free, and it never sends a byte anywhere.":"SORT는 사진마다 어떤 카메라로, 언제, 어디서 찍었는지 읽어 원하는 방식 그대로 정리합니다. 무료이며, 단 1바이트도 밖으로 보내지 않습니다.","Camera roll":"사진첩","Before":"정리 전","After":"정리 후","March":"3월","February":"2월","Screenshots":"스크린샷","What it saves you":"무엇을 아껴 주는가","Four thousand photos, two ways.":"사진 4,000장, 두 가지 방법.","By hand":"손으로","With SORT":"SORT로","3 to 5 hours":"3~5시간","of dragging, one batch at a time":" 동안 한 묶음씩 끌어다 놓기","You read dates off each file, or guess from the name":"파일마다 날짜를 직접 확인하거나 이름으로 짐작해야 합니다","GPS stays locked inside the photo, so no place folders":"GPS 정보는 사진 안에 갇혀 있어 장소별 폴더를 만들 수 없습니다","One slip and a folder lands inside another folder":"손이 미끄러지면 폴더가 다른 폴더 안으로 들어갑니다","Next month's photos arrive and you start again":"다음 달 사진이 쌓이면 처음부터 다시 시작합니다","About 4 minutes":"약 4분",", most of it the disk copying":", 대부분은 디스크 복사 시간입니다","Camera, date and place come out of the file itself":"카메라, 날짜, 장소를 파일 자체에서 읽어 냅니다","Coordinates become city names, offline":"좌표는 오프라인에서 도시 이름으로 바뀝니다","Preview shows the whole tree before anything is written":"미리보기가 아무것도 쓰기 전에 전체 구조를 보여 줍니다","Next month, same settings, one click":"다음 달에도 같은 설정으로 클릭 한 번","Scanning 100 GB takes two to four minutes. Moving within the same drive finishes in seconds, because nothing is rewritten.":"100GB를 읽는 데 2~4분이 걸립니다. 같은 드라이브 안에서 옮기면 다시 쓰는 것이 없으므로 몇 초면 끝납니다.","See it in seconds":"몇 초 만에 확인","Five steps, and the pile is gone.":"다섯 단계면 산더미가 사라집니다.","Folder":"폴더","Structure":"구조","Names":"이름","Destination":"저장 위치","Sort":"정리","Watch the whole thing run":"전체 과정 보기","Watch the demo":"데모 보기","Download SORT":"SORT 내려받기","Download":"내려받기","Everything the camera already knew.":"카메라가 이미 알고 있던 모든 것.","It reads the file, not the folder":"폴더가 아니라 파일을 읽습니다","Camera model, capture time and GPS come straight out of EXIF, HEIC and QuickTime metadata, not from whatever the file happens to be called.":"카메라 모델, 촬영 시각, GPS를 EXIF·HEIC·QuickTime 메타데이터에서 직접 읽습니다. 파일 이름에 의존하지 않습니다.","You decide the shape":"구조는 당신이 정합니다","Device, year, month, day, place, in any order you like. A file missing one of them simply loses that level instead of landing in a junk folder.":"기기, 연, 월, 일, 장소를 원하는 순서로. 빠진 항목이 있는 파일은 그 단계만 건너뛸 뿐, 잡동사니 폴더로 가지 않습니다.","Look before you commit":"실행 전에 확인하세요","Preview builds the whole tree and writes nothing at all. Copy keeps your originals untouched. Move frees the space.":"미리보기는 전체 구조를 만들어 보여 주기만 하고 아무것도 쓰지 않습니다. 복사는 원본을 그대로 두고, 이동은 공간을 비워 줍니다.","Place names without the internet":"인터넷 없이 장소 이름","GPS coordinates are matched to a city from a list built into the app. No lookup leaves your machine, so nobody learns where your photos were taken.":"GPS 좌표는 앱에 내장된 목록에서 도시와 대조됩니다. 어떤 조회도 기기를 벗어나지 않으므로, 사진을 어디서 찍었는지 아무도 알 수 없습니다.","Rename, or don't":"이름을 바꾸거나, 그대로 두거나","Keep every filename byte for byte, or rebuild them from the date, the device, the city and a counter. The extension is never touched.":"파일 이름을 바이트 단위로 그대로 두거나, 날짜·기기·도시·번호로 새로 만듭니다. 확장자는 절대 건드리지 않습니다.","Built for big libraries":"대용량 라이브러리를 위해","100 GB uses about as much memory as 100 MB, because files are streamed rather than loaded. Scanning reads only each file's header.":"파일을 통째로 불러오지 않고 스트리밍하므로 100GB도 100MB와 메모리 사용량이 비슷합니다. 검사 단계에서는 각 파일의 헤더만 읽습니다.","Questions":"질문","Five things worth knowing.":"알아 둘 만한 다섯 가지.","Do my photos get uploaded anywhere?":"제 사진이 어딘가로 전송되나요?","Is it really free?":"정말 무료인가요?","Yes. No trial, no limits, no paid version, no advertising. It is a tool CDAV.IO built and gives away.":"네. 체험판도, 제한도, 유료 버전도, 광고도 없습니다. CDAV.IO가 만들어 무료로 제공하는 도구입니다.","Can it overwrite or lose a photo?":"사진을 덮어쓰거나 잃어버릴 수 있나요?","What happens to a photo with no date or no GPS?":"날짜나 GPS가 없는 사진은 어떻게 되나요?","How large a library can it handle?":"얼마나 큰 라이브러리까지 처리하나요?","A real app in its own window. Free, no account, and it keeps working with the internet off.":"자체 창에서 실행되는 진짜 앱입니다. 무료이고, 계정이 필요 없으며, 인터넷을 꺼도 작동합니다.","Download for Windows":"Windows용 내려받기","Download for Mac":"Mac용 내려받기","Download the portable app":"휴대용 버전 내려받기","Windows":"Windows","Developed by":"개발","files":"파일","photos":"사진","videos":"동영상","devices":"기기","found":"개 발견","Looking through the folder":"폴더를 살펴보는 중","Reading each file":"파일을 하나씩 읽는 중","All read":"모두 읽음"},"zh":{"All rights reserved.":"保留所有权利。","Later":"稍后","Get it":"获取"," · macOS 12+ and Windows 10/11 · free, no account":" · macOS 12+ 和 Windows 10/11 · 免费，无需账号"," is out for macOS and Windows ":" 已支持 macOS 和 Windows ","See it":"演示","Features":"功能","FAQ":"常见问题","Your camera roll, in folders that make sense.":"让你的相册，变成有条理的文件夹。","SORT reads which camera shot each photo, when, and where, then files everything exactly the way you asked. Free, and it never sends a byte anywhere.":"SORT 会读取每张照片用哪台相机、在何时何地拍摄，然后完全按你的要求归类。完全免费，且不会向外发送任何数据。","Camera roll":"相册","Before":"整理前","After":"整理后","March":"三月","February":"二月","Screenshots":"截图","What it saves you":"为你省下什么","Four thousand photos, two ways.":"四千张照片，两种做法。","By hand":"手动","With SORT":"用 SORT","3 to 5 hours":"3 到 5 小时","of dragging, one batch at a time":"的拖拽，一批接一批","You read dates off each file, or guess from the name":"你要逐个查看文件日期，或者凭文件名猜","GPS stays locked inside the photo, so no place folders":"GPS 信息锁在照片里，做不出按地点分的文件夹","One slip and a folder lands inside another folder":"手一滑，文件夹就跑进了另一个文件夹","Next month's photos arrive and you start again":"下个月的照片一来，又得从头再来","About 4 minutes":"大约 4 分钟",", most of it the disk copying":"，其中大部分是磁盘复制的时间","Camera, date and place come out of the file itself":"相机、日期和地点直接从文件本身读出","Coordinates become city names, offline":"坐标在离线状态下变成城市名","Preview shows the whole tree before anything is written":"预览会在写入任何内容之前展示整棵目录树","Next month, same settings, one click":"下个月，同样的设置，一次点击","Scanning 100 GB takes two to four minutes. Moving within the same drive finishes in seconds, because nothing is rewritten.":"扫描 100 GB 需要两到四分钟。在同一块硬盘内移动只需几秒，因为不会重写任何数据。","See it in seconds":"几秒看懂","Five steps, and the pile is gone.":"五个步骤，一堆照片就消失了。","Folder":"文件夹","Structure":"结构","Names":"命名","Destination":"目标位置","Sort":"整理","Watch the whole thing run":"看完整运行过程","Watch the demo":"观看演示","Download SORT":"下载 SORT","Download":"下载","Everything the camera already knew.":"相机早就知道的一切。","It reads the file, not the folder":"读的是文件，不是文件夹","Camera model, capture time and GPS come straight out of EXIF, HEIC and QuickTime metadata, not from whatever the file happens to be called.":"相机型号、拍摄时间和 GPS 直接来自 EXIF、HEIC 和 QuickTime 元数据，而不是文件碰巧叫什么名字。","You decide the shape":"结构由你决定","Device, year, month, day, place, in any order you like. A file missing one of them simply loses that level instead of landing in a junk folder.":"设备、年、月、日、地点，顺序随你。缺少某一项的文件只会少一层，而不会被丢进杂项文件夹。","Look before you commit":"动手前先看一眼","Preview builds the whole tree and writes nothing at all. Copy keeps your originals untouched. Move frees the space.":"预览会构建整棵目录树，但不写入任何内容。复制保持原件不动，移动则释放空间。","Place names without the internet":"无需联网的地名","GPS coordinates are matched to a city from a list built into the app. No lookup leaves your machine, so nobody learns where your photos were taken.":"GPS 坐标会与应用内置的城市列表比对。查询不会离开你的电脑，因此没有人知道照片拍摄于何处。","Rename, or don't":"重命名，或者不改","Keep every filename byte for byte, or rebuild them from the date, the device, the city and a counter. The extension is never touched.":"文件名可以逐字节保留，也可以用日期、设备、城市和编号重新生成。扩展名永远不会被改动。","Built for big libraries":"为大型图库而生","100 GB uses about as much memory as 100 MB, because files are streamed rather than loaded. Scanning reads only each file's header.":"100 GB 占用的内存和 100 MB 差不多，因为文件是流式读取而非整体载入。扫描时只读取每个文件的头部。","Questions":"问题","Five things worth knowing.":"五件值得知道的事。","Do my photos get uploaded anywhere?":"我的照片会被上传吗？","Is it really free?":"真的免费吗？","Yes. No trial, no limits, no paid version, no advertising. It is a tool CDAV.IO built and gives away.":"是的。没有试用期、没有限制、没有付费版、没有广告。这是 CDAV.IO 做出来免费送出的工具。","Can it overwrite or lose a photo?":"它会覆盖或弄丢照片吗？","What happens to a photo with no date or no GPS?":"没有日期或 GPS 的照片会怎样？","How large a library can it handle?":"它能处理多大的图库？","A real app in its own window. Free, no account, and it keeps working with the internet off.":"一个拥有独立窗口的真正应用。免费、无需账号，断网也照常工作。","Download for Windows":"下载 Windows 版","Download for Mac":"下载 Mac 版","Download the portable app":"下载便携版","Windows":"Windows","Developed by":"开发","files":"文件","photos":"照片","videos":"视频","devices":"设备","found":"个已找到","Looking through the folder":"正在浏览文件夹","Reading each file":"正在逐个读取文件","All read":"全部读取完成"},"fr":{"All rights reserved.":"Tous droits réservés.","Later":"Plus tard","Get it":"Obtenir"," · macOS 12+ and Windows 10/11 · free, no account":" · macOS 12+ et Windows 10/11 · gratuit, sans compte"," is out for macOS and Windows ":" est disponible pour macOS et Windows ","See it":"Aperçu","Features":"Fonctions","FAQ":"FAQ","Your camera roll, in folders that make sense.":"Votre pellicule, dans des dossiers qui ont du sens.","SORT reads which camera shot each photo, when, and where, then files everything exactly the way you asked. Free, and it never sends a byte anywhere.":"SORT lit quel appareil a pris chaque photo, quand et où, puis range tout exactement comme vous l'avez demandé. Gratuit, et rien ne quitte votre ordinateur.","Camera roll":"Pellicule","Before":"Avant","After":"Après","March":"Mars","February":"Février","Screenshots":"Captures","What it saves you":"Ce que vous gagnez","Four thousand photos, two ways.":"Quatre mille photos, deux méthodes.","By hand":"À la main","With SORT":"Avec SORT","3 to 5 hours":"3 à 5 heures","of dragging, one batch at a time":"de glisser-déposer, lot par lot","You read dates off each file, or guess from the name":"Vous lisez la date sur chaque fichier, ou vous devinez d'après le nom","GPS stays locked inside the photo, so no place folders":"Le GPS reste enfermé dans la photo, donc aucun dossier par lieu","One slip and a folder lands inside another folder":"Un faux mouvement et un dossier atterrit dans un autre","Next month's photos arrive and you start again":"Les photos du mois suivant arrivent et vous recommencez","About 4 minutes":"Environ 4 minutes",", most of it the disk copying":", dont la plus grande partie est la copie disque","Camera, date and place come out of the file itself":"L'appareil, la date et le lieu sortent du fichier lui-même","Coordinates become city names, offline":"Les coordonnées deviennent des noms de villes, hors ligne","Preview shows the whole tree before anything is written":"L'aperçu montre toute l'arborescence avant la moindre écriture","Next month, same settings, one click":"Le mois suivant, mêmes réglages, un clic","Scanning 100 GB takes two to four minutes. Moving within the same drive finishes in seconds, because nothing is rewritten.":"Analyser 100 Go prend de deux à quatre minutes. Déplacer sur le même disque se termine en quelques secondes, car rien n'est réécrit.","See it in seconds":"À voir en quelques secondes","Five steps, and the pile is gone.":"Cinq étapes, et le tas a disparu.","Folder":"Dossier","Structure":"Structure","Names":"Noms","Destination":"Destination","Sort":"Trier","Watch the whole thing run":"Voir le processus complet","Watch the demo":"Voir la démo","Download SORT":"Télécharger SORT","Download":"Télécharger","Everything the camera already knew.":"Tout ce que l'appareil savait déjà.","It reads the file, not the folder":"Il lit le fichier, pas le dossier","Camera model, capture time and GPS come straight out of EXIF, HEIC and QuickTime metadata, not from whatever the file happens to be called.":"Le modèle, l'heure de prise de vue et le GPS viennent directement des métadonnées EXIF, HEIC et QuickTime, pas du nom du fichier.","You decide the shape":"Vous décidez de la forme","Device, year, month, day, place, in any order you like. A file missing one of them simply loses that level instead of landing in a junk folder.":"Appareil, année, mois, jour, lieu, dans l'ordre que vous voulez. Un fichier auquel il manque une donnée perd simplement ce niveau au lieu d'atterrir dans un dossier fourre-tout.","Look before you commit":"Regardez avant de valider","Preview builds the whole tree and writes nothing at all. Copy keeps your originals untouched. Move frees the space.":"L'aperçu construit toute l'arborescence sans rien écrire. Copier laisse vos originaux intacts. Déplacer libère de la place.","Place names without the internet":"Des noms de lieux sans internet","GPS coordinates are matched to a city from a list built into the app. No lookup leaves your machine, so nobody learns where your photos were taken.":"Les coordonnées GPS sont comparées à une liste de villes intégrée à l'application. Aucune requête ne quitte votre machine, personne n'apprend où vos photos ont été prises.","Rename, or don't":"Renommer, ou pas","Keep every filename byte for byte, or rebuild them from the date, the device, the city and a counter. The extension is never touched.":"Gardez chaque nom octet pour octet, ou reconstruisez-les à partir de la date, de l'appareil, de la ville et d'un compteur. L'extension n'est jamais touchée.","Built for big libraries":"Conçu pour les grandes bibliothèques","100 GB uses about as much memory as 100 MB, because files are streamed rather than loaded. Scanning reads only each file's header.":"100 Go consomment à peu près autant de mémoire que 100 Mo, car les fichiers sont lus en flux plutôt que chargés. L'analyse ne lit que l'en-tête de chaque fichier.","Questions":"Questions","Five things worth knowing.":"Cinq choses à savoir.","Do my photos get uploaded anywhere?":"Mes photos sont-elles envoyées quelque part ?","Is it really free?":"C'est vraiment gratuit ?","Yes. No trial, no limits, no paid version, no advertising. It is a tool CDAV.IO built and gives away.":"Oui. Pas d'essai, pas de limite, pas de version payante, pas de publicité. C'est un outil que CDAV.IO a construit et offre.","Can it overwrite or lose a photo?":"Peut-il écraser ou perdre une photo ?","What happens to a photo with no date or no GPS?":"Que devient une photo sans date ni GPS ?","How large a library can it handle?":"Quelle taille de bibliothèque peut-il gérer ?","A real app in its own window. Free, no account, and it keeps working with the internet off.":"Une vraie application, dans sa propre fenêtre. Gratuite, sans compte, et elle fonctionne sans internet.","Download for Windows":"Télécharger pour Windows","Download for Mac":"Télécharger pour Mac","Download the portable app":"Télécharger la version portable","Windows":"Windows","Developed by":"Développé par","files":"fichiers","photos":"photos","videos":"vidéos","devices":"appareils","found":"trouvés","Looking through the folder":"Exploration du dossier","Reading each file":"Lecture de chaque fichier","All read":"Tout est lu"},"it":{"All rights reserved.":"Tutti i diritti riservati.","Later":"Più tardi","Get it":"Scarica"," · macOS 12+ and Windows 10/11 · free, no account":" · macOS 12+ e Windows 10/11 · gratis, senza account"," is out for macOS and Windows ":" è disponibile per macOS e Windows ","See it":"Guarda","Features":"Funzioni","FAQ":"Domande","Your camera roll, in folders that make sense.":"Il tuo rullino, in cartelle che hanno senso.","SORT reads which camera shot each photo, when, and where, then files everything exactly the way you asked. Free, and it never sends a byte anywhere.":"SORT legge quale fotocamera ha scattato ogni foto, quando e dove, poi sistema tutto esattamente come hai chiesto. Gratis, e non invia un solo byte da nessuna parte.","Camera roll":"Rullino","Before":"Prima","After":"Dopo","March":"Marzo","February":"Febbraio","Screenshots":"Schermate","What it saves you":"Cosa ti fa risparmiare","Four thousand photos, two ways.":"Quattromila foto, due modi.","By hand":"A mano","With SORT":"Con SORT","3 to 5 hours":"Da 3 a 5 ore","of dragging, one batch at a time":"di trascinamenti, un gruppo alla volta","You read dates off each file, or guess from the name":"Leggi la data su ogni file, o la indovini dal nome","GPS stays locked inside the photo, so no place folders":"Il GPS resta chiuso nella foto, quindi niente cartelle per luogo","One slip and a folder lands inside another folder":"Una svista e una cartella finisce dentro un'altra","Next month's photos arrive and you start again":"Arrivano le foto del mese dopo e ricominci da capo","About 4 minutes":"Circa 4 minuti",", most of it the disk copying":", quasi tutti per la copia su disco","Camera, date and place come out of the file itself":"Fotocamera, data e luogo escono dal file stesso","Coordinates become city names, offline":"Le coordinate diventano nomi di città, offline","Preview shows the whole tree before anything is written":"L'anteprima mostra tutto l'albero prima che venga scritto qualcosa","Next month, same settings, one click":"Il mese prossimo, stesse impostazioni, un clic","Scanning 100 GB takes two to four minutes. Moving within the same drive finishes in seconds, because nothing is rewritten.":"Scansionare 100 GB richiede dai due ai quattro minuti. Spostare all'interno dello stesso disco finisce in pochi secondi, perché non viene riscritto nulla.","See it in seconds":"Guarda in pochi secondi","Five steps, and the pile is gone.":"Cinque passaggi e il mucchio sparisce.","Folder":"Cartella","Structure":"Struttura","Names":"Nomi","Destination":"Destinazione","Sort":"Ordina","Watch the whole thing run":"Guarda tutto il processo","Watch the demo":"Guarda la demo","Download SORT":"Scarica SORT","Download":"Scarica","Everything the camera already knew.":"Tutto quello che la fotocamera sapeva già.","It reads the file, not the folder":"Legge il file, non la cartella","Camera model, capture time and GPS come straight out of EXIF, HEIC and QuickTime metadata, not from whatever the file happens to be called.":"Modello, orario di scatto e GPS arrivano direttamente dai metadati EXIF, HEIC e QuickTime, non da come si chiama il file.","You decide the shape":"La forma la decidi tu","Device, year, month, day, place, in any order you like. A file missing one of them simply loses that level instead of landing in a junk folder.":"Dispositivo, anno, mese, giorno, luogo, nell'ordine che preferisci. A un file che ne manca uno salta solo quel livello, invece di finire in una cartella di scarto.","Look before you commit":"Guarda prima di confermare","Preview builds the whole tree and writes nothing at all. Copy keeps your originals untouched. Move frees the space.":"L'anteprima costruisce tutto l'albero senza scrivere niente. Copia lascia intatti gli originali. Sposta libera spazio.","Place names without the internet":"Nomi di luoghi senza internet","GPS coordinates are matched to a city from a list built into the app. No lookup leaves your machine, so nobody learns where your photos were taken.":"Le coordinate GPS vengono confrontate con un elenco di città incluso nell'app. Nessuna ricerca lascia il tuo computer, quindi nessuno scopre dove hai scattato.","Rename, or don't":"Rinomina, oppure no","Keep every filename byte for byte, or rebuild them from the date, the device, the city and a counter. The extension is never touched.":"Mantieni ogni nome byte per byte, oppure ricostruiscili da data, dispositivo, città e un contatore. L'estensione non viene mai toccata.","Built for big libraries":"Pensato per librerie grandi","100 GB uses about as much memory as 100 MB, because files are streamed rather than loaded. Scanning reads only each file's header.":"100 GB usano più o meno la memoria di 100 MB, perché i file vengono letti in streaming invece che caricati. La scansione legge solo l'intestazione di ogni file.","Questions":"Domande","Five things worth knowing.":"Cinque cose da sapere.","Do my photos get uploaded anywhere?":"Le mie foto vengono caricate da qualche parte?","Is it really free?":"È davvero gratis?","Yes. No trial, no limits, no paid version, no advertising. It is a tool CDAV.IO built and gives away.":"Sì. Nessuna prova, nessun limite, nessuna versione a pagamento, nessuna pubblicità. È uno strumento che CDAV.IO ha costruito e regala.","Can it overwrite or lose a photo?":"Può sovrascrivere o perdere una foto?","What happens to a photo with no date or no GPS?":"Cosa succede a una foto senza data o senza GPS?","How large a library can it handle?":"Quanto può essere grande la libreria?","A real app in its own window. Free, no account, and it keeps working with the internet off.":"Un'app vera, nella sua finestra. Gratis, senza account, e continua a funzionare con internet spento.","Download for Windows":"Scarica per Windows","Download for Mac":"Scarica per Mac","Download the portable app":"Scarica la versione portatile","Windows":"Windows","Developed by":"Sviluppato da","files":"file","photos":"foto","videos":"video","devices":"dispositivi","found":"trovati","Looking through the folder":"Esploro la cartella","Reading each file":"Leggo ogni file","All read":"Tutto letto"}};
 /* the updater writes these from JavaScript, so they are never in the markup */
 Object.assign(I18N.ro,{"The installer is open. Follow its steps.":"Installerul e deschis. Urmeaza pasii lui.","Downloading":"Se descarca","Installing":"Se instaleaza","The installer is open. Drag SORT into Applications.":"Installerul e deschis. Trage SORT in Applications.","That did not download. Opening the page instead.":"Nu s-a descarcat. Deschid pagina."});
 Object.assign(I18N.ko,{"The installer is open. Follow its steps.":"\uc124\uce58 \ud504\ub85c\uadf8\ub7a8\uc774 \uc5f4\ub838\uc2b5\ub2c8\ub2e4. \uc548\ub0b4\ub97c \ub530\ub77c\uc8fc\uc138\uc694.","Downloading":"\ub2e4\uc6b4\ub85c\ub4dc \uc911","Installing":"\uc124\uce58 \uc911","The installer is open. Drag SORT into Applications.":"\uc124\uce58 \ud504\ub85c\uadf8\ub7a8\uc774 \uc5f4\ub838\uc2b5\ub2c8\ub2e4. SORT\ub97c Applications\ub85c \ub04c\uc5b4\ub2e4 \ub193\uc73c\uc138\uc694.","That did not download. Opening the page instead.":"\ub2e4\uc6b4\ub85c\ub4dc\ud558\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4. \ub300\uc2e0 \ud398\uc774\uc9c0\ub97c \uc5fd\ub2c8\ub2e4."});
