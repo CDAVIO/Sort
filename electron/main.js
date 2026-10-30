@@ -35,10 +35,20 @@ function createWindow() {
 }
 
 // the copy the last update replaced, left behind on purpose until it is safe to go
+/* What an update leaves next to the app (SORT.app.old-…, SORT.app.new-…, and the
+   plain .old/.new of older builds) goes to the Trash. Deleting it in place does not
+   work: macOS protects the inside of an app bundle, so rmSync stopped halfway and the
+   half-empty SORT.app.old then blocked every later update. */
 function sweepOldBundle() {
   try {
     const here = bundlePath();
-    if (here) fs.rmSync(here + '.old', { recursive: true, force: true });
+    if (!here) return;
+    const dir = path.dirname(here), base = path.basename(here);
+    for (const n of fs.readdirSync(dir)) {
+      if (n === base || n.indexOf(base + '.') !== 0) continue;
+      if (!/^\.(old|new)(-\d+)?$/.test(n.slice(base.length))) continue;
+      shell.trashItem(path.join(dir, n)).catch(() => {});
+    }
   } catch (e) {}
 }
 
@@ -212,18 +222,17 @@ function installMac(dmg) {
     const here = bundlePath();
     if (!here) throw new Error('SORT is not running from an app bundle');
 
-    const staged = here + '.new', old = here + '.old';
-    try { fs.rmSync(staged, { recursive: true, force: true }); } catch (e) {}
+    // names nobody else uses, so a leftover from an earlier try can never be in the way
+    const stamp = Date.now(), staged = here + '.new-' + stamp, old = here + '.old-' + stamp;
     execFileSync('ditto', [src, staged]);
     // the copy arrives quarantined, which is what makes macOS call it damaged
     try { execFileSync('xattr', ['-dr', 'com.apple.quarantine', staged]); } catch (e) {}
 
-    try { fs.rmSync(old, { recursive: true, force: true }); } catch (e) {}
-    fs.renameSync(here, old);                 // allowed while running: the inode stays open
+    try { fs.renameSync(here, old); }         // allowed while running: the inode stays open
+    catch (e) { shell.trashItem(staged).catch(() => {}); throw e; }
     try { fs.renameSync(staged, here); }
-    catch (e) { fs.renameSync(old, here); throw e; }   // put the working copy back
-    // the old bundle is still mapped into this process: clearing it now can kill
-    // us before the relaunch, so it waits for the next start
+    catch (e) { fs.renameSync(old, here); shell.trashItem(staged).catch(() => {}); throw e; }   // put the working copy back
+    // the old bundle is still mapped into this process, so the next start sends it to the Trash
   } finally {
     try { execFileSync('hdiutil', ['detach', mount, '-quiet']); } catch (e) {}
   }
