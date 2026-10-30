@@ -3936,10 +3936,9 @@ $('caps').addEventListener('click',e=>{
     // folders behind the flying cards
     const fs=Math.min(58,W*0.13);
     L.folders.forEach((f,k)=>{
-      const since=tau-f.hit, jig=since<500?Math.sin(since/30)*3*(1-since/500):0, pop=since<300?1+0.12*Math.sin(since/300*Math.PI):1;
+      // the folders stand still; only the cards move
       g.fillStyle='rgba(0,0,0,.55)'; g.beginPath(); g.ellipse(f.x,f.y+fs*0.42,fs*0.42,fs*0.08,0,0,7); g.fill();
-      const d=fs*pop;
-      if(ready(IMG_FOLDER)) g.drawImage(IMG_FOLDER,f.x-d/2+jig,f.y-d/2,d,d);
+      if(ready(IMG_FOLDER)) g.drawImage(IMG_FOLDER,f.x-fs/2,f.y-fs/2,fs,fs);
       g.font="10px 'JetBrains Mono',monospace"; g.textAlign='center'; g.textBaseline='top'; g.fillStyle='#8a8a8a';
       g.fillText(f.n,f.x,f.y+fs*0.5);
     });
