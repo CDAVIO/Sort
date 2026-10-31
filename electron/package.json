@@ -1,7 +1,7 @@
 {
   "name": "sort-cdavio",
   "productName": "SORT",
-  "version": "1.9.3",
+  "version": "1.9.4",
   "description": "Sort your camera roll into folders by device, date and place.",
   "author": "CDAV.IO <hello@cdav.io>",
   "homepage": "https://sort.cdav.io",
@@ -48,7 +48,26 @@
       "notarize": false
     },
     "dmg": {
-      "title": "SORT"
+      "title": "SORT",
+      "background": "resources/background.png",
+      "iconSize": 96,
+      "window": {
+        "width": 540,
+        "height": 380
+      },
+      "contents": [
+        {
+          "x": 140,
+          "y": 190,
+          "type": "file"
+        },
+        {
+          "x": 400,
+          "y": 190,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
     },
     "win": {
       "target": [

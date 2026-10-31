@@ -553,6 +553,8 @@ html[data-mode="app"] .appCtl{display:flex}
   display:grid;place-items:center;background:transparent;
   border:1px solid var(--rule);color:var(--ink2)}
 .tglBtn:hover{color:var(--ink);border-color:var(--rule2)}
+.tglBtn:focus{outline:none}
+.tglBtn:focus-visible{outline:none;border-color:var(--brand);color:var(--ink)}
 .tglBtn .ic{font-size:17px;grid-area:1/1}
 .setWrap{position:relative;flex:none}
 .setMenu{position:absolute;top:calc(100% + 8px);right:0;z-index:50;width:260px;
@@ -796,7 +798,7 @@ html[data-mode="app"] .updbar{bottom:80px}
 .clock{font-family:'JetBrains Mono',monospace;display:flex;align-items:baseline;gap:5px}
 .clock b{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:#fff}
 .lane.good .clock b{color:var(--brand)}
-.clock i{font-style:normal;font-size:12px;color:#777}
+.clock i{font-style:normal;font-size:13px;font-weight:700;letter-spacing:.02em;color:#8a8a8a}
 .laneCv{display:block;width:100%;height:200px;margin-top:12px}
 .laneBar{height:3px;border-radius:9px;background:#1b1b1b;overflow:hidden;margin-top:6px}
 .laneBar i{display:block;height:100%;width:0;background:#ff6b5e;border-radius:9px}
@@ -989,9 +991,9 @@ html[data-mode="app"] .scrim:not(#reportScrim){pointer-events:none}
   place-items:center;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-style:normal;flex:none}
 .rstep.done{color:var(--ink2);cursor:pointer}
 .rstep.done:hover{background:var(--wash)}
-.rstep.done i{background:var(--ink);border-color:var(--ink);color:var(--brand)}
+.rstep.done i{background:var(--ink);border-color:var(--ink);color:var(--paper);font-weight:700}
 .rstep.on{color:var(--ink);border-color:var(--rule2);background:var(--paper)}
-.rstep.on i{background:var(--brand);border-color:var(--brand);color:var(--ink);font-weight:700}
+.rstep.on i{background:var(--brand);border-color:var(--brand);color:var(--on-brand);font-weight:700}
 @media(max-width:620px){.rstep span{display:none}.rstep{padding:6px}}
 .xbtn{width:32px;height:32px;border-radius:9px;border:1px solid var(--rule2);background:var(--paper);
   display:grid;place-items:center;cursor:pointer;color:var(--ink2);flex:none}
@@ -1225,7 +1227,7 @@ html[data-mode="app"] .scrim:not(#reportScrim){pointer-events:none}
   <h2 class="secH">Four thousand photos, two ways.</h2>
   <div class="vs3d">
     <div class="lane bad">
-      <div class="laneTop"><p class="vsT"><svg class="ic"><use href="#i-x"/></svg> By hand</p><div class="clock"><b id="clkA">0:00</b><i>h</i></div></div>
+      <div class="laneTop"><p class="vsT"><svg class="ic"><use href="#i-x"/></svg> By hand</p><div class="clock"><b id="clkA">0:00:00</b><i>H</i></div></div>
       <canvas class="laneCv" id="laneA" aria-hidden="true"></canvas>
       <div class="laneBar"><i id="barA"></i></div>
       <ul>
@@ -1237,7 +1239,7 @@ html[data-mode="app"] .scrim:not(#reportScrim){pointer-events:none}
       </ul>
     </div>
     <div class="lane good">
-      <div class="laneTop"><p class="vsT"><svg class="ic"><use href="#i-check"/></svg> With SORT</p><div class="clock"><b id="clkB">0:00</b><i>min</i></div></div>
+      <div class="laneTop"><p class="vsT"><svg class="ic"><use href="#i-check"/></svg> With SORT</p><div class="clock"><b id="clkB">0:00</b><i>Min</i></div></div>
       <canvas class="laneCv" id="laneB" aria-hidden="true"></canvas>
       <div class="laneBar"><i id="barB"></i></div>
       <ul>
@@ -2825,6 +2827,8 @@ const Stage={
   },
   loop(t){
     if(!this.running) return;
+    const th=document.documentElement.getAttribute('data-theme')||'';
+    if(th!==this.theme){ this.theme=th; this.readPalette(); rebuildFolderOff(); }   // labels follow light and dark
     const g=this.ctx, W=this.W, H=this.H;
     g.clearRect(0,0,W,H);
     const live=this.mode==='scan'||this.mode==='organize';
@@ -4014,8 +4018,8 @@ $('caps').addEventListener('click',e=>{
     const last=timing(L,L.cards.length-1), end=last.s+last.d;
     if(L.fast){ const p=clamp(tau/end), secs=Math.round(240*p);
       L.clk.textContent=Math.floor(secs/60)+':'+pad(secs%60); L.bar.style.width=(p*100).toFixed(1)+'%'; }
-    else{ const p=clamp(tau/(CYCLE-600)), mins=Math.round(270*p);
-      L.clk.textContent=Math.floor(mins/60)+':'+pad(mins%60); L.bar.style.width=(landed/L.cards.length*100).toFixed(1)+'%'; }
+    else{ const p=clamp(tau/(CYCLE-600)), secs=Math.round(4.5*3600*p);   // hours, minutes and seconds ticking by
+      L.clk.textContent=Math.floor(secs/3600)+':'+pad(Math.floor(secs/60)%60)+':'+pad(secs%60); L.bar.style.width=(landed/L.cards.length*100).toFixed(1)+'%'; }
     // the reasons appear as the scene reaches them
     L.lis.forEach((li,k)=>{ const at=L.fast?380+k*480:700+k*1900; li.classList.toggle('on',tau>=at); });
   }
@@ -4640,6 +4644,7 @@ function wizUpdate(){
   next.hidden=(n>=4);
   next.disabled=(n===1&&!scanned);
   $('btnAgain').hidden=!settled;
+  $('btnStop').hidden=settled;            // nothing left to stop once it is done
   $('btnDone').hidden=!settled;
   if(ST.busy) wizSay('');
   else if(n===1) wizSay(scanned?`${fmtN(ST.items.length)} files read and ready.`:'Choose a folder to continue.');
