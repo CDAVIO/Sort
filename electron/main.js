@@ -193,13 +193,25 @@ function fetchToFile(url, dest, onProgress) {
   });
 }
 
-ipcMain.handle('updateDownload', async (_e, { url, name }) => {
+function sha256Of(file) {
+  return new Promise((resolve, reject) => {
+    const h = require('crypto').createHash('sha256');
+    fs.createReadStream(file).on('data', c => h.update(c)).on('error', reject).on('end', () => resolve(h.digest('hex')));
+  });
+}
+
+ipcMain.handle('updateDownload', async (_e, { url, name, sha256 }) => {
   try {
-    const dest = path.join(tmpDir(), name || 'SORT-update');
+    const dest = path.join(tmpDir(), path.basename(name || 'SORT-update'));
     try { fs.unlinkSync(dest); } catch (e) {}
     await fetchToFile(url, dest, (got, total) => {
       if (win && !win.isDestroyed()) win.webContents.send('updateProgress', { got, total });
     });
+    // the site publishes each installer's fingerprint; anything else is not installed
+    if (sha256 && (await sha256Of(dest)) !== String(sha256).toLowerCase()) {
+      try { fs.unlinkSync(dest); } catch (e) {}
+      throw new Error('the download does not match the published file');
+    }
     return ok(dest);
   } catch (e) { return err(e); }
 });

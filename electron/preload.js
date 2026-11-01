@@ -21,7 +21,7 @@ contextBridge.exposeInMainWorld('__sortNative', {
   unlink   : p                 => call('unlink',     { p }),
 
   // updating itself: fetch the installer with progress, then put it in place
-  updDownload : (url, name) => call('updateDownload', { url, name }),
+  updDownload : (url, name, sha256) => call('updateDownload', { url, name, sha256 }),
   updInstall  : file        => call('updateInstall',  { file }),
   onUpdProgress : cb => {
     ipcRenderer.removeAllListeners('updateProgress');

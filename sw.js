@@ -29,7 +29,11 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
-  if (new URL(req.url).origin !== location.origin) return;
+  const url = new URL(req.url);
+  if (url.origin !== location.origin) return;
+  // what changes with each release always comes from the network
+  if (url.pathname === '/latest.json' || url.pathname.startsWith('/download/') ||
+      url.pathname === '/install.sh' || url.pathname === '/install.ps1') return;
 
   // The page itself: take the fresh copy when there is a network, fall back to the cache.
   if (req.mode === 'navigate' || req.destination === 'document') {
