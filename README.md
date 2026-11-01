@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://sortcdav.netlify.app"><img src="https://sortcdav.netlify.app/readme/hero.svg" alt="SORT: photos fly from a messy pile into folders by device" width="100%"></a>
+  <a href="https://sortcdav.netlify.app"><img src="hero.svg" alt="SORT: photos fly from a messy pile into folders by device" width="100%"></a>
 </p>
 
 <h1 align="center">SORT</h1>
@@ -22,11 +22,11 @@
 
 Thousands of files in one folder, named by whatever the camera felt like. SORT opens each file, reads the camera model, the moment it was taken and the GPS position, and builds the folders for you.
 
-<p align="center"><img src="https://sortcdav.netlify.app/readme/before-after.svg" alt="Before: one flat folder of files. After: folders by device, year and month" width="100%"></p>
+<p align="center"><img src="before-after.svg" alt="Before: one flat folder of files. After: folders by device, year and month" width="100%"></p>
 
 ## Five steps, and the pile is gone
 
-<p align="center"><img src="https://sortcdav.netlify.app/readme/steps.svg" alt="Folder, Structure, Names, Destination, Sort" width="100%"></p>
+<p align="center"><img src="steps.svg" alt="Folder, Structure, Names, Destination, Sort" width="100%"></p>
 
 1. **Folder**: pick the folder once. SORT reads every file's metadata on your computer, and a bloom of your own photos shows the progress.
 2. **Structure**: choose the shape, for example ★ **Device / Year / Month**, or build your own from device, year, month, day, city, country and type.
@@ -36,7 +36,7 @@ Thousands of files in one folder, named by whatever the camera felt like. SORT o
 
 ## What it saves you
 
-<p align="center"><img src="https://sortcdav.netlify.app/readme/time.svg" alt="Four thousand photos: 4:30:00 H by hand, 4:00 Min with SORT" width="100%"></p>
+<p align="center"><img src="time.svg" alt="Four thousand photos: 4:30:00 H by hand, 4:00 Min with SORT" width="100%"></p>
 
 | | By hand | With SORT |
 |---|---|---|

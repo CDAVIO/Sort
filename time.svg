@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300" role="img" aria-label="Four thousand photos: 3 to 5 hours by hand, about 4 minutes with SORT">
+<defs><style>
+  text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .slow{animation:slow 9s linear infinite}
+  @keyframes slow{0%{width:0}92%{width:300px}100%{width:300px}}
+  .fast{animation:fast 9s cubic-bezier(.2,.8,.2,1) infinite}
+  @keyframes fast{0%{width:0}10%,100%{width:980px}}
+  .done{opacity:0;animation:done 9s infinite}
+  @keyframes done{0%,10%{opacity:0}14%,96%{opacity:1}100%{opacity:0}}
+  @media (prefers-reduced-motion:reduce){.slow,.fast,.done{animation:none}.done{opacity:1}}
+</style></defs>
+<rect width="1200" height="300" rx="28" fill="#050505"/>
+<text x="60" y="62" fill="#fff" font-size="26" font-weight="800" letter-spacing="-.5">Four thousand photos, two ways.</text>
+<text x="60" y="118" fill="#9a9a9a" font-size="15" font-weight="700">✕  By hand</text>
+<text x="1140" y="120" fill="#fff" font-size="26" font-weight="700" text-anchor="end" class="mono">4:30:00 <tspan font-size="13" fill="#8a8a8a">H</tspan></text>
+<rect x="60" y="136" width="1080" height="8" rx="4" fill="#1b1b1b"/>
+<rect x="60" y="136" width="300" height="8" rx="4" fill="#ff6b5e" class="slow"/>
+<text x="60" y="166" fill="#7a7a7a" font-size="13">dragging one batch at a time, reading dates off each file, and it never finishes</text>
+<text x="60" y="214" fill="#ffd905" font-size="15" font-weight="700">✓  With SORT</text>
+<text x="1140" y="216" fill="#ffd905" font-size="26" font-weight="700" text-anchor="end" class="mono">4:00 <tspan font-size="13" fill="#8a8a8a">Min</tspan></text>
+<rect x="60" y="232" width="1080" height="8" rx="4" fill="#1b1b1b"/>
+<rect x="60" y="232" width="980" height="8" rx="4" fill="#ffd905" class="fast"/>
+<g class="done"><circle cx="1110" cy="236" r="13" fill="#ffd905"/><path d="M1104 236l4 4 8-8" fill="none" stroke="#111" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="60" y="264" fill="#7a7a7a" font-size="13">camera, date and place come out of the file itself · most of the time is the disk copying</text>
+</svg>

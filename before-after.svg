@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420" role="img" aria-label="Before: a flat pile of files. After: folders by device, year and month">
+<defs><style>
+  text{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px}
+  .h{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:700;font-size:13px;letter-spacing:2px}
+  .in{opacity:0;animation:in 8s ease-out infinite}
+  @keyframes in{0%{opacity:0;transform:translateX(-8px)}6%,86%{opacity:1;transform:none}94%,100%{opacity:0}}
+  .arrow{animation:nudge 1.6s ease-in-out infinite}
+  @keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}
+  @media (prefers-reduced-motion:reduce){.in,.arrow{animation:none;opacity:1}}
+</style></defs>
+<rect width="1200" height="420" rx="28" fill="#050505"/>
+<!-- before -->
+<rect x="40" y="40" width="470" height="340" rx="18" fill="#0e0e0e" stroke="#262626"/>
+<circle cx="66" cy="66" r="6" fill="#ff5f57"/><circle cx="86" cy="66" r="6" fill="#febc2e"/><circle cx="106" cy="66" r="6" fill="#28c840"/>
+<text x="130" y="71" fill="#6f6f6f">Camera roll</text>
+<circle cx="70" cy="110" r="4" fill="#ff6b5e"/><text x="84" y="115" fill="#9a9a9a" class="h">BEFORE</text>
+<g fill="#cfcfcf">
+<text x="70" y="152">IMG_4821.HEIC</text><text x="70" y="180">DJI_0035.MP4</text><text x="70" y="208">IMG_9497.HEIC</text>
+<text x="70" y="236">Screenshot 2025-03-31.PNG</text><text x="70" y="264">_MG_1104.CR3</text><text x="70" y="292">IMG_3090.DNG</text>
+<text x="70" y="320">MVI_2290.MOV</text><text x="70" y="348" fill="#6f6f6f">… 3,993 more in one folder</text>
+</g>
+<!-- arrow -->
+<g class="arrow"><path d="M548 210h70" stroke="#ffd905" stroke-width="6" stroke-linecap="round"/><path d="M606 190l24 20-24 20" fill="none" stroke="#ffd905" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<!-- after -->
+<rect x="670" y="40" width="490" height="340" rx="18" fill="#0e0e0e" stroke="rgba(255,217,5,.35)"/>
+<circle cx="696" cy="66" r="6" fill="#ff5f57"/><circle cx="716" cy="66" r="6" fill="#febc2e"/><circle cx="736" cy="66" r="6" fill="#28c840"/>
+<text x="760" y="71" fill="#6f6f6f">Organized</text>
+<circle cx="700" cy="110" r="4" fill="#ffd905"/><text x="714" y="115" fill="#9a9a9a" class="h">AFTER</text>
+<g>
+<text x="700" y="152" fill="#ffd905" class="in" style="animation-delay:.2s">iPhone 16 Pro Max</text>
+<text x="722" y="180" fill="#e8e8e8" class="in" style="animation-delay:.5s">2025</text>
+<text x="744" y="208" fill="#e8e8e8" class="in" style="animation-delay:.8s">March  <tspan fill="#6f6f6f">· 212 files</tspan></text>
+<text x="700" y="236" fill="#ffd905" class="in" style="animation-delay:1.2s">DJI Osmo Pocket 2</text>
+<text x="722" y="264" fill="#e8e8e8" class="in" style="animation-delay:1.5s">2026 / February  <tspan fill="#6f6f6f">· 64 files</tspan></text>
+<text x="700" y="292" fill="#ffd905" class="in" style="animation-delay:1.9s">Canon EOS R6</text>
+<text x="722" y="320" fill="#e8e8e8" class="in" style="animation-delay:2.2s">2025 / Bucharest  <tspan fill="#6f6f6f">· 31 files</tspan></text>
+<text x="700" y="348" fill="#3fae84" class="in" style="animation-delay:2.6s">Screenshots  <tspan fill="#6f6f6f">· kept apart</tspan></text>
+</g>
+</svg>

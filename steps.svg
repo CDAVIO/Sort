@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 230" width="1200" height="230" role="img" aria-label="Five steps: Folder, Structure, Names, Destination, Sort">
+<defs><style>
+  text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif}
+  .bar{animation:fill 10s linear infinite}
+  @keyframes fill{0%{width:0}80%,95%{width:880px}100%{width:0}}
+  .s1{animation:s1 10s linear infinite}.n1{animation:n1 10s linear infinite}
+  @keyframes s1{0%,0%{fill:#1c1c1c}1.5%,95%{fill:#ffd905}100%{fill:#1c1c1c}}
+  @keyframes n1{0%,0%{fill:#8a8a8a}1.5%,95%{fill:#111}100%{fill:#8a8a8a}}
+  .s2{animation:s2 10s linear infinite}.n2{animation:n2 10s linear infinite}
+  @keyframes s2{0%,20%{fill:#1c1c1c}21%,95%{fill:#ffd905}100%{fill:#1c1c1c}}
+  @keyframes n2{0%,20%{fill:#8a8a8a}21%,95%{fill:#111}100%{fill:#8a8a8a}}
+  .s3{animation:s3 10s linear infinite}.n3{animation:n3 10s linear infinite}
+  @keyframes s3{0%,40%{fill:#1c1c1c}41%,95%{fill:#ffd905}100%{fill:#1c1c1c}}
+  @keyframes n3{0%,40%{fill:#8a8a8a}41%,95%{fill:#111}100%{fill:#8a8a8a}}
+  .s4{animation:s4 10s linear infinite}.n4{animation:n4 10s linear infinite}
+  @keyframes s4{0%,60%{fill:#1c1c1c}61%,95%{fill:#ffd905}100%{fill:#1c1c1c}}
+  @keyframes n4{0%,60%{fill:#8a8a8a}61%,95%{fill:#111}100%{fill:#8a8a8a}}
+  .s5{animation:s5 10s linear infinite}.n5{animation:n5 10s linear infinite}
+  @keyframes s5{0%,80%{fill:#1c1c1c}81%,95%{fill:#ffd905}100%{fill:#1c1c1c}}
+  @keyframes n5{0%,80%{fill:#8a8a8a}81%,95%{fill:#111}100%{fill:#8a8a8a}}
+  @media (prefers-reduced-motion:reduce){.bar,.s1,.s2,.s3,.s4,.s5,.n1,.n2,.n3,.n4,.n5{animation:none}}
+</style></defs>
+<rect width="1200" height="230" rx="28" fill="#050505"/>
+<rect x="160" y="88" width="880" height="4" rx="2" fill="#1c1c1c"/>
+<rect x="160" y="88" width="880" height="4" rx="2" fill="#ffd905" class="bar"/>
+<g font-size="15" text-anchor="middle">
+  <circle cx="160" cy="90" r="24" class="s1"/><text x="160" y="96" font-weight="800" font-size="17" class="n1">1</text>
+  <text x="160" y="146" fill="#f3f3f3" font-weight="700">Folder</text><text x="160" y="170" fill="#8a8a8a" font-size="13">pick it once</text>
+  <circle cx="380" cy="90" r="24" class="s2"/><text x="380" y="96" font-weight="800" font-size="17" class="n2">2</text>
+  <text x="380" y="146" fill="#f3f3f3" font-weight="700">Structure</text><text x="380" y="170" fill="#8a8a8a" font-size="13">device / year / month</text>
+  <circle cx="600" cy="90" r="24" class="s3"/><text x="600" y="96" font-weight="800" font-size="17" class="n3">3</text>
+  <text x="600" y="146" fill="#f3f3f3" font-weight="700">Names</text><text x="600" y="170" fill="#8a8a8a" font-size="13">keep or rebuild</text>
+  <circle cx="820" cy="90" r="24" class="s4"/><text x="820" y="96" font-weight="800" font-size="17" class="n4">4</text>
+  <text x="820" y="146" fill="#f3f3f3" font-weight="700">Destination</text><text x="820" y="170" fill="#8a8a8a" font-size="13">copy or move</text>
+  <circle cx="1040" cy="90" r="24" class="s5"/><text x="1040" y="96" font-weight="800" font-size="17" class="n5">5</text>
+  <text x="1040" y="146" fill="#f3f3f3" font-weight="700">Sort</text><text x="1040" y="170" fill="#8a8a8a" font-size="13">watch it happen</text>
+</g>
+</svg>
