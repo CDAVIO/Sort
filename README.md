@@ -1,458 +1,130 @@
 <p align="center">
-  <img src="icons/og-card.png" alt="SORT by CDAV.IO, your camera roll, in folders that make sense" width="820">
+  <a href="https://sortcdav.netlify.app"><img src="https://sortcdav.netlify.app/readme/hero.svg" alt="SORT: photos fly from a messy pile into folders by device" width="100%"></a>
+</p>
+
+<h1 align="center">SORT</h1>
+
+<p align="center">
+  <b>Your camera roll, in folders that make sense.</b><br>
+  SORT reads which camera shot each photo, when, and where, then files everything exactly the way you asked.<br>
+  Free for macOS and Windows. No account. Your photos never leave your computer.
 </p>
 
 <p align="center">
-  A free photo organizer for <b>macOS</b> and <b>Windows</b>.<br>
-  It files your camera roll by <b>device, date and place</b>, on your own machine, offline.
-</p>
-
-<p align="center">
-  <a href="https://sortcdav.netlify.app"><b>sortcdav.netlify.app</b></a> &nbsp;·&nbsp;
-  <a href="https://github.com/CDAVIO/Sort/releases/latest"><b>Download</b></a> &nbsp;·&nbsp;
-  <a href="LICENSE">MIT</a>
+  <a href="https://sortcdav.netlify.app/#download"><b>Download SORT</b></a> &nbsp;·&nbsp;
+  <a href="https://sortcdav.netlify.app">Website</a> &nbsp;·&nbsp;
+  <a href="https://sortcdav.netlify.app/#report">Report a bug</a>
 </p>
 
 ---
 
+## Before and after
+
+Thousands of files in one folder, named by whatever the camera felt like. SORT opens each file, reads the camera model, the moment it was taken and the GPS position, and builds the folders for you.
+
+<p align="center"><img src="https://sortcdav.netlify.app/readme/before-after.svg" alt="Before: one flat folder of files. After: folders by device, year and month" width="100%"></p>
+
+## Five steps, and the pile is gone
+
+<p align="center"><img src="https://sortcdav.netlify.app/readme/steps.svg" alt="Folder, Structure, Names, Destination, Sort" width="100%"></p>
+
+1. **Folder**: pick the folder once. SORT reads every file's metadata on your computer, and a bloom of your own photos shows the progress.
+2. **Structure**: choose the shape, for example ★ **Device / Year / Month**, or build your own from device, year, month, day, city, country and type.
+3. **Names**: keep the camera's file names, or rebuild them from the date, the device, the city and a counter.
+4. **Destination**: **Copy** leaves the originals where they are. **Move** frees the space, and on the same drive it finishes in seconds. Not sure? Do a dry run first: you see every folder and nothing is written.
+5. **Sort**: watch each photo fly into its folder, and see the result when it lands.
+
+## What it saves you
+
+<p align="center"><img src="https://sortcdav.netlify.app/readme/time.svg" alt="Four thousand photos: 4:30:00 H by hand, 4:00 Min with SORT" width="100%"></p>
+
+| | By hand | With SORT |
+|---|---|---|
+| Four thousand photos | 3 to 5 hours of dragging | About 4 minutes, most of it the disk copying |
+| Dates | Read off each file, or guessed from the name | Taken from the file itself |
+| Places | GPS stays locked inside the photo | Coordinates become city names, offline |
+| Mistakes | One slip and a folder lands inside another | A dry run shows the whole tree first |
+| Next month | Start again | Same settings, one click |
+
 ## Download
 
-| System | File |
+Get it from **[sortcdav.netlify.app](https://sortcdav.netlify.app/#download)**. The page picks the right file for your computer.
+
+| Computer | File |
 |---|---|
-| macOS 12+, Apple chip | `SORT-<version>-arm64.dmg` |
-| macOS 12+, Intel | `SORT-<version>.dmg` |
-| Windows 10 / 11 | `SORT.Setup.<version>.exe` |
+| Mac with Apple chip (M1 and newer) | `.dmg` (Apple chip) |
+| Mac with Intel | `.dmg` (Intel) |
+| Windows 10 / 11 | Installer, or a portable app that needs no install |
 
-**[Get the latest release →](https://github.com/CDAVIO/Sort/releases/latest)**
+### Fastest: one line in the Terminal
 
-Free. No account, no upload, no subscription, no telemetry.
+**macOS**: open Terminal and paste. It downloads SORT, puts it in Applications and opens it, with no "unidentified developer" warning.
 
-SORT keeps itself up to date: when a newer version exists, a bar appears at the bottom
-of the window, and one click downloads it and puts it in place.
+```bash
+curl -fsSL https://sortcdav.netlify.app/install.sh | bash
+```
 
-### First run on macOS
+**Windows**: open PowerShell and paste. It downloads SORT and installs it for your user, no administrator needed.
 
-The builds carry no paid Apple certificate, so macOS refuses the first launch and calls
-the app damaged. Drag **SORT** into **Applications**, then run this once in **Terminal**:
+```powershell
+irm https://sortcdav.netlify.app/install.ps1 | iex
+```
+
+Both check the file's SHA-256 fingerprint against the one the site publishes before installing anything.
+
+<details>
+<summary>Installed from the .dmg and macOS says SORT cannot be opened?</summary>
+
+SORT has no paid Apple certificate, so macOS blocks it the first time. Run this once in Terminal, then open SORT normally:
 
 ```bash
 xattr -dr com.apple.quarantine /Applications/SORT.app
 ```
+</details>
 
-It opens normally from then on, and updates never ask again.
+<details>
+<summary>Windows says the publisher is unknown?</summary>
 
-### First run on Windows
+Choose **More info**, then **Run anyway**. Windows asks only the first time.
+</details>
 
-SmartScreen says the publisher is unknown, for the same reason. Choose **More info**,
-then **Run anyway**. If Windows refuses to open the file at all, run this once in
-**PowerShell**:
+## Features
 
-```powershell
-Get-ChildItem "$env:USERPROFILE\Downloads\SORT*.exe" | Unblock-File
-```
+- **Camera, date and place come from the file itself**: EXIF, HEIC and QuickTime metadata, not the file name. iPhone, Canon, DJI, GoPro and others write their model into the file, so device folders need no typing.
+- **Places without the internet**: GPS coordinates are matched to a city from a list built into SORT. No lookup leaves your machine.
+- **Real photos while it works**: the scan and the sort show thumbnails of your own pictures and frames from your clips.
+- **Raw files too**: DNG (iPhone ProRAW included), CR2, NEF, ARW, ORF, RW2, PEF, SRW and RAF keep their camera.
+- **Live Photos stay in one piece**: the picture and its short video land in the same folder.
+- **Screenshots stop crowding the camera roll**: they get a folder of their own.
+- **Built for big libraries**: 100 GB uses about as much memory as 100 MB, and scanning reads only each file's header.
+- **Updates itself**: Settings → Check for updates, or let SORT check on its own.
+- **Light and dark**, in English, Română, Deutsch, Français, Italiano, 한국어 and 中文.
 
----
+### Formats
 
-## What it does
-
-SORT reads the metadata inside each photo and video (camera model, capture time, GPS)
-then files everything into the folder structure you choose.
-
-```
-iPhone 16 Pro Max / 2025 / March / IMG_9497.HEIC
-Screenshots       / 2025 / March / screen.PNG
-Bucharest / 2025 / March / 31 March / IMG_9497.HEIC
-DJI Osmo Pocket 2 / 2026 / February / DJI_0035.MP4
-2025 / March / whatsapp.jpg          ← no device, no GPS
-```
-
-Everything happens on your own computer. SORT reads and writes the files directly on your
-disk. Nothing is ever sent anywhere.
-
----
-
-## How to use it
-
-1. **Open SORT**: from Applications, or the Start menu
-2. **Choose a folder**: SORT asks for it once
-3. **Build the structure**: pick a preset or compose your own from tokens
-4. **Rename** (optional): keep the camera's names or rebuild them from the date
-5. **Choose destination and mode**: Copy, Move or Preview
-6. **Sort**: watch the tree fill up
-
----
-
-## Folder structure
-
-Click tokens together to build any structure:
-
-| Token | Example | Token | Example |
-|---|---|---|---|
-| `{device}` | iPhone 16 Pro Max | `{year}` | 2025 |
-| `{brand}` | Apple | `{month}` | March |
-| `{type}` | Photos / Videos / Screenshots | `{mm}` | 03 |
-| `{city}` | Bucharest | `{day}` | 31 March |
-| `{country}` | RO | `{dd}` | 31 |
-| `{ext}` | HEIC | `{date}` | 2025-03-31 |
-
-**Missing data disappears.** No GPS means no location folder. No date means only what is
-known is used. You can switch to `No date` / `Unknown` labels instead.
-
-Month names: English, Romanian (Martie) or numeric.
-
----
-
-## Renaming
-
-Renaming is optional. By default SORT keeps every filename exactly as the camera wrote it.
-
-When you do rename, you compose a pattern from tokens. SORT fills each token from the
-metadata it read, and always keeps the file extension.
-
-### Tokens
-
-| Token | Means | Example |
-|---|---|---|
-| `{orig}` | the original name, without extension | `IMG_9497` |
-| `{year}` | year of capture | `2025` |
-| `{mm}` | month, two digits | `03` |
-| `{dd}` | day, two digits | `31` |
-| `{HH}` | hour, 24-hour clock | `14` |
-| `{MI}` | minute | `22` |
-| `{SS}` | second | `05` |
-| `{device}` | camera model, spaces removed | `iPhone16ProMax` |
-| `{city}` | nearest city from GPS | `Bucharest` |
-| `{n}` | counter, four digits | `0001` |
-
-### Example patterns
-
-All of these show the same photo, `IMG_9497.HEIC`, taken on an iPhone 16 Pro Max in
-Bucharest on 31 March 2025 at 14:22:05.
-
-| Pattern | Result |
-|---|---|
-| `{orig}` | `IMG_9497.HEIC` |
-| `{dd}_{mm}_{year}` | `31_03_2025.HEIC` |
-| `{year}-{mm}-{dd}` | `2025-03-31.HEIC` |
-| `{year}-{mm}-{dd}_{HH}-{MI}-{SS}` | `2025-03-31_14-22-05.HEIC` |
-| `{year}{mm}{dd}_{orig}` | `20250331_IMG_9497.HEIC` |
-| `{device}_{year}-{mm}-{dd}` | `iPhone16ProMax_2025-03-31.HEIC` |
-| `{city}_{year}-{mm}-{dd}_{n}` | `Bucharest_2025-03-31_0001.HEIC` |
-| `{orig}_{city}` | `IMG_9497_Bucharest.HEIC` |
-
-You can type any text between tokens:
-
-| Pattern | Result |
-|---|---|
-| `Holiday_{year}_{n}` | `Holiday_2025_0001.HEIC` |
-| `{city} - {dd}.{mm}.{year}` | `Bucharest - 31.03.2025.HEIC` |
-
-### Rules
-
-**The extension is never changed.** `IMG_3323.JPG` keeps `.JPG` in capitals;
-`photo.jpeg` keeps `.jpeg`. SORT does not normalise it.
-
-**Keeping the original name returns it byte for byte.** Choose `{orig}` and the file
-arrives with precisely the name it had, including its capitalisation.
-
-**Duplicates are numbered.** If two files would end up with the same name in the same
-folder, the second becomes `_2`, the third `_3`, and so on. Nothing is ever overwritten.
-
-**Missing data falls back to a visible placeholder**, so you can spot those files
-immediately rather than having them silently blend in:
-
-| Missing | Token | Becomes |
-|---|---|---|
-| no capture date | `{year}` `{mm}` `{dd}` | `0000` `00` `00` |
-| no GPS | `{city}` | `NoLoc` |
-| no camera model | `{device}` | `UnknownDevice` |
-
-If you would rather not see placeholders in your filenames, keep `{orig}` and let the
-folder structure carry the sorting instead. A missing folder level simply disappears,
-while a missing token in a filename has to be filled with something.
-
-## Copy, Move, Preview
-
-- **Copy**: every file is written to the new folder, originals untouched. Nothing can be lost.
-- **Move**: on the same drive the file is renamed in place, so nothing is rewritten and a
-  100 GB library moves in seconds. Across drives it copies, verifies the size, then deletes
-  the original. If a write fails, that original stays put.
-- **Preview**: builds the whole tree and shows it. Writes nothing, deletes nothing. Run this first.
-
----
-
-## What it reads
-
-| Format | Where the metadata lives |
-|---|---|
-| JPEG, TIFF, DNG, WebP | EXIF (APP1 / TIFF IFD) |
-| HEIC, HEIF, AVIF | ISO-BMFF `meta` / `iinf` / `iloc` → Exif item |
-| PNG | `eXIf` chunk |
-| MOV, MP4, M4V | QuickTime `moov`: `mvhd`, `keys`+`ilst`, `udta` |
-| anything else | filename date, then file modified date |
-
-GPS coordinates are matched to a city **offline**, against a built-in list of ~220 cities
-within 75 km. No request ever leaves the page, so your locations stay private and there is
-no API key to manage.
-
----
-
-## It also runs in a browser
-
-The app is the way to use SORT, and nothing here needs a browser. But the same
-`index.html` opens in one, which is useful for a quick look without installing anything.
-
-| | Folder to folder (Copy / Move) | Metadata + ZIP download |
-|---|---|---|
-| Chrome, Edge, Brave, Opera (desktop) | yes | yes |
-| Safari, Firefox | no | yes |
-
-Writing straight into folders uses the **File System Access API**, which only Chrome, Edge
-and Brave have on the desktop. Elsewhere SORT still reads everything and hands back the
-organized library as a ZIP, and a ZIP cannot exceed 4 GB.
-
-The app does not use that API at all. It reads and writes through Node, which is both
-faster and free of the browser's limits.
-
----
-
-## How it is built
-
-SORT is **one `index.html` file**, the whole program, including the landing page at
-[sortcdav.netlify.app](https://sortcdav.netlify.app). `electron/` wraps that same file in a native
-window, so the app and the page are never out of step.
-
-It does **not** use Chromium's File System Access API. Iterating a directory picked
-with `showDirectoryPicker` hangs in Electron ([electron#45225][e]), and that is
-SORT's main loop. Instead `electron/shim.js` reimplements the handful of File
-System Access calls SORT makes on top of Node `fs` in the main process, so the app
-code runs unchanged. Copying is `fs.copyFile` and moving is `fs.rename`, which are
-both faster than pushing bytes through JavaScript.
-
-[e]: https://github.com/electron/electron/issues/45225
-
-```
-cd electron
-npm install
-npm start            # run it locally
-npm run build:mac    # .dmg   (needs macOS)
-npm run build:win    # .exe   (needs Windows)
-```
-
-You do not need either machine: push a tag and GitHub builds both.
-
-```
-git tag v1.0.0 && git push origin v1.0.0
-```
-
-`.github/workflows/build-apps.yml` runs on GitHub's own macOS and Windows runners
-and attaches the installers to the release.
-
-The builds are **unsigned**: no Apple or Windows certificate is configured, which is
-why the two commands above exist. On Apple Silicon, right-click → Open does not help:
-macOS removed that bypass, and the `xattr` command is the only way through. Signing
-costs about $99/year for Apple and $200/year for a Windows certificate.
-
----
-
-## Running it offline
-
-The page carries everything it needs, fonts included, so it makes **no network
-request at all**, not even on first load. The desktop app and the page behave the
-same way here: once SORT is on your machine, the internet is never touched again.
-
-The app never asks for the network. Opening `index.html` from disk in a browser behaves
-the same way, in Chrome, Edge or Brave.
-
----
-
-## Large libraries
-
-100 GB works. Files are **streamed**, never loaded into memory, so 100 GB uses about as much
-RAM as 100 MB. Scanning reads only the header of each file: 256 KB for a photo, about a
-megabyte for a video.
-
-Expect roughly 2–4 minutes to scan a 100 GB library, then the copy runs at your disk's speed.
-With **Move** on the same drive it finishes in seconds, because nothing is rewritten.
-
-Leave SORT open and the computer awake while it runs.
-
----
-
-## Hosting
-
-It is one file. Put `index.html` anywhere that serves HTTPS:
-
-- Drag it into **Netlify** or **Cloudflare Pages**
-- **GitHub Pages**: Settings → Pages → Branch `main`, folder `/ (root)`
-- Your own server: upload `index.html`
-
-Opening it straight from disk also works, but the browser asks permission on every open,
-because a local file has no stable identity to remember.
-
----
-
-
-## Working with this repo
-
-**To just use SORT**, you do not need any of this. Download `index.html` and open it.
-That is the whole program.
-
-This section is for working on the code.
-
-### Get a copy and open it
-
-**Mac, in Terminal**
-
-```bash
-cd ~/Documents
-git clone https://github.com/CDAVIO/Sort.git
-cd Sort
-open -a "Google Chrome" index.html
-```
-
-**Windows, in PowerShell**
-
-The git commands are identical everywhere. Only the paths are written differently:
-
-```powershell
-cd $HOME\Documents
-git clone https://github.com/CDAVIO/Sort.git
-cd Sort
-start chrome index.html
-```
-
-The last line is the one that opens SORT. `cd Sort` only moves you into the folder.
-
-Use Chrome, Edge or Brave. Safari cannot write to folders, so the folder picker does nothing there.
-
-**If it says `destination path 'Sort' already exists`**
-
-A folder of that name is already there, probably from an earlier attempt. Git refuses to
-clone over it on purpose. Delete it first:
-
-```bash
-rm -rf ~/Documents/Sort          # Mac
-```
-
-```powershell
-Remove-Item -Recurse -Force $HOME\Documents\Sort      # Windows
-```
-
-Then run the commands again.
-
-### After you change something
-
-Same on both systems:
-
-```bash
-git add .
-git commit -m "what changed"
-git push
-```
-
-### Signing in
-
-Making the repository public changed who can **read** it. It did not change who can
-**write** to it, and it never will: without that, anyone on the internet could push to
-SORT. So `git push` still has to prove it is you.
-
-**The easy way: an SSH key.** Set it up once and git never asks for anything again.
-
-If you already made a key for signing commits, it is the same key. GitHub keeps
-authentication and signing apart, so the same key has to be added twice, once for each
-job. Copy it:
-
-```bash
-pbcopy < ~/.ssh/id_ed25519.pub                       # Mac
-```
-
-If there is no key yet, make one first, pressing Enter at all three questions:
-
-```bash
-ssh-keygen -t ed25519 -C "your@email"
-```
-
-Then on **github.com/settings/keys** → *New SSH key* → **Key type: Authentication Key** →
-paste → *Add SSH key*.
-
-Tell the repository to use it:
-
-```bash
-git remote set-url origin git@github.com:CDAVIO/Sort.git
-```
-
-That is all. `git push` works from now on with nothing to type and nothing to expire.
-
-**The other way: a personal access token.** It works, but it expires, and it has to be
-made again every few months.
-
-```
-Username: your GitHub username
-Password: a personal access token
-```
-
-**Your GitHub password does not work here.** It only works for logging into the website.
-Git has needed a token since 2021, and the field is still labelled *Password*, which is the
-confusing part.
-
-Make one at **github.com/settings/tokens** → *Tokens (classic)* → *Generate new token*:
-
-- Tick only **repo**
-- Set an expiration, for example 90 days
-- Copy it immediately, because GitHub shows it once and never again
-
-Nothing appears on screen while you paste it. That is normal. Press Enter.
-
-Save it so you only do this once:
-
-```bash
-git config --global credential.helper osxkeychain      # Mac
-git config --global credential.helper manager          # Windows
-```
-
-Treat a token like a password. Never paste it into a chat, a file, or your code. A public
-key, the one ending in `.pub`, is the opposite: it is meant to be handed out, and nothing
-can be done with it alone.
-
-### Signing your commits
-
-A signed commit carries the green **Verified** mark on GitHub, which says the commit really
-came from whoever holds the key. It is optional, and a repository is perfectly normal
-without it.
-
-```bash
-git config --global gpg.format ssh
-git config --global user.signingkey ~/.ssh/id_ed25519.pub
-git config --global commit.gpgsign true
-```
-
-The same key goes on **github.com/settings/keys** a second time, with **Key type: Signing
-Key**. Commits made through github.com in the browser are signed by GitHub itself and come
-out verified with no setup at all.
-
-Leave *Vigilant mode* alone unless every commit in the repository is signed: it stamps
-every unsigned commit as **Unverified**, which includes anything built by a workflow.
-
-### Chain commands with `&&`
-
-```bash
-cd ~/Documents/Sort && git add . && git commit -m "update" && git push
-```
-
-With `&&`, a failed step stops the rest. Without it, a failed `cd` leaves you in the wrong
-folder and every following command runs there anyway, which is how people accidentally turn
-their home folder into a git repository.
-
----
+Photos: JPG, HEIC, HEIF, PNG, WebP, AVIF, TIFF, GIF, BMP, JXL, and raw DNG, CR2, CR3, NEF, ARW, ORF, RW2, PEF, SRW, RAF and more.
+Videos: MOV, MP4, M4V, AVI, MKV, 3GP, WebM, MTS, M2TS, MPG, WMV, INSV and more.
 
 ## Privacy
 
-Nothing is uploaded. Nothing is installed. There is no account, no analytics, no server,
-no API key, and no network request of any kind after the page loads.
+Your photos and videos never leave your device. No account, no cookies, no analytics, no ads. SORT only talks to its own website, to see whether a newer version exists. Read the [Privacy Policy](https://sortcdav.netlify.app/privacy.html).
 
-Your photos and their GPS coordinates never leave your computer.
+## Questions
+
+**Is it really free?** Yes. No trial, no limits, no paid version, no advertising.
+
+**Can it lose a photo?** Copy never touches the originals. Move deletes an original only after its copy has been written and its size checked. Keep a backup of anything you cannot replace.
+
+**What happens to a photo with no date or no GPS?** It simply loses that folder level instead of landing in a junk folder.
+
+**Found a problem?** [Report it here](https://sortcdav.netlify.app/#report). Every report is read, and you get an answer when the fix is out.
 
 ---
 
-Built by [CDAV.IO](https://cdav.io) 
+<p align="center">
+  <a href="https://sortcdav.netlify.app/privacy.html">Privacy Policy</a> ·
+  <a href="https://sortcdav.netlify.app/terms.html">Terms of Service</a> ·
+  <a href="https://sortcdav.netlify.app/legal.html">Legal</a>
+  <br><br>
+  Copyright © 2026 CDAV.IO. All rights reserved.
+</p>
