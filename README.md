@@ -31,7 +31,7 @@ Thousands of files in one folder, named by whatever the camera felt like. SORT o
 1. **Folder**: pick the folder once. SORT reads every file's metadata on your computer, and a bloom of your own photos shows the progress.
 2. **Structure**: choose the shape, for example ★ **Device / Year / Month**, or build your own from device, year, month, day, city, country and type.
 3. **Names**: keep the camera's file names, or rebuild them from the date, the device, the city and a counter.
-4. **Destination**: **Copy** leaves the originals where they are. **Move** frees the space, and on the same drive it finishes in seconds. Not sure? Do a dry run first: you see every folder and nothing is written.
+4. **Destination**: **Copy** leaves the originals where they are. **Move** frees the space, and on the same drive it finishes in seconds. **Find duplicates** looks for the same photo kept twice. Not sure? Do a dry run first: you see every folder and nothing is written.
 5. **Sort**: watch each photo fly into its folder, and see the result when it lands.
 
 ## What it saves you
@@ -47,6 +47,18 @@ Thousands of files in one folder, named by whatever the camera felt like. SORT o
 | Places | GPS stays locked inside the photo | Coordinates become city names, offline |
 | Mistakes | One slip and a folder lands inside another | A dry run shows the whole tree first |
 | Next month | Start again | Same settings, one click |
+
+## Find duplicate photos
+
+<p align="center"><img src="duplicates.svg" alt="SORT finds the same photo twice: the iPhone original stays, the smaller WhatsApp copy goes to a Duplicates folder" width="100%"></p>
+
+The same photo saved twice, even the smaller copy WhatsApp sent back, is found on your computer. No AI and no internet: SORT compares the pictures themselves.
+
+- **Exact copies**: the same file under another name, such as `IMG_0002 (1).jpg`.
+- **Resized copies**: WhatsApp, exports and re-saves. SORT shrinks each photo to a tiny 64-bit fingerprint, and pictures that look the same have almost the same one.
+- **The original stays**: the one with the camera's data, the most pixels and the biggest file. Click any photo to keep that one instead.
+- **You choose what happens to the copies**: a `Duplicates` folder next to your photos, or the Trash in the app. Nothing is ever deleted for good.
+- Photos only: JPG, PNG, HEIC, WebP and raw files. Videos, music and documents are left alone.
 
 ## Download
 
@@ -96,6 +108,7 @@ Choose **More info**, then **Run anyway**. Windows asks only the first time.
 - **Places without the internet**: GPS coordinates are matched to a city from a list built into SORT. No lookup leaves your machine.
 - **Real photos while it works**: the scan and the sort show thumbnails of your own pictures and frames from your clips.
 - **Raw files too**: DNG (iPhone ProRAW included), CR2, NEF, ARW, ORF, RW2, PEF, SRW and RAF keep their camera.
+- **Finds duplicate photos**: exact copies and resized ones such as WhatsApp sends; the original stays, the copies go to a Duplicates folder or the Trash.
 - **Live Photos stay in one piece**: the picture and its short video land in the same folder.
 - **Screenshots stop crowding the camera roll**: they get a folder of their own.
 - **Built for big libraries**: 100 GB uses about as much memory as 100 MB, and scanning reads only each file's header.
