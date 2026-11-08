@@ -38,6 +38,8 @@ Thousands of files in one folder, named by whatever the camera felt like. SORT o
 
 <p align="center"><img src="time.svg" alt="Four thousand photos: 4:30:00 H by hand, 4:00 Min with SORT" width="100%"></p>
 
+<p align="center"><img src="sort-two-ways.gif" alt="By hand: four and a half hours at the desk. With SORT: one click in four minutes, then off to the gym." width="100%"></p>
+
 | | By hand | With SORT |
 |---|---|---|
 | Four thousand photos | 3 to 5 hours of dragging | About 4 minutes, most of it the disk copying |
