@@ -50,7 +50,12 @@ Thousands of files in one folder, named by whatever the camera felt like. SORT o
 
 ## Find duplicate photos
 
-<p align="center"><img src="duplicates.svg" alt="SORT finds the same photo twice: the iPhone original stays, the smaller WhatsApp copy goes to a Duplicates folder" width="100%"></p>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="duplicates-light.svg">
+    <img src="duplicates.svg" alt="SORT finds the same photo twice: the iPhone original stays, the smaller WhatsApp copy goes to a Duplicates folder" width="100%">
+  </picture>
+</p>
 
 The same photo saved twice, even the smaller copy WhatsApp sent back, is found on your computer. No AI and no internet: SORT compares the pictures themselves.
 
