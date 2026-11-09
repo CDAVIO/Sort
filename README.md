@@ -16,6 +16,10 @@
   <a href="https://sortcdav.netlify.app/#report">Report a bug</a>
 </p>
 
+<p align="center">
+  <a href="https://sortcdav.netlify.app/media/sort-ad-long.mp4"><img src="ad-poster.jpg" alt="Watch SORT in 30 seconds: what it does, 4 hours versus 4 minutes, Copy, Move and Find duplicates, and the one-line Mac install" width="100%"></a>
+</p>
+
 ---
 
 ## Before and after
