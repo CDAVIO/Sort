@@ -47,11 +47,17 @@ Thousands of files in one folder, named by whatever the camera felt like. SORT o
 4. **Destination**: **Copy** leaves the originals where they are. **Move** frees the space, and on the same drive it finishes in seconds. **Find duplicates** looks for the same photo kept twice. Not sure? Do a dry run first: you see every folder and nothing is written.
 5. **Sort**: watch each photo fly into its folder, and see the result when it lands.
 
+## The app
+
+<p align="center"><img src="app-2.jpg" alt="SORT 2.0 on the Mac: choose Copy, Move or Find duplicates, then Sort my photos" width="100%"></p>
+
+Copy keeps the originals where they are. Move frees the space. Find duplicates catches the same photo kept twice. One yellow button, and the pile is gone.
+
 ## What it saves you
 
 <p align="center"><img src="time.svg" alt="Four thousand photos: 4:30:00 H by hand, 4:00 Min with SORT" width="100%"></p>
 
-<p align="center"><img src="sort-two-ways.gif" alt="By hand: four and a half hours at the desk. With SORT: one click in four minutes, then off to the gym." width="100%"></p>
+<p align="center"><img src="sort-race.gif" alt="By hand: the clock runs past three and a half hours. With SORT: done in 4 minutes, the rest of the day is yours." width="100%"></p>
 
 | | By hand | With SORT |
 |---|---|---|
