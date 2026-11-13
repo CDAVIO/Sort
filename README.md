@@ -1,24 +1,33 @@
 <p align="center">
-  <a href="https://sortcdav.netlify.app"><img src="hero.svg" alt="SORT: photos fly from a messy pile into folders by device" width="100%"></a>
+  <a href="https://sort.cdav.io"><img src="hero.svg" alt="SORT: photos fly from a messy pile into folders by device" width="100%"></a>
 </p>
 
-<h1 align="center">SORT</h1>
+<h1 align="center">4,000 photos.<br>4 hours by hand. 4 minutes with SORT.</h1>
 
 <p align="center">
   <b>Your camera roll, in folders that make sense.</b><br>
   SORT reads which camera shot each photo, when, and where, then files everything exactly the way you asked.<br>
-  Free for macOS and Windows. No account. Your photos never leave your computer.
+  Mac and Windows. Your photos never leave your computer.
 </p>
 
 <p align="center">
-  <a href="https://sortcdav.netlify.app/#download"><b>Download SORT</b></a> &nbsp;·&nbsp;
-  <a href="https://sortcdav.netlify.app">Website</a> &nbsp;·&nbsp;
-  <a href="https://sortcdav.netlify.app/#report">Report a bug</a>
+  <a href="https://sort.cdav.io/#download"><img src="https://img.shields.io/badge/Download-macOS-ffd905?style=for-the-badge&logo=apple&logoColor=111111&labelColor=111111" alt="Download for macOS"></a>
+  <a href="https://sort.cdav.io/#download"><img src="https://img.shields.io/badge/Download-Windows-ffd905?style=for-the-badge&logo=windows&logoColor=111111&labelColor=111111" alt="Download for Windows"></a>
+  <a href="https://sort.cdav.io/pricing"><img src="https://img.shields.io/badge/7_days-free-ffffff?style=for-the-badge&labelColor=111111" alt="7 days free"></a>
 </p>
 
 <p align="center">
-  <a href="https://sortcdav.netlify.app/media/sort-ad-long.mp4"><img src="ad-poster.jpg" alt="Watch SORT in 30 seconds: what it does, 4 hours versus 4 minutes, Copy, Move and Find duplicates, and the one-line Mac install" width="100%"></a>
+  <a href="https://sort.cdav.io">Website</a> &nbsp;·&nbsp;
+  <a href="https://sort.cdav.io/pricing">Pricing</a> &nbsp;·&nbsp;
+  <a href="https://sort.cdav.io/affiliate">Earn with SORT</a> &nbsp;·&nbsp;
+  <a href="https://sort.cdav.io/#report">Report a bug</a>
 </p>
+
+<p align="center">
+  <a href="https://sort.cdav.io/media/sort-ad-long.mp4"><img src="ad-poster.jpg" alt="Watch SORT in 30 seconds: what it does, 4 hours versus 4 minutes, Copy, Move and Find duplicates, and the one-line Mac install" width="100%"></a>
+</p>
+
+> **Your camera roll is thousands of files called `IMG_4821.HEIC`.** Sorting them by hand costs an evening, every few months, forever. SORT does it in the time it takes to make a coffee, and next month it is one click.
 
 ---
 
@@ -69,9 +78,23 @@ The same photo saved twice, even the smaller copy WhatsApp sent back, is found o
 - **You choose what happens to the copies**: a `Duplicates` folder next to your photos, or the Trash in the app. Nothing is ever deleted for good.
 - Photos only: JPG, PNG, HEIC, WebP and raw files. Videos, music and documents are left alone.
 
+## One price. A whole year.
+
+<p align="center"><b>45 € per year</b>, VAT included. Not per month.</p>
+
+| | |
+|---|---|
+| **Try it free** | 7 days of Copy and Move, no card needed |
+| **One payment** | Copy, Move and Find duplicates for 365 days, on every Mac and PC you own |
+| **No subscription trap** | Nothing renews by itself |
+| **Changed your mind?** | Refund within 14 days, from your account |
+| **For comparison** | A typical AI subscription is 20 $ a month, 240 $ a year |
+
+New members often get an introductory offer on [sort.cdav.io/pricing](https://sort.cdav.io/pricing).
+
 ## Download
 
-Get it from **[sortcdav.netlify.app](https://sortcdav.netlify.app/#download)**. The page picks the right file for your computer.
+Get it from **[sort.cdav.io](https://sort.cdav.io/#download)**. The page picks the right file for your computer.
 
 | Computer | File |
 |---|---|
@@ -84,13 +107,13 @@ Get it from **[sortcdav.netlify.app](https://sortcdav.netlify.app/#download)**. 
 **macOS**: open Terminal and paste. It downloads SORT, puts it in Applications and opens it, with no "unidentified developer" warning.
 
 ```bash
-curl -fsSL https://sortcdav.netlify.app/install.sh | bash
+curl -fsSL https://sort.cdav.io/install.sh | bash
 ```
 
 **Windows**: open PowerShell and paste. It downloads SORT and installs it for your user, no administrator needed.
 
 ```powershell
-irm https://sortcdav.netlify.app/install.ps1 | iex
+irm https://sort.cdav.io/install.ps1 | iex
 ```
 
 Both check the file's SHA-256 fingerprint against the one the site publishes before installing anything.
@@ -131,24 +154,27 @@ Videos: MOV, MP4, M4V, AVI, MKV, 3GP, WebM, MTS, M2TS, MPG, WMV, INSV and more.
 
 ## Privacy
 
-Your photos and videos never leave your device. No account, no cookies, no analytics, no ads. SORT only talks to its own website, to see whether a newer version exists. Read the [Privacy Policy](https://sortcdav.netlify.app/privacy.html).
+Your photos and videos never leave your device: SORT reads them on your computer and sends nothing anywhere. Your account (Google or email) only holds your plan and your invoices. Payments go through Stripe; SORT never sees your card. No ads, ever. Read the [Privacy Policy](https://sort.cdav.io/privacy).
 
 ## Questions
 
-**Is it really free?** Yes. No trial, no limits, no paid version, no advertising.
+**Is there a free version?** Every new account gets 7 days of Copy and Move for free, with no card. Find duplicates and the full year are part of the yearly plan.
 
 **Can it lose a photo?** Copy never touches the originals. Move deletes an original only after its copy has been written and its size checked. Keep a backup of anything you cannot replace.
 
 **What happens to a photo with no date or no GPS?** It simply loses that folder level instead of landing in a junk folder.
 
-**Found a problem?** [Report it here](https://sortcdav.netlify.app/#report). Every report is read, and you get an answer when the fix is out.
+**Can I earn by recommending it?** Yes: the [Affiliate Program](https://sort.cdav.io/affiliate) pays 15% to 20% of every sale you bring.
+
+**Found a problem?** [Report it here](https://sort.cdav.io/#report). Every report is read, and you get an answer when the fix is out.
 
 ---
 
 <p align="center">
-  <a href="https://sortcdav.netlify.app/privacy.html">Privacy Policy</a> ·
-  <a href="https://sortcdav.netlify.app/terms.html">Terms of Service</a> ·
-  <a href="https://sortcdav.netlify.app/legal.html">Legal</a>
+  <a href="https://sort.cdav.io/privacy">Privacy Policy</a> ·
+  <a href="https://sort.cdav.io/terms">Terms of Service</a> ·
+  <a href="https://sort.cdav.io/legal">Legal</a> ·
+  <a href="mailto:hello@cdav.io">hello@cdav.io</a>
   <br><br>
   Copyright © 2026 CDAV.IO. All rights reserved.
 </p>
